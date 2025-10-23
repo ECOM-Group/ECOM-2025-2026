@@ -6,15 +6,16 @@ import { map, switchMap } from 'rxjs';
 import { AccountService } from 'app/core/auth/account.service';
 import { IProdOrder } from 'app/entities/prod-order/prod-order.model';
 import { IOrderLine } from 'app/entities/order-line/order-line.model';
+import LoginComponent from 'app/login/login.component';
 
 @Component({
   selector: 'jhi-fiche-produit',
-  imports: [],
+  imports: [LoginComponent],
   templateUrl: './fiche-produit.component.html',
   styleUrl: './fiche-produit.component.scss',
 })
 export default class FicheProduitComponent implements OnInit {
-  private product: IProduct = {
+  product: IProduct = {
     id: -1, // id temporaire
     price: null,
     desc: '',
@@ -22,8 +23,8 @@ export default class FicheProduitComponent implements OnInit {
     imageHash: null,
     tags: [],
   };
-  private id: number = -1;
-  private isConnected: boolean = true;
+  id: number = -1;
+  isConnected: boolean = true;
 
   constructor(
     private route: ActivatedRoute,
