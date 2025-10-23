@@ -1,0 +1,11 @@
+<div class="mini-fiche-container">
+  <!-- Afficher l'image du produit et ces informations en dessous-->
+  <a routerLink="/fiche_produit/{{ product.id }}" class="mini-fiche-link">
+    <!-- TODO: corriger src pour les images -->
+    <img src="" alt="{{ product.desc }}" class="mini-fiche-image" />
+    <div class="mini-fiche-info">
+      <p class="mini-fiche-description">{{ product.desc }}</p>
+      <p class="mini-fiche-price">{{ product.price }} €</p>
+    </div>
+  </a>
+</div>
