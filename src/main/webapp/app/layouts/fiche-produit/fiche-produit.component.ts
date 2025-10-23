@@ -14,7 +14,7 @@ import { IOrderLine } from 'app/entities/order-line/order-line.model';
   styleUrl: './fiche-produit.component.scss',
 })
 export default class FicheProduitComponent implements OnInit {
-  product: IProduct = {
+  private product: IProduct = {
     id: -1, // id temporaire
     price: null,
     desc: '',
@@ -22,7 +22,8 @@ export default class FicheProduitComponent implements OnInit {
     imageHash: null,
     tags: [],
   };
-  id: number = -1;
+  private id: number = -1;
+  private isConnected: boolean = true;
 
   constructor(
     private route: ActivatedRoute,
@@ -50,12 +51,12 @@ export default class FicheProduitComponent implements OnInit {
   public addToCart(id: number): void {
     // Récupérer le user connecté, récupérer l'utilisateur complet depuis l'API, puis gérer la commande
     this.accountService
-      .getAuthenticationState()
+      .identity()
       .pipe(
         switchMap(user => {
           if (!user || !user.login) {
+            this.isConnected = false;
             throw new Error('Utilisateur non authentifié');
-            //renvoyer vers la page de connexion
           }
           return this.http.get<any>(`/api/admin/users/${user.login}`);
         }),
