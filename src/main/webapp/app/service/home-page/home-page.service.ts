@@ -11,6 +11,17 @@ export class HomePageService {
   constructor(private http: HttpClient) {}
 
   GetMostSelledProducts(): Observable<IProduct[]> {
+    return this.http.get<IProduct[]>('/api/products/most-selled').pipe(
+      map((products: IProduct[]) => {
+        if (!products || products.length === 0) {
+          console.log('Aucun produit trouvé dans GetMostSelledProducts');
+        }
+        return products;
+      }),
+    );
+  }
+  /*
+  GetMostSelledProducts(): Observable<IProduct[]> {
     return this.http.get<IOrderLine[]>('/api/order-lines').pipe(
       map((orderlines: IOrderLine[]) => {
         const salesMap = new Map<number, number>();
@@ -36,5 +47,5 @@ export class HomePageService {
         return forkJoin(requests);
       }),
     );
-  }
+  }*/
 }
