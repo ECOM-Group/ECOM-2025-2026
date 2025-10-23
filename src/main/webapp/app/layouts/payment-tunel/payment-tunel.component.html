@@ -1,22 +1,33 @@
-<form [formGroup]="paymentForm" (ngSubmit)="submit()">
-  <div formGroupName="delivery">
-    <h2>Adresse de livraison</h2>
-    <jhi-adress-form [adresseForm]="deliveryForm()"></jhi-adress-form>
+@if (isConnected) {
+  <div class="flex">
+    <div class="form">
+      <form [formGroup]="paymentForm" (ngSubmit)="submit()">
+        <div formGroupName="delivery">
+          <h2>Adresse de livraison</h2>
+          <jhi-adress-form [adresseForm]="deliveryForm()"></jhi-adress-form>
+        </div>
+
+        <label>
+          <input type="checkbox" formControlName="sameAdress" />
+          Adresse de facturation identique à l'adresse de livraison
+        </label>
+
+        <div *ngIf="!isSameAdress()" formGroupName="billing">
+          <h2>Adresse de facturation</h2>
+          <jhi-adress-form [adresseForm]="billingForm()"></jhi-adress-form>
+        </div>
+
+        <div formGroupName="card">
+          <jhi-payment-card-form [cardForm]="cardForm()"></jhi-payment-card-form>
+        </div>
+
+        <button type="submit">Valider</button>
+      </form>
+    </div>
+    <div class="prodOrder">
+      <h1><strong>AFFICHER LE PROD ORDER (component a faire) </strong></h1>
+    </div>
   </div>
-
-  <label>
-    <input type="checkbox" formControlName="sameAdress" />
-    Adresse de facturation identique à l'adresse de livraison
-  </label>
-
-  <div *ngIf="!isSameAdress()" formGroupName="billing">
-    <h2>Adresse de facturation</h2>
-    <jhi-adress-form [adresseForm]="billingForm()"></jhi-adress-form>
-  </div>
-
-  <div formGroupName="card">
-    <jhi-payment-card-form [cardForm]="cardForm()"></jhi-payment-card-form>
-  </div>
-
-  <button type="submit">Valider</button>
-</form>
+} @else {
+  <jhi-login redirectUrl="payment"></jhi-login>
+}

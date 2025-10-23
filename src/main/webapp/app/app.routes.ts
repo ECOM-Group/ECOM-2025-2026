@@ -34,7 +34,7 @@ const routes: Routes = [
     title: 'login.title',
   },
   {
-    path: 'payment/:id',
+    path: 'payment',
     loadComponent: () => import('./layouts/payment-tunel/payment-tunel.component'),
   },
   {

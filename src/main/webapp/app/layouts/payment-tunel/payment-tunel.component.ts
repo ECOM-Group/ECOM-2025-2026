@@ -5,18 +5,31 @@ import { AdressFormComponent } from '../adress-form/adress-form.component';
 import { AdresseFormGroup } from 'app/layouts/adress-form/adress-form-group';
 import { CardFormGroup } from '../payment-card-form/payment-card-group-form';
 import { PaymentCardFormComponent } from '../payment-card-form/payment-card-form.component';
-import { concat } from 'rxjs';
+import { EMPTY, map, of, switchMap, tap } from 'rxjs';
+import { Router } from '@angular/router';
+import { AccountService } from 'app/core/auth/account.service';
+import { HttpClient } from '@angular/common/http';
+import LoginComponent from 'app/login/login.component';
+import { IUser } from 'app/admin/user-management/user-management.model';
+import { IProdOrder } from 'app/entities/prod-order/prod-order.model';
+
 @Component({
   standalone: true,
   selector: 'jhi-payment-tunel',
-  imports: [ReactiveFormsModule, NgIf, AdressFormComponent, PaymentCardFormComponent],
+  imports: [ReactiveFormsModule, NgIf, AdressFormComponent, PaymentCardFormComponent, LoginComponent],
   templateUrl: './payment-tunel.component.html',
   styleUrls: ['./payment-tunel.component.scss'],
 })
 export default class PaymentTunelComponent implements OnInit {
   paymentForm!: FormGroup;
+  isConnected = true;
 
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private http: HttpClient,
+    private accountService: AccountService,
+  ) {}
 
   ngOnInit(): void {
     this.paymentForm = this.fb.group({
@@ -25,8 +38,40 @@ export default class PaymentTunelComponent implements OnInit {
       billing: new AdresseFormGroup(),
       card: new CardFormGroup(),
     });
-
     this.setDynamiqueValidatorOnBilling();
+
+    this.accountService
+      .identity()
+      .pipe(
+        switchMap(user => {
+          if (user && user.login) {
+            console.log('Utilisateur déjà connecté');
+            return of(user); // user = Objet, of(user) : of = créé un observable => of(user) = créer un observable et envoit user dedans
+          }
+
+          this.isConnected = false;
+          return this.accountService.getAuthenticationState();
+        }),
+
+        switchMap(user => {
+          if (!user || !user.login) {
+            console.log('Toujours pas connecté après redirection');
+            return EMPTY;
+          }
+          this.isConnected = true;
+          console.log('Utilisateur :', user, 'typeof', typeof user);
+          return this.http.get<IUser>(`/api/admin/users/${user.login}`);
+        }),
+        map(user => user.id),
+        switchMap(userId => {
+          return this.http.get<IProdOrder>(`/api/prod-orders/${userId}/current`);
+        }),
+      )
+      .subscribe({
+        next: prodOrder => console.log('ON SUBSCRIBE :', prodOrder),
+        error: err => console.error('Erreur :', err),
+        complete: () => console.log('Flux terminé'),
+      });
   }
 
   setDynamiqueValidatorOnBilling() {
