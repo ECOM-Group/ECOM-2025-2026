@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, inject, signal, viewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnInit, inject, signal, viewChild } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 
@@ -39,13 +39,13 @@ export default class LoginComponent implements OnInit, AfterViewInit {
     this.username().nativeElement.focus();
   }
 
+  @Input() redirectUrl?: string;
   login(): void {
     this.loginService.login(this.loginForm.getRawValue()).subscribe({
       next: () => {
         this.authenticationError.set(false);
         if (!this.router.getCurrentNavigation()) {
-          // There were no routing during login (eg from navigationToStoredUrl)
-          this.router.navigate(['']);
+          this.router.navigate([this.redirectUrl || '']);
         }
       },
       error: () => this.authenticationError.set(true),
