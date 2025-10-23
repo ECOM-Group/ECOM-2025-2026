@@ -1,0 +1,133 @@
+// Enums
+enum CardType {
+  CREATURE,
+  INSTANT,
+  SORCERY,
+  ARTIFACT,
+  ENCHANTMENT,
+  LAND,
+  PLANESWALKER
+}
+
+enum ProductType{
+	CARD
+    BOX
+	ALBUM
+	SLEEVES
+}
+
+enum Role {
+  CUSTOMER,
+  ADMIN,
+  ANON
+}
+
+enum Language {
+  FRENCH,
+  ENGLISH,
+  KLINGON,
+  JAPANESE
+}
+
+enum Material {
+  STEEL,
+  DIRT,
+  TISSU,
+  SILK
+}
+
+enum PayementMode {
+  CREDIT_CARD,
+  SPIRITUAL_ESSENCE,
+  BODY
+}
+
+entity Customer {
+  firstName String
+  lastName String
+  email String
+  password String
+}
+
+// Address Entity
+entity Address {
+  id Long
+  country String
+  city String
+  street String
+  zipcode Integer
+}
+
+// Product Base Class
+entity Product {
+  id Long
+  name String
+  prodType ProductType
+  price Integer
+  desc String
+  quantity Integer
+  imageHash Integer
+  name String
+  cardType CardType
+  cardText String
+  edition Integer
+  language Language
+  material Material
+  color String
+  pageNum Integer
+  pageLoad Integer
+  capacity Integer
+}
+
+// Tag Entity
+entity Tag {
+  id Long
+  name String
+}
+
+// Illustrator Entity
+entity Illustrator {
+  id Long
+  firstName String
+  lastName String
+}
+
+// Order-related entities
+entity ProdOrder {
+  id Long
+  valid Boolean
+  promo Float
+}
+
+entity OrderLine {
+  id Long
+  unitPrice Integer
+  total Integer
+  quantity Integer
+}
+
+entity Review {
+  id Long
+  desc String
+  grade Integer
+}
+
+// PayementTunnel
+entity PayementTunnel {
+  payementMethod PayementMode
+}
+
+relationship ManyToOne {
+  Card{illustrator} to Illustrator{cards}
+  OrderLine{prodOrder} to ProdOrder{orderLines}
+  ProdOrder{address} to Address{orders}
+  Review{user} to User{reviews} with builtInEntity
+  Review{product} to Product{reviews}
+  OrderLine{product} to Product{orderLines}
+  ProdOrder{user} to User{orders} with builtInEntity
+}
+
+relationship ManyToMany {
+  Address{id} to User{addresses} with builtInEntity
+  Tag{id} to Product{tags}
+}
