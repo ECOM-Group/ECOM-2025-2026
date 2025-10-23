@@ -1,0 +1,79 @@
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { NgIf } from '@angular/common';
+import { AdressFormComponent } from '../adress-form/adress-form.component';
+import { AdresseFormGroup } from 'app/layouts/adress-form/adress-form-group';
+import { CardFormGroup } from '../payment-card-form/payment-card-group-form';
+import { PaymentCardFormComponent } from '../payment-card-form/payment-card-form.component';
+import { concat } from 'rxjs';
+@Component({
+  standalone: true,
+  selector: 'jhi-payment-tunel',
+  imports: [ReactiveFormsModule, NgIf, AdressFormComponent, PaymentCardFormComponent],
+  templateUrl: './payment-tunel.component.html',
+  styleUrls: ['./payment-tunel.component.scss'],
+})
+export default class PaymentTunelComponent implements OnInit {
+  paymentForm!: FormGroup;
+
+  constructor(private fb: FormBuilder) {}
+
+  ngOnInit(): void {
+    this.paymentForm = this.fb.group({
+      sameAdress: [true],
+      delivery: new AdresseFormGroup(),
+      billing: new AdresseFormGroup(),
+      card: new CardFormGroup(),
+    });
+
+    this.setDynamiqueValidatorOnBilling();
+  }
+
+  setDynamiqueValidatorOnBilling() {
+    const billingGroup = this.paymentForm.get('billing') as AdresseFormGroup;
+
+    const changeValidator = (sameAdress: boolean) => {
+      console.log(sameAdress);
+      if (sameAdress) {
+        Object.keys(billingGroup.controls).forEach(field => {
+          billingGroup.get(field)?.clearValidators();
+          billingGroup.get(field)?.updateValueAndValidity();
+        });
+      } else {
+        // Ajouter les validators
+        billingGroup.get('firstName')?.setValidators(Validators.required);
+        billingGroup.get('lastName')?.setValidators(Validators.required);
+        billingGroup.get('email')?.setValidators([Validators.required, Validators.email]);
+        billingGroup.get('phoneNumber')?.setValidators([Validators.required, Validators.pattern(/^(\d{2} ?){5}$/)]);
+        billingGroup.get('adress')?.setValidators(Validators.required);
+        billingGroup.get('postalCode')?.setValidators([Validators.required, Validators.pattern(/^\d{5}$/)]);
+        billingGroup.get('city')?.setValidators(Validators.required);
+        Object.keys(billingGroup.controls).forEach(field => {
+          billingGroup.get(field)?.updateValueAndValidity();
+        });
+      }
+    };
+
+    this.paymentForm.get('sameAdress')?.valueChanges.subscribe(sameAdress => changeValidator(sameAdress));
+    changeValidator(this.paymentForm.get('sameAdress')?.value);
+  }
+
+  deliveryForm(): AdresseFormGroup {
+    return this.paymentForm.get('delivery') as AdresseFormGroup;
+  }
+  billingForm(): AdresseFormGroup {
+    return this.paymentForm.get('billing') as AdresseFormGroup;
+  }
+  cardForm(): CardFormGroup {
+    return this.paymentForm.get('card') as CardFormGroup;
+  }
+
+  isSameAdress(): boolean {
+    return this.paymentForm?.get('sameAdress')?.value;
+  }
+
+  submit(): void {
+    console.log(this.paymentForm.value);
+    console.log(this.paymentForm.valid);
+  }
+}

@@ -1,0 +1,14 @@
+label {
+  min-width: 6rem;
+}
+input {
+  margin-block: 4px;
+  width: 20rem;
+}
+input::placeholder {
+  text-align: center;
+}
+div.ng-invalid {
+  border: none;
+  box-shadow: none;
+}

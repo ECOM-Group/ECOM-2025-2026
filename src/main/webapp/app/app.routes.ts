@@ -34,6 +34,10 @@ const routes: Routes = [
     title: 'login.title',
   },
   {
+    path: 'payment/:id',
+    loadComponent: () => import('./layouts/payment-tunel/payment-tunel.component'),
+  },
+  {
     path: '',
     loadChildren: () => import(`./entities/entity.routes`),
   },
