@@ -1,0 +1,14 @@
+{
+  "ecom20252026App": {
+    "CardType": {
+      "null": "",
+      "CREATURE": "CREATURE",
+      "INSTANT": "INSTANT",
+      "SORCERY": "SORCERY",
+      "ARTIFACT": "ARTIFACT",
+      "ENCHANTMENT": "ENCHANTMENT",
+      "LAND": "LAND",
+      "PLANESWALKER": "PLANESWALKER"
+    }
+  }
+}

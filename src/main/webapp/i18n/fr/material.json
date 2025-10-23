@@ -1,0 +1,11 @@
+{
+  "ecom20252026App": {
+    "Material": {
+      "null": "",
+      "STEEL": "STEEL",
+      "DIRT": "DIRT",
+      "TISSU": "TISSU",
+      "SILK": "SILK"
+    }
+  }
+}

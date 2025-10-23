@@ -1,0 +1,114 @@
+<div>
+  <h2 id="page-heading" data-cy="ProdOrderHeading">
+    <span jhiTranslate="ecom20252026App.prodOrder.home.title">ProdOrders</span>
+
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading">
+        <fa-icon icon="sync" [animation]="isLoading ? 'spin' : undefined"></fa-icon>
+        <span jhiTranslate="ecom20252026App.prodOrder.home.refreshListLabel">Actualiser la liste</span>
+      </button>
+
+      <button
+        id="jh-create-entity"
+        data-cy="entityCreateButton"
+        class="btn btn-primary jh-create-entity create-prod-order"
+        [routerLink]="['/prod-order/new']"
+      >
+        <fa-icon icon="plus"></fa-icon>
+        <span jhiTranslate="ecom20252026App.prodOrder.home.createLabel">Créer un nouveau Prod Order</span>
+      </button>
+    </div>
+  </h2>
+
+  <jhi-alert-error />
+
+  <jhi-alert />
+
+  @if (prodOrders().length === 0) {
+    <div class="alert alert-warning" id="no-result">
+      <span jhiTranslate="ecom20252026App.prodOrder.home.notFound">Aucun Prod Order trouvé</span>
+    </div>
+  } @else {
+    <div class="table-responsive table-entities" id="entities">
+      <table class="table table-striped" aria-describedby="page-heading">
+        <thead>
+          <tr jhiSort [(sortState)]="sortState" (sortChange)="navigateToWithComponentValues($event)">
+            <th scope="col" jhiSortBy="id">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.prodOrder.id">Id</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="valid">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.prodOrder.valid">Valid</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="promo">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.prodOrder.promo">Promo</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="address.id">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.prodOrder.address">Address</span>
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="user.id">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.prodOrder.user">User</span>
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (prodOrder of prodOrders(); track trackId(prodOrder)) {
+            <tr data-cy="entityTable">
+              <td>
+                <a [routerLink]="['/prod-order', prodOrder.id, 'view']">{{ prodOrder.id }}</a>
+              </td>
+              <td>{{ prodOrder.valid }}</td>
+              <td>{{ prodOrder.promo }}</td>
+              <td>
+                @if (prodOrder.address) {
+                  <div>
+                    <a [routerLink]="['/address', prodOrder.address.id, 'view']">{{ prodOrder.address.id }}</a>
+                  </div>
+                }
+              </td>
+              <td>
+                {{ prodOrder.user?.id }}
+              </td>
+              <td class="text-end">
+                <div class="btn-group">
+                  <a [routerLink]="['/prod-order', prodOrder.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                    <fa-icon icon="eye"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.view">Voir</span>
+                  </a>
+
+                  <a [routerLink]="['/prod-order', prodOrder.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                    <fa-icon icon="pencil-alt"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Editer</span>
+                  </a>
+
+                  <button type="submit" (click)="delete(prodOrder)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
+                    <fa-icon icon="times"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Supprimer</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

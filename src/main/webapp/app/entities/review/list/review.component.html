@@ -1,0 +1,114 @@
+<div>
+  <h2 id="page-heading" data-cy="ReviewHeading">
+    <span jhiTranslate="ecom20252026App.review.home.title">Reviews</span>
+
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading">
+        <fa-icon icon="sync" [animation]="isLoading ? 'spin' : undefined"></fa-icon>
+        <span jhiTranslate="ecom20252026App.review.home.refreshListLabel">Actualiser la liste</span>
+      </button>
+
+      <button
+        id="jh-create-entity"
+        data-cy="entityCreateButton"
+        class="btn btn-primary jh-create-entity create-review"
+        [routerLink]="['/review/new']"
+      >
+        <fa-icon icon="plus"></fa-icon>
+        <span jhiTranslate="ecom20252026App.review.home.createLabel">Créer un nouveau Review</span>
+      </button>
+    </div>
+  </h2>
+
+  <jhi-alert-error />
+
+  <jhi-alert />
+
+  @if (reviews().length === 0) {
+    <div class="alert alert-warning" id="no-result">
+      <span jhiTranslate="ecom20252026App.review.home.notFound">Aucun Review trouvé</span>
+    </div>
+  } @else {
+    <div class="table-responsive table-entities" id="entities">
+      <table class="table table-striped" aria-describedby="page-heading">
+        <thead>
+          <tr jhiSort [(sortState)]="sortState" (sortChange)="navigateToWithComponentValues($event)">
+            <th scope="col" jhiSortBy="id">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.review.id">Id</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="desc">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.review.desc">Desc</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="grade">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.review.grade">Grade</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="user.id">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.review.user">User</span>
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="product.id">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.review.product">Product</span>
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (review of reviews(); track trackId(review)) {
+            <tr data-cy="entityTable">
+              <td>
+                <a [routerLink]="['/review', review.id, 'view']">{{ review.id }}</a>
+              </td>
+              <td>{{ review.desc }}</td>
+              <td>{{ review.grade }}</td>
+              <td>
+                {{ review.user?.id }}
+              </td>
+              <td>
+                @if (review.product) {
+                  <div>
+                    <a [routerLink]="['/product', review.product.id, 'view']">{{ review.product.id }}</a>
+                  </div>
+                }
+              </td>
+              <td class="text-end">
+                <div class="btn-group">
+                  <a [routerLink]="['/review', review.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                    <fa-icon icon="eye"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.view">Voir</span>
+                  </a>
+
+                  <a [routerLink]="['/review', review.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                    <fa-icon icon="pencil-alt"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Editer</span>
+                  </a>
+
+                  <button type="submit" (click)="delete(review)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
+                    <fa-icon icon="times"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Supprimer</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

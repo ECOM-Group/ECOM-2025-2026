@@ -1,0 +1,26 @@
+{
+  "ecom20252026App": {
+    "illustrator": {
+      "home": {
+        "title": "Illustrators",
+        "refreshListLabel": "Actualiser la liste",
+        "createLabel": "Créer un nouveau Illustrator",
+        "createOrEditLabel": "Créer ou éditer un Illustrator",
+        "notFound": "Aucun Illustrator trouvé"
+      },
+      "created": "Un nouveau Illustrator a été créé avec l'identifiant {{ param }}",
+      "updated": "Le Illustrator avec l'identifiant {{ param }} a été mis à jour",
+      "deleted": "Le Illustrator avec l'identifiant {{ param }} a été supprimé",
+      "delete": {
+        "question": "Êtes-vous certain de vouloir supprimer le Illustrator {{ id }} ?"
+      },
+      "detail": {
+        "title": "Illustrator"
+      },
+      "id": "Id",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "cards": "Cards"
+    }
+  }
+}

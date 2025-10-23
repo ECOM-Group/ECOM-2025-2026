@@ -1,0 +1,16 @@
+{
+  "annotations": {
+    "changelogDate": "20251023083008"
+  },
+  "applications": "*",
+  "fields": [
+    {
+      "fieldName": "payementMethod",
+      "fieldType": "PayementMode",
+      "fieldValues": "CREDIT_CARD,SPIRITUAL_ESSENCE,BODY"
+    }
+  ],
+  "name": "PayementTunnel",
+  "relationships": [],
+  "searchEngine": "no"
+}

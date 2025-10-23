@@ -1,0 +1,98 @@
+<div>
+  <h2 id="page-heading" data-cy="PayementTunnelHeading">
+    <span jhiTranslate="ecom20252026App.payementTunnel.home.title">PayementTunnels</span>
+
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading">
+        <fa-icon icon="sync" [animation]="isLoading ? 'spin' : undefined"></fa-icon>
+        <span jhiTranslate="ecom20252026App.payementTunnel.home.refreshListLabel">Actualiser la liste</span>
+      </button>
+
+      <button
+        id="jh-create-entity"
+        data-cy="entityCreateButton"
+        class="btn btn-primary jh-create-entity create-payement-tunnel"
+        [routerLink]="['/payement-tunnel/new']"
+      >
+        <fa-icon icon="plus"></fa-icon>
+        <span jhiTranslate="ecom20252026App.payementTunnel.home.createLabel">Créer un nouveau Payement Tunnel</span>
+      </button>
+    </div>
+  </h2>
+
+  <jhi-alert-error />
+
+  <jhi-alert />
+
+  @if (payementTunnels().length === 0) {
+    <div class="alert alert-warning" id="no-result">
+      <span jhiTranslate="ecom20252026App.payementTunnel.home.notFound">Aucun Payement Tunnel trouvé</span>
+    </div>
+  } @else {
+    <div class="table-responsive table-entities" id="entities">
+      <table class="table table-striped" aria-describedby="page-heading">
+        <thead>
+          <tr jhiSort [(sortState)]="sortState" (sortChange)="navigateToWithComponentValues($event)">
+            <th scope="col" jhiSortBy="id">
+              <div class="d-flex">
+                <span jhiTranslate="global.field.id">ID</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="payementMethod">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.payementTunnel.payementMethod">Payement Method</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (payementTunnel of payementTunnels(); track trackId(payementTunnel)) {
+            <tr data-cy="entityTable">
+              <td>
+                <a [routerLink]="['/payement-tunnel', payementTunnel.id, 'view']">{{ payementTunnel.id }}</a>
+              </td>
+              <td [jhiTranslate]="'ecom20252026App.PayementMode.' + (payementTunnel.payementMethod ?? 'null')">
+                {{
+                  { null: '', CREDIT_CARD: 'CREDIT_CARD', SPIRITUAL_ESSENCE: 'SPIRITUAL_ESSENCE', BODY: 'BODY' }[
+                    payementTunnel.payementMethod ?? 'null'
+                  ]
+                }}
+              </td>
+              <td class="text-end">
+                <div class="btn-group">
+                  <a
+                    [routerLink]="['/payement-tunnel', payementTunnel.id, 'view']"
+                    class="btn btn-info btn-sm"
+                    data-cy="entityDetailsButton"
+                  >
+                    <fa-icon icon="eye"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.view">Voir</span>
+                  </a>
+
+                  <a
+                    [routerLink]="['/payement-tunnel', payementTunnel.id, 'edit']"
+                    class="btn btn-primary btn-sm"
+                    data-cy="entityEditButton"
+                  >
+                    <fa-icon icon="pencil-alt"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Editer</span>
+                  </a>
+
+                  <button type="submit" (click)="delete(payementTunnel)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
+                    <fa-icon icon="times"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Supprimer</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

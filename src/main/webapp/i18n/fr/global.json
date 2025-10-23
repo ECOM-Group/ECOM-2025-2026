@@ -8,7 +8,15 @@
       "entities": {
         "main": "Entités",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)",
-        "adminAuthority": "Authority"
+        "customer": "Customer",
+        "address": "Address",
+        "product": "Product",
+        "tag": "Tag",
+        "illustrator": "Illustrator",
+        "prodOrder": "Prod Order",
+        "orderLine": "Order Line",
+        "review": "Review",
+        "payementTunnel": "Payement Tunnel"
       },
       "account": {
         "main": "Compte",

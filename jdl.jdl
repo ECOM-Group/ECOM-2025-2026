@@ -118,7 +118,7 @@ entity PayementTunnel {
 }
 
 relationship ManyToOne {
-  Card{illustrator} to Illustrator{cards}
+  Product{illustrator} to Illustrator{cards}
   OrderLine{prodOrder} to ProdOrder{orderLines}
   ProdOrder{address} to Address{orders}
   Review{user} to User{reviews} with builtInEntity

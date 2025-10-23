@@ -50,6 +50,23 @@ public class CacheConfiguration {
             createCache(cm, com.mycompany.myapp.domain.User.class.getName());
             createCache(cm, com.mycompany.myapp.domain.Authority.class.getName());
             createCache(cm, com.mycompany.myapp.domain.User.class.getName() + ".authorities");
+            createCache(cm, com.mycompany.myapp.domain.Customer.class.getName());
+            createCache(cm, com.mycompany.myapp.domain.Address.class.getName());
+            createCache(cm, com.mycompany.myapp.domain.Address.class.getName() + ".ids");
+            createCache(cm, com.mycompany.myapp.domain.Address.class.getName() + ".orders");
+            createCache(cm, com.mycompany.myapp.domain.Product.class.getName());
+            createCache(cm, com.mycompany.myapp.domain.Product.class.getName() + ".reviews");
+            createCache(cm, com.mycompany.myapp.domain.Product.class.getName() + ".orderLines");
+            createCache(cm, com.mycompany.myapp.domain.Product.class.getName() + ".tags");
+            createCache(cm, com.mycompany.myapp.domain.Tag.class.getName());
+            createCache(cm, com.mycompany.myapp.domain.Tag.class.getName() + ".ids");
+            createCache(cm, com.mycompany.myapp.domain.Illustrator.class.getName());
+            createCache(cm, com.mycompany.myapp.domain.Illustrator.class.getName() + ".cards");
+            createCache(cm, com.mycompany.myapp.domain.ProdOrder.class.getName());
+            createCache(cm, com.mycompany.myapp.domain.ProdOrder.class.getName() + ".orderLines");
+            createCache(cm, com.mycompany.myapp.domain.OrderLine.class.getName());
+            createCache(cm, com.mycompany.myapp.domain.Review.class.getName());
+            createCache(cm, com.mycompany.myapp.domain.PayementTunnel.class.getName());
             // jhipster-needle-ehcache-add-entry
         };
     }

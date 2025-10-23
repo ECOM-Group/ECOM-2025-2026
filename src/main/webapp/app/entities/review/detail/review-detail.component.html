@@ -1,0 +1,50 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (review(); as reviewRef) {
+      <div>
+        <h2 data-cy="reviewDetailsHeading"><span jhiTranslate="ecom20252026App.review.detail.title">Review</span></h2>
+
+        <hr />
+
+        <jhi-alert-error />
+
+        <jhi-alert />
+
+        <dl class="row-md jh-entity-details">
+          <dt><span jhiTranslate="ecom20252026App.review.id">Id</span></dt>
+          <dd>
+            <span>{{ reviewRef.id }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.review.desc">Desc</span></dt>
+          <dd>
+            <span>{{ reviewRef.desc }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.review.grade">Grade</span></dt>
+          <dd>
+            <span>{{ reviewRef.grade }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.review.user">User</span></dt>
+          <dd>
+            <span>{{ reviewRef.user?.id }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.review.product">Product</span></dt>
+          <dd>
+            @if (review()!.product) {
+              <div>
+                <a [routerLink]="['/product', review()!.product?.id, 'view']">{{ reviewRef.product?.id }}</a>
+              </div>
+            }
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back">Retour</span>
+        </button>
+
+        <button type="button" [routerLink]="['/review', reviewRef.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit">Editer</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

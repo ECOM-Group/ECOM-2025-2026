@@ -1,0 +1,7 @@
+export enum PayementMode {
+  CREDIT_CARD = 'CREDIT_CARD',
+
+  SPIRITUAL_ESSENCE = 'SPIRITUAL_ESSENCE',
+
+  BODY = 'BODY',
+}

@@ -1,0 +1,11 @@
+{
+  "ecom20252026App": {
+    "ProductType": {
+      "null": "",
+      "CARD": "CARD",
+      "BOX": "BOX",
+      "ALBUM": "ALBUM",
+      "SLEEVES": "SLEEVES"
+    }
+  }
+}

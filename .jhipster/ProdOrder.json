@@ -1,0 +1,46 @@
+{
+  "annotations": {
+    "changelogDate": "20251023083005"
+  },
+  "applications": "*",
+  "fields": [
+    {
+      "fieldName": "id",
+      "fieldType": "Long"
+    },
+    {
+      "fieldName": "valid",
+      "fieldType": "Boolean"
+    },
+    {
+      "fieldName": "promo",
+      "fieldType": "Float"
+    }
+  ],
+  "name": "ProdOrder",
+  "relationships": [
+    {
+      "otherEntityName": "address",
+      "otherEntityRelationshipName": "orders",
+      "relationshipName": "address",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    },
+    {
+      "otherEntityName": "user",
+      "otherEntityRelationshipName": "orders",
+      "relationshipName": "user",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipWithBuiltInEntity": true
+    },
+    {
+      "otherEntityName": "orderLine",
+      "otherEntityRelationshipName": "prodOrder",
+      "relationshipName": "orderLines",
+      "relationshipSide": "right",
+      "relationshipType": "one-to-many"
+    }
+  ],
+  "searchEngine": "no"
+}

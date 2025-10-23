@@ -1,0 +1,24 @@
+{
+  "ecom20252026App": {
+    "payementTunnel": {
+      "home": {
+        "title": "PayementTunnels",
+        "refreshListLabel": "Actualiser la liste",
+        "createLabel": "Créer un nouveau Payement Tunnel",
+        "createOrEditLabel": "Créer ou éditer un Payement Tunnel",
+        "notFound": "Aucun Payement Tunnel trouvé"
+      },
+      "created": "Un nouveau Payement Tunnel a été créé avec l'identifiant {{ param }}",
+      "updated": "Le Payement Tunnel avec l'identifiant {{ param }} a été mis à jour",
+      "deleted": "Le Payement Tunnel avec l'identifiant {{ param }} a été supprimé",
+      "delete": {
+        "question": "Êtes-vous certain de vouloir supprimer le Payement Tunnel {{ id }} ?"
+      },
+      "detail": {
+        "title": "Payement Tunnel"
+      },
+      "id": "ID",
+      "payementMethod": "Payement Method"
+    }
+  }
+}

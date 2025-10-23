@@ -1,0 +1,244 @@
+<div>
+  <h2 id="page-heading" data-cy="ProductHeading">
+    <span jhiTranslate="ecom20252026App.product.home.title">Products</span>
+
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading">
+        <fa-icon icon="sync" [animation]="isLoading ? 'spin' : undefined"></fa-icon>
+        <span jhiTranslate="ecom20252026App.product.home.refreshListLabel">Actualiser la liste</span>
+      </button>
+
+      <button
+        id="jh-create-entity"
+        data-cy="entityCreateButton"
+        class="btn btn-primary jh-create-entity create-product"
+        [routerLink]="['/product/new']"
+      >
+        <fa-icon icon="plus"></fa-icon>
+        <span jhiTranslate="ecom20252026App.product.home.createLabel">Créer un nouveau Product</span>
+      </button>
+    </div>
+  </h2>
+
+  <jhi-alert-error />
+
+  <jhi-alert />
+
+  @if (products().length === 0) {
+    <div class="alert alert-warning" id="no-result">
+      <span jhiTranslate="ecom20252026App.product.home.notFound">Aucun Product trouvé</span>
+    </div>
+  } @else {
+    <div class="table-responsive table-entities" id="entities">
+      <table class="table table-striped" aria-describedby="page-heading">
+        <thead>
+          <tr jhiSort [(sortState)]="sortState" (sortChange)="navigateToWithComponentValues($event)">
+            <th scope="col" jhiSortBy="id">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.product.id">Id</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="name">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.product.name">Name</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="prodType">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.product.prodType">Prod Type</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="price">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.product.price">Price</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="desc">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.product.desc">Desc</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="quantity">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.product.quantity">Quantity</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="imageHash">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.product.imageHash">Image Hash</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="cardType">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.product.cardType">Card Type</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="cardText">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.product.cardText">Card Text</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="edition">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.product.edition">Edition</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="language">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.product.language">Language</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="material">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.product.material">Material</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="color">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.product.color">Color</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="pageNum">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.product.pageNum">Page Num</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="pageLoad">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.product.pageLoad">Page Load</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="capacity">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.product.capacity">Capacity</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="illustrator.id">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.product.illustrator">Illustrator</span>
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="tags.id">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.product.tags">Tags</span>
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of products(); track trackId(product)) {
+            <tr data-cy="entityTable">
+              <td>
+                <a [routerLink]="['/product', product.id, 'view']">{{ product.id }}</a>
+              </td>
+              <td>{{ product.name }}</td>
+              <td [jhiTranslate]="'ecom20252026App.ProductType.' + (product.prodType ?? 'null')">
+                {{ { null: '', CARD: 'CARD', BOX: 'BOX', ALBUM: 'ALBUM', SLEEVES: 'SLEEVES' }[product.prodType ?? 'null'] }}
+              </td>
+              <td>{{ product.price }}</td>
+              <td>{{ product.desc }}</td>
+              <td>{{ product.quantity }}</td>
+              <td>{{ product.imageHash }}</td>
+              <td [jhiTranslate]="'ecom20252026App.CardType.' + (product.cardType ?? 'null')">
+                {{
+                  {
+                    null: '',
+                    CREATURE: 'CREATURE',
+                    INSTANT: 'INSTANT',
+                    SORCERY: 'SORCERY',
+                    ARTIFACT: 'ARTIFACT',
+                    ENCHANTMENT: 'ENCHANTMENT',
+                    LAND: 'LAND',
+                    PLANESWALKER: 'PLANESWALKER',
+                  }[product.cardType ?? 'null']
+                }}
+              </td>
+              <td>{{ product.cardText }}</td>
+              <td>{{ product.edition }}</td>
+              <td [jhiTranslate]="'ecom20252026App.Language.' + (product.language ?? 'null')">
+                {{
+                  { null: '', FRENCH: 'FRENCH', ENGLISH: 'ENGLISH', KLINGON: 'KLINGON', JAPANESE: 'JAPANESE' }[product.language ?? 'null']
+                }}
+              </td>
+              <td [jhiTranslate]="'ecom20252026App.Material.' + (product.material ?? 'null')">
+                {{ { null: '', STEEL: 'STEEL', DIRT: 'DIRT', TISSU: 'TISSU', SILK: 'SILK' }[product.material ?? 'null'] }}
+              </td>
+              <td>{{ product.color }}</td>
+              <td>{{ product.pageNum }}</td>
+              <td>{{ product.pageLoad }}</td>
+              <td>{{ product.capacity }}</td>
+              <td>
+                @if (product.illustrator) {
+                  <div>
+                    <a [routerLink]="['/illustrator', product.illustrator.id, 'view']">{{ product.illustrator.id }}</a>
+                  </div>
+                }
+              </td>
+              <td>
+                @for (tags of product.tags; track $index; let last = $last) {
+                  <span>
+                    <a class="form-control-static" [routerLink]="['/tag', tags.id, 'view']">{{ tags.id }}</a
+                    >{{ last ? '' : ', ' }}
+                  </span>
+                }
+              </td>
+              <td class="text-end">
+                <div class="btn-group">
+                  <a [routerLink]="['/product', product.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                    <fa-icon icon="eye"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.view">Voir</span>
+                  </a>
+
+                  <a [routerLink]="['/product', product.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                    <fa-icon icon="pencil-alt"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Editer</span>
+                  </a>
+
+                  <button type="submit" (click)="delete(product)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
+                    <fa-icon icon="times"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Supprimer</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -1,0 +1,126 @@
+<div>
+  <h2 id="page-heading" data-cy="OrderLineHeading">
+    <span jhiTranslate="ecom20252026App.orderLine.home.title">OrderLines</span>
+
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading">
+        <fa-icon icon="sync" [animation]="isLoading ? 'spin' : undefined"></fa-icon>
+        <span jhiTranslate="ecom20252026App.orderLine.home.refreshListLabel">Actualiser la liste</span>
+      </button>
+
+      <button
+        id="jh-create-entity"
+        data-cy="entityCreateButton"
+        class="btn btn-primary jh-create-entity create-order-line"
+        [routerLink]="['/order-line/new']"
+      >
+        <fa-icon icon="plus"></fa-icon>
+        <span jhiTranslate="ecom20252026App.orderLine.home.createLabel">Créer un nouveau Order Line</span>
+      </button>
+    </div>
+  </h2>
+
+  <jhi-alert-error />
+
+  <jhi-alert />
+
+  @if (orderLines().length === 0) {
+    <div class="alert alert-warning" id="no-result">
+      <span jhiTranslate="ecom20252026App.orderLine.home.notFound">Aucun Order Line trouvé</span>
+    </div>
+  } @else {
+    <div class="table-responsive table-entities" id="entities">
+      <table class="table table-striped" aria-describedby="page-heading">
+        <thead>
+          <tr jhiSort [(sortState)]="sortState" (sortChange)="navigateToWithComponentValues($event)">
+            <th scope="col" jhiSortBy="id">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.orderLine.id">Id</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="unitPrice">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.orderLine.unitPrice">Unit Price</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="total">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.orderLine.total">Total</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="quantity">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.orderLine.quantity">Quantity</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="prodOrder.id">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.orderLine.prodOrder">Prod Order</span>
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="product.id">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.orderLine.product">Product</span>
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (orderLine of orderLines(); track trackId(orderLine)) {
+            <tr data-cy="entityTable">
+              <td>
+                <a [routerLink]="['/order-line', orderLine.id, 'view']">{{ orderLine.id }}</a>
+              </td>
+              <td>{{ orderLine.unitPrice }}</td>
+              <td>{{ orderLine.total }}</td>
+              <td>{{ orderLine.quantity }}</td>
+              <td>
+                @if (orderLine.prodOrder) {
+                  <div>
+                    <a [routerLink]="['/prod-order', orderLine.prodOrder.id, 'view']">{{ orderLine.prodOrder.id }}</a>
+                  </div>
+                }
+              </td>
+              <td>
+                @if (orderLine.product) {
+                  <div>
+                    <a [routerLink]="['/product', orderLine.product.id, 'view']">{{ orderLine.product.id }}</a>
+                  </div>
+                }
+              </td>
+              <td class="text-end">
+                <div class="btn-group">
+                  <a [routerLink]="['/order-line', orderLine.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                    <fa-icon icon="eye"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.view">Voir</span>
+                  </a>
+
+                  <a [routerLink]="['/order-line', orderLine.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                    <fa-icon icon="pencil-alt"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Editer</span>
+                  </a>
+
+                  <button type="submit" (click)="delete(orderLine)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
+                    <fa-icon icon="times"></fa-icon>
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Supprimer</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

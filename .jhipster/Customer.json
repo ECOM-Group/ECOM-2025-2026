@@ -1,0 +1,27 @@
+{
+  "annotations": {
+    "changelogDate": "20251023083000"
+  },
+  "applications": "*",
+  "fields": [
+    {
+      "fieldName": "firstName",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "lastName",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "email",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "password",
+      "fieldType": "String"
+    }
+  ],
+  "name": "Customer",
+  "relationships": [],
+  "searchEngine": "no"
+}

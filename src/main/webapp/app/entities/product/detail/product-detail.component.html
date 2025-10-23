@@ -1,0 +1,124 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (product(); as productRef) {
+      <div>
+        <h2 data-cy="productDetailsHeading"><span jhiTranslate="ecom20252026App.product.detail.title">Product</span></h2>
+
+        <hr />
+
+        <jhi-alert-error />
+
+        <jhi-alert />
+
+        <dl class="row-md jh-entity-details">
+          <dt><span jhiTranslate="ecom20252026App.product.id">Id</span></dt>
+          <dd>
+            <span>{{ productRef.id }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.product.name">Name</span></dt>
+          <dd>
+            <span>{{ productRef.name }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.product.prodType">Prod Type</span></dt>
+          <dd>
+            <span [jhiTranslate]="'ecom20252026App.ProductType.' + (productRef.prodType ?? 'null')">{{
+              { null: '', CARD: 'CARD', BOX: 'BOX', ALBUM: 'ALBUM', SLEEVES: 'SLEEVES' }[productRef.prodType ?? 'null']
+            }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.product.price">Price</span></dt>
+          <dd>
+            <span>{{ productRef.price }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.product.desc">Desc</span></dt>
+          <dd>
+            <span>{{ productRef.desc }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.product.quantity">Quantity</span></dt>
+          <dd>
+            <span>{{ productRef.quantity }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.product.imageHash">Image Hash</span></dt>
+          <dd>
+            <span>{{ productRef.imageHash }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.product.cardType">Card Type</span></dt>
+          <dd>
+            <span [jhiTranslate]="'ecom20252026App.CardType.' + (productRef.cardType ?? 'null')">{{
+              {
+                null: '',
+                CREATURE: 'CREATURE',
+                INSTANT: 'INSTANT',
+                SORCERY: 'SORCERY',
+                ARTIFACT: 'ARTIFACT',
+                ENCHANTMENT: 'ENCHANTMENT',
+                LAND: 'LAND',
+                PLANESWALKER: 'PLANESWALKER',
+              }[productRef.cardType ?? 'null']
+            }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.product.cardText">Card Text</span></dt>
+          <dd>
+            <span>{{ productRef.cardText }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.product.edition">Edition</span></dt>
+          <dd>
+            <span>{{ productRef.edition }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.product.language">Language</span></dt>
+          <dd>
+            <span [jhiTranslate]="'ecom20252026App.Language.' + (productRef.language ?? 'null')">{{
+              { null: '', FRENCH: 'FRENCH', ENGLISH: 'ENGLISH', KLINGON: 'KLINGON', JAPANESE: 'JAPANESE' }[productRef.language ?? 'null']
+            }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.product.material">Material</span></dt>
+          <dd>
+            <span [jhiTranslate]="'ecom20252026App.Material.' + (productRef.material ?? 'null')">{{
+              { null: '', STEEL: 'STEEL', DIRT: 'DIRT', TISSU: 'TISSU', SILK: 'SILK' }[productRef.material ?? 'null']
+            }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.product.color">Color</span></dt>
+          <dd>
+            <span>{{ productRef.color }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.product.pageNum">Page Num</span></dt>
+          <dd>
+            <span>{{ productRef.pageNum }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.product.pageLoad">Page Load</span></dt>
+          <dd>
+            <span>{{ productRef.pageLoad }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.product.capacity">Capacity</span></dt>
+          <dd>
+            <span>{{ productRef.capacity }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.product.illustrator">Illustrator</span></dt>
+          <dd>
+            @if (product()!.illustrator) {
+              <div>
+                <a [routerLink]="['/illustrator', product()!.illustrator?.id, 'view']">{{ productRef.illustrator?.id }}</a>
+              </div>
+            }
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.product.tags">Tags</span></dt>
+          <dd>
+            @for (tags of productRef.tags; track $index; let last = $last) {
+              <span>
+                <a [routerLink]="['/tag', tags.id, 'view']">{{ tags?.id }}</a
+                >{{ last ? '' : ', ' }}
+              </span>
+            }
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back">Retour</span>
+        </button>
+
+        <button type="button" [routerLink]="['/product', productRef.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit">Editer</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

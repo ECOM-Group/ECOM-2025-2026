@@ -1,0 +1,42 @@
+{
+  "ecom20252026App": {
+    "product": {
+      "home": {
+        "title": "Products",
+        "refreshListLabel": "Actualiser la liste",
+        "createLabel": "Créer un nouveau Product",
+        "createOrEditLabel": "Créer ou éditer un Product",
+        "notFound": "Aucun Product trouvé"
+      },
+      "created": "Un nouveau Product a été créé avec l'identifiant {{ param }}",
+      "updated": "Le Product avec l'identifiant {{ param }} a été mis à jour",
+      "deleted": "Le Product avec l'identifiant {{ param }} a été supprimé",
+      "delete": {
+        "question": "Êtes-vous certain de vouloir supprimer le Product {{ id }} ?"
+      },
+      "detail": {
+        "title": "Product"
+      },
+      "id": "Id",
+      "name": "Name",
+      "prodType": "Prod Type",
+      "price": "Price",
+      "desc": "Desc",
+      "quantity": "Quantity",
+      "imageHash": "Image Hash",
+      "cardType": "Card Type",
+      "cardText": "Card Text",
+      "edition": "Edition",
+      "language": "Language",
+      "material": "Material",
+      "color": "Color",
+      "pageNum": "Page Num",
+      "pageLoad": "Page Load",
+      "capacity": "Capacity",
+      "illustrator": "Illustrator",
+      "reviews": "Reviews",
+      "orderLines": "Order Lines",
+      "tags": "Tags"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "ecom20252026App": {
+    "PayementMode": {
+      "null": "",
+      "CREDIT_CARD": "CREDIT_CARD",
+      "SPIRITUAL_ESSENCE": "SPIRITUAL_ESSENCE",
+      "BODY": "BODY"
+    }
+  }
+}

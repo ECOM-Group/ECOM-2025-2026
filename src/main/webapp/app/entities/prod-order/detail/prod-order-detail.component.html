@@ -1,0 +1,50 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (prodOrder(); as prodOrderRef) {
+      <div>
+        <h2 data-cy="prodOrderDetailsHeading"><span jhiTranslate="ecom20252026App.prodOrder.detail.title">Prod Order</span></h2>
+
+        <hr />
+
+        <jhi-alert-error />
+
+        <jhi-alert />
+
+        <dl class="row-md jh-entity-details">
+          <dt><span jhiTranslate="ecom20252026App.prodOrder.id">Id</span></dt>
+          <dd>
+            <span>{{ prodOrderRef.id }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.prodOrder.valid">Valid</span></dt>
+          <dd>
+            <span>{{ prodOrderRef.valid }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.prodOrder.promo">Promo</span></dt>
+          <dd>
+            <span>{{ prodOrderRef.promo }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.prodOrder.address">Address</span></dt>
+          <dd>
+            @if (prodOrder()!.address) {
+              <div>
+                <a [routerLink]="['/address', prodOrder()!.address?.id, 'view']">{{ prodOrderRef.address?.id }}</a>
+              </div>
+            }
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.prodOrder.user">User</span></dt>
+          <dd>
+            <span>{{ prodOrderRef.user?.id }}</span>
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back">Retour</span>
+        </button>
+
+        <button type="button" [routerLink]="['/prod-order', prodOrderRef.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit">Editer</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

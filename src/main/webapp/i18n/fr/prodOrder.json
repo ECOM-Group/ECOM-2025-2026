@@ -1,0 +1,28 @@
+{
+  "ecom20252026App": {
+    "prodOrder": {
+      "home": {
+        "title": "ProdOrders",
+        "refreshListLabel": "Actualiser la liste",
+        "createLabel": "Créer un nouveau Prod Order",
+        "createOrEditLabel": "Créer ou éditer un Prod Order",
+        "notFound": "Aucun Prod Order trouvé"
+      },
+      "created": "Un nouveau Prod Order a été créé avec l'identifiant {{ param }}",
+      "updated": "Le Prod Order avec l'identifiant {{ param }} a été mis à jour",
+      "deleted": "Le Prod Order avec l'identifiant {{ param }} a été supprimé",
+      "delete": {
+        "question": "Êtes-vous certain de vouloir supprimer le Prod Order {{ id }} ?"
+      },
+      "detail": {
+        "title": "Prod Order"
+      },
+      "id": "Id",
+      "valid": "Valid",
+      "promo": "Promo",
+      "address": "Address",
+      "user": "User",
+      "orderLines": "Order Lines"
+    }
+  }
+}

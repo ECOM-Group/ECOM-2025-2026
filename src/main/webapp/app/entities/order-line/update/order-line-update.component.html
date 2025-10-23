@@ -1,0 +1,89 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    <form name="editForm" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+      <h2
+        id="jhi-order-line-heading"
+        data-cy="OrderLineCreateUpdateHeading"
+        jhiTranslate="ecom20252026App.orderLine.home.createOrEditLabel"
+      >
+        Créer ou éditer un Order Line
+      </h2>
+
+      <div>
+        <jhi-alert-error />
+
+        @if (editForm.controls.id.value !== null) {
+          <div class="mb-3">
+            <label class="form-label" for="field_id" jhiTranslate="ecom20252026App.orderLine.id">Id</label>
+            <input type="number" class="form-control" name="id" id="field_id" data-cy="id" formControlName="id" [readonly]="true" />
+          </div>
+        }
+
+        <div class="mb-3">
+          <label class="form-label" for="field_unitPrice" jhiTranslate="ecom20252026App.orderLine.unitPrice">Unit Price</label>
+          <input type="number" class="form-control" name="unitPrice" id="field_unitPrice" data-cy="unitPrice" formControlName="unitPrice" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_total" jhiTranslate="ecom20252026App.orderLine.total">Total</label>
+          <input type="number" class="form-control" name="total" id="field_total" data-cy="total" formControlName="total" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_quantity" jhiTranslate="ecom20252026App.orderLine.quantity">Quantity</label>
+          <input type="number" class="form-control" name="quantity" id="field_quantity" data-cy="quantity" formControlName="quantity" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_prodOrder" jhiTranslate="ecom20252026App.orderLine.prodOrder">Prod Order</label>
+          <select
+            class="form-control"
+            id="field_prodOrder"
+            data-cy="prodOrder"
+            name="prodOrder"
+            formControlName="prodOrder"
+            [compareWith]="compareProdOrder"
+          >
+            <option [ngValue]="null"></option>
+            @for (prodOrderOption of prodOrdersSharedCollection; track $index) {
+              <option [ngValue]="prodOrderOption">{{ prodOrderOption.id }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_product" jhiTranslate="ecom20252026App.orderLine.product">Product</label>
+          <select
+            class="form-control"
+            id="field_product"
+            data-cy="product"
+            name="product"
+            formControlName="product"
+            [compareWith]="compareProduct"
+          >
+            <option [ngValue]="null"></option>
+            @for (productOption of productsSharedCollection; track $index) {
+              <option [ngValue]="productOption">{{ productOption.id }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" (click)="previousState()">
+          <fa-icon icon="ban"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Annuler</span>
+        </button>
+
+        <button
+          type="submit"
+          id="save-entity"
+          data-cy="entityCreateSaveButton"
+          [disabled]="editForm.invalid || isSaving"
+          class="btn btn-primary"
+        >
+          <fa-icon icon="save"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Sauvegarder</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

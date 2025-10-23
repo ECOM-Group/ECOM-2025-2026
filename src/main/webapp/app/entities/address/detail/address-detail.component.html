@@ -1,0 +1,52 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (address(); as addressRef) {
+      <div>
+        <h2 data-cy="addressDetailsHeading"><span jhiTranslate="ecom20252026App.address.detail.title">Address</span></h2>
+
+        <hr />
+
+        <jhi-alert-error />
+
+        <jhi-alert />
+
+        <dl class="row-md jh-entity-details">
+          <dt><span jhiTranslate="ecom20252026App.address.id">Id</span></dt>
+          <dd>
+            <span>{{ addressRef.id }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.address.country">Country</span></dt>
+          <dd>
+            <span>{{ addressRef.country }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.address.city">City</span></dt>
+          <dd>
+            <span>{{ addressRef.city }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.address.street">Street</span></dt>
+          <dd>
+            <span>{{ addressRef.street }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.address.zipcode">Zipcode</span></dt>
+          <dd>
+            <span>{{ addressRef.zipcode }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.address.id">Id</span></dt>
+          <dd>
+            @for (id of addressRef.ids; track $index; let last = $last) {
+              <span> {{ id.id }}{{ last ? '' : ', ' }} </span>
+            }
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back">Retour</span>
+        </button>
+
+        <button type="button" [routerLink]="['/address', addressRef.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit">Editer</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>
