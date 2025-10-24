@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 import { Authority } from 'app/config/authority.constants';
 
 import { UserRouteAccessService } from 'app/core/auth/user-route-access.service';
-import { PROD_ORDER_ROUTE } from './prod-order/prod-order.route';
+import { CART_ROUTE } from './cart/cart.route';
 import { errorRoute } from './layouts/error/error.route';
 
 const routes: Routes = [
@@ -38,7 +38,7 @@ const routes: Routes = [
     path: '',
     loadChildren: () => import(`./entities/entity.routes`),
   },
-  PROD_ORDER_ROUTE,
+  CART_ROUTE,
   ...errorRoute,
 ];
 

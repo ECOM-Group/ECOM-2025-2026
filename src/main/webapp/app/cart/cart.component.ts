@@ -16,12 +16,12 @@ interface OrderLine {
 }
 
 @Component({
-  selector: 'jhi-prod-order',
+  selector: 'jhi-cart',
   imports: [],
-  templateUrl: './prod-order.component.html',
-  styleUrl: './prod-order.component.scss',
+  templateUrl: './cart.component.html',
+  styleUrl: './cart.component.scss',
 })
-export class ProdOrderComponent implements OnInit {
+export class CartComponent implements OnInit {
   orderId?: number;
   items: OrderLine[] = [];
 
