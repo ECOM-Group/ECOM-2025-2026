@@ -44,6 +44,20 @@ export class OrderLineService {
     return this.http.delete(`${this.resourceUrl}/${id}`, { observe: 'response' });
   }
 
+  incrementQuantity(orderLine: IOrderLine): Observable<EntityResponseType> {
+    const updated = { ...orderLine, quantity: (orderLine.quantity ?? 0) + 1 };
+    return this.update(updated);
+  }
+
+  decrementQuantity(orderLine: IOrderLine): Observable<EntityResponseType | HttpResponse<{}>> {
+    if ((orderLine.quantity ?? 1) <= 1) {
+      // If quantity drops below 1, delete the order line
+      return this.delete(orderLine.id!);
+    }
+    const updated = { ...orderLine, quantity: (orderLine.quantity ?? 1) - 1 };
+    return this.update(updated);
+  }
+
   getOrderLineIdentifier(orderLine: Pick<IOrderLine, 'id'>): number {
     return orderLine.id;
   }
