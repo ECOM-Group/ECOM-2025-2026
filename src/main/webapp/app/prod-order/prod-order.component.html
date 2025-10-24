@@ -1,0 +1,32 @@
+<div class="container mt-4">
+  <h2>Order #{{ orderId }} Items</h2>
+
+  @if (items.length > 0) {
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Quantity</th>
+          <th>Price</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items; track item.id) {
+          <tr>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.product.price }}</td>
+            <td>{{ item.quantity * item.product.price }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4">No items found for this order.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  } @else {
+    <p>No items found for this order.</p>
+  }
+</div>
