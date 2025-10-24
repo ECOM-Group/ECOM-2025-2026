@@ -181,7 +181,7 @@ public class ProdOrderResource {
             .build();
     }
 
-    @GetMapping("/{id}/order-lines")
+    @GetMapping("/{id}/contents")
     public ResponseEntity<List<OrderLine>> getOrderLines(@PathVariable("id") Long id) {
         LOG.debug("REST request to consult lines ProdOrder : {}", id);
         List<OrderLine> lines = prodOrderService.getOrderLinesByProdOrder(id);

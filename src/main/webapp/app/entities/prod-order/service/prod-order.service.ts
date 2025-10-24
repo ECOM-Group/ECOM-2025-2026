@@ -6,6 +6,7 @@ import { isPresent } from 'app/core/util/operators';
 import { ApplicationConfigService } from 'app/core/config/application-config.service';
 import { createRequestOption } from 'app/core/request/request-util';
 import { IProdOrder, NewProdOrder } from '../prod-order.model';
+import { IOrderLine } from 'app/entities/order-line/order-line.model';
 
 export type PartialUpdateProdOrder = Partial<IProdOrder> & Pick<IProdOrder, 'id'>;
 
@@ -70,5 +71,9 @@ export class ProdOrderService {
       return [...prodOrdersToAdd, ...prodOrderCollection];
     }
     return prodOrderCollection;
+  }
+
+  getOrderLines(orderId: number): Observable<IOrderLine[]> {
+    return this.http.get<IOrderLine[]>(`${this.resourceUrl}/${orderId}/contents`);
   }
 }

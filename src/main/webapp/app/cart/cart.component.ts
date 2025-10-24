@@ -1,13 +1,7 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { IOrderLine } from 'app/entities/order-line/order-line.model';
-
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-}
+import { ProdOrderService } from 'app/entities/prod-order/service/prod-order.service';
 
 @Component({
   selector: 'jhi-cart',
@@ -21,7 +15,7 @@ export class CartComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private http: HttpClient,
+    private prodOrderService: ProdOrderService,
   ) {}
 
   ngOnInit(): void {
@@ -31,9 +25,10 @@ export class CartComponent implements OnInit {
   }
 
   loadOrderItems(): void {
+    if (this.orderId == null) return; // sanity check
     // Fetch items of the order from backend
-    this.http.get(`/api/prod-orders/${this.orderId}/order-lines`).subscribe({
-      next: data => (this.items = data as IOrderLine[]),
+    this.prodOrderService.getOrderLines(this.orderId).subscribe({
+      next: (lines: IOrderLine[]) => (this.items = lines),
       error: err => console.error('Failed to fetch order lines', err),
     });
   }
