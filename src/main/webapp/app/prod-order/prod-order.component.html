@@ -14,7 +14,7 @@
       <tbody>
         @for (item of items; track item.id) {
           <tr>
-            <td>{{ item.product.name }}</td>
+            <td>{{ item.product ? item.product.name : 'N/A' }}</td>
             <td>{{ item.quantity }}</td>
             <td>{{ item.unitPrice }}</td>
             <td>{{ item.quantity * item.unitPrice }}</td>
