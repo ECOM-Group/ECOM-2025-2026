@@ -190,6 +190,8 @@ public class ProdOrderResource {
             return ResponseEntity.noContent().build();
         }
         LOG.debug("Found {} order lines for ProdOrder id: {}", lines.size(), id);
+        // Log each order line individually for detailed debugging
+        lines.forEach(line -> LOG.debug("OrderLine: {}", line));
         return ResponseEntity.ok(lines);
     }
 }
