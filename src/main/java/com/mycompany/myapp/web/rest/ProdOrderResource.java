@@ -1,7 +1,9 @@
 package com.mycompany.myapp.web.rest;
 
+import com.mycompany.myapp.domain.OrderLine;
 import com.mycompany.myapp.domain.ProdOrder;
 import com.mycompany.myapp.repository.ProdOrderRepository;
+import com.mycompany.myapp.service.ProdOrderService;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -33,9 +35,11 @@ public class ProdOrderResource {
     private String applicationName;
 
     private final ProdOrderRepository prodOrderRepository;
+    private final ProdOrderService prodOrderService;
 
-    public ProdOrderResource(ProdOrderRepository prodOrderRepository) {
+    public ProdOrderResource(ProdOrderRepository prodOrderRepository, ProdOrderService prodOrderService) {
         this.prodOrderRepository = prodOrderRepository;
+        this.prodOrderService = prodOrderService;
     }
 
     /**
@@ -175,5 +179,17 @@ public class ProdOrderResource {
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    @GetMapping("/{id}/order-lines")
+    public ResponseEntity<List<OrderLine>> getOrderLines(@PathVariable("id") Long id) {
+        LOG.debug("REST request to consult lines ProdOrder : {}", id);
+        List<OrderLine> lines = prodOrderService.getOrderLinesByProdOrder(id);
+        if (lines.isEmpty()) {
+            LOG.debug("No order lines found for ProdOrder id: {}", id);
+            return ResponseEntity.noContent().build();
+        }
+        LOG.debug("Found {} order lines for ProdOrder id: {}", lines.size(), id);
+        return ResponseEntity.ok(lines);
     }
 }
