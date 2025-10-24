@@ -118,7 +118,8 @@ jobs:
 
 #////////////////////////////////////////////////////////////////////////////////////////
   deploy:
-    if: false  # Désactivé pour le moment
+    if: false  
+    #Desactive pour le moment
     needs: [build, test-unit, test-e2e]
     runs-on: ubuntu-latest
     steps:
