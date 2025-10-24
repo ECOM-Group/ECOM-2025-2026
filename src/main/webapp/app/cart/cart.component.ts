@@ -1,18 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { IOrderLine } from 'app/entities/order-line/order-line.model';
 
 interface Product {
   id: number;
   name: string;
   description: string;
-}
-interface OrderLine {
-  id: number;
-  unitPrice: number;
-  total: number;
-  quantity: number;
-  product: Product;
 }
 
 @Component({
@@ -23,7 +17,7 @@ interface OrderLine {
 })
 export class CartComponent implements OnInit {
   orderId?: number;
-  items: OrderLine[] = [];
+  items: IOrderLine[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -39,7 +33,7 @@ export class CartComponent implements OnInit {
   loadOrderItems(): void {
     // Fetch items of the order from backend
     this.http.get(`/api/prod-orders/${this.orderId}/order-lines`).subscribe({
-      next: data => (this.items = data as OrderLine[]),
+      next: data => (this.items = data as IOrderLine[]),
       error: err => console.error('Failed to fetch order lines', err),
     });
   }
