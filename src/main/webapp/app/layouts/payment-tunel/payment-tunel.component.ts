@@ -12,6 +12,7 @@ import { HttpClient } from '@angular/common/http';
 import LoginComponent from 'app/login/login.component';
 import { IUser } from 'app/admin/user-management/user-management.model';
 import { IProdOrder } from 'app/entities/prod-order/prod-order.model';
+import { loadStripe } from '@stripe/stripe-js';
 
 @Component({
   standalone: true,
@@ -120,5 +121,19 @@ export default class PaymentTunelComponent implements OnInit {
   submit(): void {
     console.log(this.paymentForm.value);
     console.log(this.paymentForm.valid);
+    if (this.paymentForm.invalid) return;
+    this.pay();
+  }
+
+  async pay() {
+    const stripe = await loadStripe(
+      'pk_test_51SL1eH9mZN1DQFxykNy0gNXhNOGZgIgHZkLX48pw9TWxyFCWx2gPDSzNNaUAGFChLmoQs05oFbJgDWXuWZqHqtkV00dDaJneYm',
+    ); // clé publique
+    this.http.post<any>('/api/payments/create-checkout-session', {}).subscribe(async data => {
+      if (data.url) {
+        console.log(data.url);
+        //window.location.href = data.url;
+      }
+    });
   }
 }

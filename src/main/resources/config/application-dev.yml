@@ -51,6 +51,9 @@ spring:
   thymeleaf:
     cache: false
 
+stripe:
+  secret-key: sk_test_51SL1eH9mZN1DQFxyQLFYRbgpScDCp7UDifPo64XvuHNZRYo5PmFReW8Eu9s3SAtE4lAaoeGDsLKq1uMIZDhrmwDl004r5vKtzg
+
 server:
   port: 8080
   # make sure requests the proxy uri instead of the server one

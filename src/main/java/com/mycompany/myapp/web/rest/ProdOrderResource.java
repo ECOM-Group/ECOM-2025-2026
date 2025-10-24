@@ -173,7 +173,7 @@ public class ProdOrderResource {
     @GetMapping("/{id}/current")
     public ResponseEntity<ProdOrder> getCurrentProdOrder(@PathVariable("id") Long id) {
         LOG.debug("REST request to get current ProdOrder : {}", id);
-        ProdOrder prodOrder = prodOrderRepository.getCurrentInvalidByUserId();
+        ProdOrder prodOrder = prodOrderRepository.findInvalidByUserIsCurrentUser();
         return ResponseUtil.wrapOrNotFound(Optional.ofNullable(prodOrder));
     }
 

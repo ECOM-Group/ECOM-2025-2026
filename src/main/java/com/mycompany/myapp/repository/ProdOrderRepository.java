@@ -16,5 +16,5 @@ public interface ProdOrderRepository extends JpaRepository<ProdOrder, Long> {
     List<ProdOrder> findByUserIsCurrentUser();
 
     @Query("select prodOrder from ProdOrder prodOrder where prodOrder.user.login = ?#{authentication.name} and valid=false")
-    ProdOrder getCurrentInvalidByUserId();
+    ProdOrder findInvalidByUserIsCurrentUser();
 }

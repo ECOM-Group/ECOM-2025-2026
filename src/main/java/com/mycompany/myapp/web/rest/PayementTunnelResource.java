@@ -1,11 +1,19 @@
 package com.mycompany.myapp.web.rest;
 
+import com.mycompany.myapp.domain.OrderLine;
 import com.mycompany.myapp.domain.PayementTunnel;
+import com.mycompany.myapp.domain.ProdOrder;
+import com.mycompany.myapp.repository.OrderLineRepository;
 import com.mycompany.myapp.repository.PayementTunnelRepository;
+import com.mycompany.myapp.repository.ProdOrderRepository;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
+import com.stripe.Stripe;
+import com.stripe.model.checkout.Session;
+import com.stripe.param.checkout.SessionCreateParams;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -13,7 +21,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.ResponseUtil;
 
@@ -32,10 +48,74 @@ public class PayementTunnelResource {
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 
-    private final PayementTunnelRepository payementTunnelRepository;
+    @Value("${stripe.secret-key}")
+    private String stripeSecretKey;
 
-    public PayementTunnelResource(PayementTunnelRepository payementTunnelRepository) {
+    private final PayementTunnelRepository payementTunnelRepository;
+    private final ProdOrderRepository prodOrderRepository;
+    private final OrderLineRepository orderLineRepository;
+
+    public PayementTunnelResource(
+        PayementTunnelRepository payementTunnelRepository,
+        ProdOrderRepository prodOrderRepository,
+        OrderLineRepository orderLineRepository
+    ) {
         this.payementTunnelRepository = payementTunnelRepository;
+        this.prodOrderRepository = prodOrderRepository;
+        this.orderLineRepository = orderLineRepository;
+    }
+
+    /**
+     * Stripe checkout session creation based on user's current (unpaid) order.
+     */
+    @PostMapping("/create-checkout-session")
+    public ResponseEntity<Map<String, String>> createCheckoutSession(@PathVariable Long userId) throws Exception {
+        LOG.debug("REST request to create Stripe checkout session for user {}", userId);
+        Stripe.apiKey = stripeSecretKey;
+
+        // Recup le pannier courrant
+        ProdOrder order = prodOrderRepository.findInvalidByUserIsCurrentUser();
+        if (order == null) {
+            LOG.warn("Aucun panier actif trouvé pour l’utilisateur {}", userId);
+            return ResponseEntity.badRequest().body(Map.of("error", "Aucun panier actif trouvé pour cet utilisateur."));
+        }
+
+        // Récupérer les order lines du panier
+        List<OrderLine> orderLines = orderLineRepository.findByOrderId(order.getId());
+        if (orderLines.isEmpty()) {
+            LOG.warn("Le panier {} de l’utilisateur {} est vide", order.getId(), userId);
+            return ResponseEntity.badRequest().body(Map.of("error", "Le panier est vide."));
+        }
+
+        // Créer la session stripe
+        SessionCreateParams.Builder paramsBuilder = SessionCreateParams.builder()
+            .setMode(SessionCreateParams.Mode.PAYMENT)
+            .setSuccessUrl("http://localhost:4200/success")
+            .setCancelUrl("http://localhost:4200/cancel");
+
+        for (OrderLine line : orderLines) {
+            double unitPrice = line.getUnitPrice() != null ? line.getUnitPrice() : 0.0;
+            int quantity = line.getQuantity() != null ? line.getQuantity() : 1;
+
+            String productName = line.getProduct() != null ? line.getProduct().getName() : "Unknown";
+            paramsBuilder.addLineItem(
+                SessionCreateParams.LineItem.builder()
+                    .setQuantity((long) quantity)
+                    .setPriceData(
+                        SessionCreateParams.LineItem.PriceData.builder()
+                            .setCurrency("eur")
+                            .setUnitAmount(Math.round(unitPrice * 100))
+                            .setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder().setName(productName).build())
+                            .build()
+                    )
+                    .build()
+            );
+        }
+
+        Session session = Session.create(paramsBuilder.build());
+        LOG.debug("Session Stripe créée avec succès pour l’utilisateur {} : {}", userId, session.getId());
+
+        return ResponseEntity.ok(Map.of("url", session.getUrl()));
     }
 
     /**
