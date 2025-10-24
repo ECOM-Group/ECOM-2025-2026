@@ -11,17 +11,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Récupère le code source du dépôt GitHub
       - uses: actions/checkout@v4
 
-      # Installe JDK 17 (nécessaire pour JHipster)
+      # JDK 17 pour JHipster backend
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
-          distribution: 'temurin'  # Distribution open-source de Java
+          distribution: 'temurin'
 
-      # Met en cache le dossier .m2 pour accélérer les builds suivants
+      # Cache Maven
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
@@ -29,113 +28,115 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      # Exécute la commande Maven pour builder et tester l’application en mode production
-      - name: Build and test with Maven
-        run: ./mvnw -Pprod verify
+      # Build du backend (Maven)
+      - name: Build backend
+        run: ./mvnw -ntp -Pprod clean verify
 
-      # Génère le .war ou le .jar final, sans relancer les tests
-      - name: Package the application
-        run: ./mvnw package -Pprod -DskipTests
+      # Cache Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
 
-      # Stocke le fichier généré pour le job suivant
+      # Installe dépendances front-end
+      - name: Install npm dependencies
+        run: npm ci
+
+      # Build du frontend (Angular)
+      - name: Build frontend
+        run: npm run build
+
+      # Upload du .jar pour les jobs suivants
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: jhipster-app
-          path: target/*.war
+          path: target/*.jar
+
 #////////////////////////////////////////////////////////////////////////////////////////
-  # Job dédié aux tests unitaires (Java et TypeScript/JavaScript)
   test-unit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      # Backend unit tests
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # Lance UNIQUEMENT les tests unitaires Java (ceux dans src/test/java)
       - name: Run Java unit tests
         run: ./mvnw test
 
-            ##########################################
-
-      # Installe Node.js pour les tests TypeScript/JavaScript
+      # Frontend unit tests
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'  # Peut être changé selon la version de ton projet
+          node-version: '22'
 
-      # Installe les dépendances npm
       - name: Install npm dependencies
-        run: npm install
+        run: npm ci
 
-      # Lance les tests unitaires TypeScript/JavaScript (défini dans package.json)
-      - name: Run TypeScript/JavaScript unit tests
+      - name: Run frontend unit tests
         run: npm test
 
 #////////////////////////////////////////////////////////////////////////////////////////
-  # Job dédié aux tests E2E (Protractor/Cypress)
   test-e2e:
-    # Ce job dépend du job "build" : il ne s'exécute que si "build" a réussi
     needs: build
     runs-on: ubuntu-latest
     steps:
-      # Récupère le code source du dépôt GitHub
       - uses: actions/checkout@v4
 
-      # Installe Node.js version 18 (nécessaire pour les tests E2E)
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'  # Peut être changé selon la version de ton projet
+          node-version: '22'
 
-      # Installe les dépendances npm (défini dans package.json)
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      # Lance les tests E2E (la commande doit être définie dans package.json)
+      # Prépare les conteneurs Docker (base de données, services)
+      - name: Prepare E2E environment
+        run: npm run ci:e2e:prepare
+
+      # Lance le backend et attend qu'il démarre
+      - name: Start backend server for E2E
+        run: npm run ci:e2e:server:start &
+
+      # Attendre que le serveur soit prêt
+      - name: Wait for backend
+        run: npm run ci:server:await
+
+      # Lancer les tests E2E
       - name: Run E2E tests
-        run: npm run e2e
+        run: npm run ci:frontend:test
+
+      # Nettoyage (arrêt des conteneurs)
+      - name: Teardown E2E environment
+        run: npm run ci:e2e:teardown
 
 #////////////////////////////////////////////////////////////////////////////////////////
-  # Job de déploiement (ne s’exécute qu’après la réussite de tous les tests)
   deploy:
-    if: false  # Désactive le déploiement                                                          ###-Paralyse le Deploy-###
+    if: false  # Désactivé pour le moment
     needs: [build, test-unit, test-e2e]
     runs-on: ubuntu-latest
     steps:
-      # Récupère le fichier généré par le job build
       - name: Download artifact
         uses: actions/download-artifact@v3
         with:
           name: jhipster-app
 
-      # Installe la clé SSH privée pour se connecter au serveur
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}  # Secret configuré dans GitHub
-          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}  # Secret configuré dans GitHub
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
 
-      # Utilise scp pour copier le .war sur le serveur, dans /opt/jhipster/
       - name: Copy files to server
         run: |
-          scp -o StrictHostKeyChecking=no target/*.war ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/opt/jhipster/
+          scp -o StrictHostKeyChecking=no target/*.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/opt/jhipster/
 
-      # Se connecte en SSH et redémarre le service
       - name: Restart application
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "sudo systemctl restart jhipster"
-
-
-# Settings > Secrets and variables > Actions
-
-#Crée les secrets suivants 
-#Nom du secret Contenu attendu
-#SSH_PRIVATE_KEY ta clé privée SSH (ex : contenu de ~/.ssh/id_rsa)
-#SSH_KNOWN_HOSTS sortie de ssh-keyscan ton_serveur
-#SSH_USER nom d’utilisateur SSH (ex : ubuntu)
-#SSH_HOST adresse IP ou domaine du serveur (ex : myserver.example.com)
