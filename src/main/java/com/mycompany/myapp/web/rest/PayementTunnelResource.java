@@ -8,10 +8,11 @@ import com.mycompany.myapp.repository.PayementTunnelRepository;
 import com.mycompany.myapp.repository.ProdOrderRepository;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import com.stripe.Stripe;
-import com.stripe.model.checkout.Session;
-import com.stripe.param.checkout.SessionCreateParams;
+import com.stripe.model.PaymentIntent;
+import com.stripe.param.PaymentIntentCreateParams;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -65,57 +66,40 @@ public class PayementTunnelResource {
         this.orderLineRepository = orderLineRepository;
     }
 
-    /**
-     * Stripe checkout session creation based on user's current (unpaid) order.
-     */
-    @PostMapping("/create-checkout-session")
-    public ResponseEntity<Map<String, String>> createCheckoutSession(@PathVariable Long userId) throws Exception {
-        LOG.debug("REST request to create Stripe checkout session for user {}", userId);
+    @PostMapping("/create-payment-intent")
+    public ResponseEntity<Map<String, Object>> createPaymentIntent(@RequestBody Map<String, Object> data) throws Exception {
         Stripe.apiKey = stripeSecretKey;
 
-        // Recup le pannier courrant
+        // Récupère le paymentMethodId envoyé par le front
+        String paymentMethodId = (String) data.get("paymentMethodId");
+
+        // Récupère le panier courant
         ProdOrder order = prodOrderRepository.findInvalidByUserIsCurrentUser();
         if (order == null) {
-            LOG.warn("Aucun panier actif trouvé pour l’utilisateur {}", userId);
-            return ResponseEntity.badRequest().body(Map.of("error", "Aucun panier actif trouvé pour cet utilisateur."));
+            return ResponseEntity.badRequest().body(Map.of("error", "Aucun panier actif trouvé"));
         }
 
-        // Récupérer les order lines du panier
-        List<OrderLine> orderLines = orderLineRepository.findByOrderId(order.getId());
-        if (orderLines.isEmpty()) {
-            LOG.warn("Le panier {} de l’utilisateur {} est vide", order.getId(), userId);
-            return ResponseEntity.badRequest().body(Map.of("error", "Le panier est vide."));
-        }
-
-        // Créer la session stripe
-        SessionCreateParams.Builder paramsBuilder = SessionCreateParams.builder()
-            .setMode(SessionCreateParams.Mode.PAYMENT)
-            .setSuccessUrl("http://localhost:4200/success")
-            .setCancelUrl("http://localhost:4200/cancel");
-
-        for (OrderLine line : orderLines) {
+        List<OrderLine> lines = orderLineRepository.findByProdOrderId(order.getId());
+        long totalAmount = 0;
+        for (OrderLine line : lines) {
             double unitPrice = line.getUnitPrice() != null ? line.getUnitPrice() : 0.0;
             int quantity = line.getQuantity() != null ? line.getQuantity() : 1;
-
-            String productName = line.getProduct() != null ? line.getProduct().getName() : "Unknown";
-            paramsBuilder.addLineItem(
-                SessionCreateParams.LineItem.builder()
-                    .setQuantity((long) quantity)
-                    .setPriceData(
-                        SessionCreateParams.LineItem.PriceData.builder()
-                            .setCurrency("eur")
-                            .setUnitAmount(Math.round(unitPrice * 100))
-                            .setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder().setName(productName).build())
-                            .build()
-                    )
-                    .build()
-            );
+            totalAmount += Math.round(unitPrice * 100) * quantity;
         }
 
-        Session session = Session.create(paramsBuilder.build());
-        LOG.debug("Session Stripe créée avec succès pour l’utilisateur {} : {}", userId, session.getId());
+        PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
+            .setAmount(totalAmount)
+            .setCurrency("eur")
+            .setPaymentMethod(paymentMethodId)
+            .setConfirmationMethod(PaymentIntentCreateParams.ConfirmationMethod.AUTOMATIC)
+            .setConfirm(false)
+            .build();
 
-        return ResponseEntity.ok(Map.of("url", session.getUrl()));
+        PaymentIntent intent = PaymentIntent.create(params);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("clientSecret", intent.getClientSecret());
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -213,6 +197,22 @@ public class PayementTunnelResource {
             result,
             HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, payementTunnel.getId().toString())
         );
+    }
+
+    @PostMapping("/validate-order")
+    public ResponseEntity<Void> validateCurrentOrder() {
+        LOG.debug("Validation du panier en cours pour l’utilisateur connecté");
+        ProdOrder currentOrder = prodOrderRepository.findInvalidByUserIsCurrentUser();
+        if (currentOrder == null) {
+            LOG.warn("Aucun panier non validé trouvé pour cet utilisateur");
+            return ResponseEntity.badRequest().build();
+        }
+
+        currentOrder.setValid(true);
+        prodOrderRepository.save(currentOrder);
+
+        LOG.info("Commande {} validée avec succès", currentOrder.getId());
+        return ResponseEntity.ok().build();
     }
 
     /**

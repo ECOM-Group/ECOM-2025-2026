@@ -1,18 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { NgIf } from '@angular/common';
 import { AdressFormComponent } from '../adress-form/adress-form.component';
 import { AdresseFormGroup } from 'app/layouts/adress-form/adress-form-group';
 import { CardFormGroup } from '../payment-card-form/payment-card-group-form';
 import { PaymentCardFormComponent } from '../payment-card-form/payment-card-form.component';
-import { EMPTY, map, of, switchMap, tap } from 'rxjs';
+import { EMPTY, map, of, switchMap } from 'rxjs';
 import { Router } from '@angular/router';
 import { AccountService } from 'app/core/auth/account.service';
 import { HttpClient } from '@angular/common/http';
 import LoginComponent from 'app/login/login.component';
 import { IUser } from 'app/admin/user-management/user-management.model';
 import { IProdOrder } from 'app/entities/prod-order/prod-order.model';
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe, Stripe, StripeCardElement } from '@stripe/stripe-js';
 
 @Component({
   standalone: true,
@@ -21,9 +21,14 @@ import { loadStripe } from '@stripe/stripe-js';
   templateUrl: './payment-tunel.component.html',
   styleUrls: ['./payment-tunel.component.scss'],
 })
-export default class PaymentTunelComponent implements OnInit {
+export default class PaymentTunelComponent implements OnInit, AfterViewInit {
   paymentForm!: FormGroup;
   isConnected = true;
+
+  stripe: Stripe | null = null;
+  card: StripeCardElement | null = null;
+  isProcessing = false;
+  message: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -37,7 +42,7 @@ export default class PaymentTunelComponent implements OnInit {
       sameAdress: [true],
       delivery: new AdresseFormGroup(),
       billing: new AdresseFormGroup(),
-      card: new CardFormGroup(),
+      // card: new CardFormGroup(),
     });
     this.setDynamiqueValidatorOnBilling();
 
@@ -46,21 +51,17 @@ export default class PaymentTunelComponent implements OnInit {
       .pipe(
         switchMap(user => {
           if (user && user.login) {
-            console.log('Utilisateur déjà connecté');
-            return of(user); // user = Objet, of(user) : of = créé un observable => of(user) = créer un observable et envoit user dedans
+            this.isConnected = true;
+            return of(user);
           }
-
           this.isConnected = false;
           return this.accountService.getAuthenticationState();
         }),
-
         switchMap(user => {
           if (!user || !user.login) {
-            console.log('Toujours pas connecté après redirection');
             return EMPTY;
           }
           this.isConnected = true;
-          console.log('Utilisateur :', user, 'typeof', typeof user);
           return this.http.get<IUser>(`/api/admin/users/${user.login}`);
         }),
         map(user => user.id),
@@ -71,15 +72,28 @@ export default class PaymentTunelComponent implements OnInit {
       .subscribe({
         next: prodOrder => console.log('ON SUBSCRIBE :', prodOrder),
         error: err => console.error('Erreur :', err),
-        complete: () => console.log('Flux terminé'),
       });
+  }
+
+  async ngAfterViewInit() {
+    this.stripe = await loadStripe(
+      'pk_test_51SL1eH9mZN1DQFxykNy0gNXhNOGZgIgHZkLX48pw9TWxyFCWx2gPDSzNNaUAGFChLmoQs05oFbJgDWXuWZqHqtkV00dDaJneYm',
+    );
+
+    const elements = this.stripe!.elements();
+    this.card = elements.create('card');
+    this.card.mount('#card-element');
+
+    this.card.on('change', event => {
+      const displayError = document.getElementById('card-errors');
+      if (displayError) displayError.textContent = event.error ? event.error.message : '';
+    });
   }
 
   setDynamiqueValidatorOnBilling() {
     const billingGroup = this.paymentForm.get('billing') as AdresseFormGroup;
 
     const changeValidator = (sameAdress: boolean) => {
-      console.log(sameAdress);
       if (sameAdress) {
         Object.keys(billingGroup.controls).forEach(field => {
           billingGroup.get(field)?.clearValidators();
@@ -119,21 +133,65 @@ export default class PaymentTunelComponent implements OnInit {
   }
 
   submit(): void {
-    console.log(this.paymentForm.value);
-    console.log(this.paymentForm.valid);
+    console.log(this.paymentForm.invalid);
     if (this.paymentForm.invalid) return;
     this.pay();
   }
 
   async pay() {
-    const stripe = await loadStripe(
-      'pk_test_51SL1eH9mZN1DQFxykNy0gNXhNOGZgIgHZkLX48pw9TWxyFCWx2gPDSzNNaUAGFChLmoQs05oFbJgDWXuWZqHqtkV00dDaJneYm',
-    ); // clé publique
-    this.http.post<any>('/api/payments/create-checkout-session', {}).subscribe(async data => {
-      if (data.url) {
-        console.log(data.url);
-        //window.location.href = data.url;
-      }
+    if (!this.stripe || !this.card) {
+      console.error('Stripe non initialisé');
+      return;
+    }
+
+    this.isProcessing = true;
+    this.message = null;
+
+    const { paymentMethod, error } = await this.stripe.createPaymentMethod({
+      type: 'card',
+      card: this.card,
+    });
+
+    if (error) {
+      this.message = error.message || 'Erreur de paiement';
+      this.isProcessing = false;
+      return;
+    }
+
+    this.http
+      .post<any>('/api/payement-tunnels/create-payment-intent', {
+        paymentMethodId: paymentMethod.id,
+      })
+      .subscribe(
+        async res => {
+          const result = await this.stripe!.confirmCardPayment(res.clientSecret);
+
+          if (result.error) {
+            this.message = result.error.message || 'Erreur de paiement';
+          } else if (result.paymentIntent.status === 'succeeded') {
+            this.message = '✅ Paiement réussi !';
+            this.saveOrder();
+          }
+
+          this.isProcessing = false;
+        },
+        () => {
+          this.message = 'Erreur serveur';
+          this.isProcessing = false;
+        },
+      );
+  }
+
+  saveOrder() {
+    this.http.post('/api/payement-tunnels/validate-order', {}).subscribe({
+      next: () => {
+        console.log('Commande validée en base ✅');
+        this.router.navigate(['/success']);
+      },
+      error: err => {
+        console.error('Erreur lors de la validation de la commande :', err);
+        this.message = 'Erreur lors de la validation de la commande';
+      },
     });
   }
 }

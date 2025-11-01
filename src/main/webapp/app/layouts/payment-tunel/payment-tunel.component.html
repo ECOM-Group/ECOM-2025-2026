@@ -17,11 +17,21 @@
           <jhi-adress-form [adresseForm]="billingForm()"></jhi-adress-form>
         </div>
 
+        <!--
         <div formGroupName="card">
           <jhi-payment-card-form [cardForm]="cardForm()"></jhi-payment-card-form>
         </div>
+        -->
+        <div formGroupName="card">
+          <h2>Paiement</h2>
+          <div id="card-element" class="card-element"></div>
+          <div id="card-errors" class="error"></div>
+        </div>
 
-        <button type="submit">Valider</button>
+        <button type="submit" [disabled]="isProcessing">
+          {{ isProcessing ? 'Paiement en cours...' : 'Valider et payer' }}
+        </button>
+        <div *ngIf="message" class="message">{{ message }}</div>
       </form>
     </div>
     <div class="prodOrder">
