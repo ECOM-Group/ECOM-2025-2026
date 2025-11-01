@@ -45,7 +45,7 @@ export default class LoginComponent implements OnInit, AfterViewInit {
       next: () => {
         this.authenticationError.set(false);
         if (!this.router.getCurrentNavigation()) {
-          this.router.navigate([this.redirectUrl || '']);
+          window.location.href = this.redirectUrl || '/';
         }
       },
       error: () => this.authenticationError.set(true),
