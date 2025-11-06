@@ -3,7 +3,6 @@ import { Routes } from '@angular/router';
 import { Authority } from 'app/config/authority.constants';
 
 import { UserRouteAccessService } from 'app/core/auth/user-route-access.service';
-import { CART_ROUTE } from './cart/cart.route';
 import { errorRoute } from './layouts/error/error.route';
 
 const routes: Routes = [
@@ -30,6 +29,10 @@ const routes: Routes = [
     loadChildren: () => import('./account/account.route'),
   },
   {
+    path: 'cart',
+    loadChildren: () => import('./cart/cart.route'),
+  },
+  {
     path: 'login',
     loadComponent: () => import('./login/login.component'),
     title: 'login.title',
@@ -38,7 +41,6 @@ const routes: Routes = [
     path: '',
     loadChildren: () => import(`./entities/entity.routes`),
   },
-  CART_ROUTE,
   ...errorRoute,
 ];
 

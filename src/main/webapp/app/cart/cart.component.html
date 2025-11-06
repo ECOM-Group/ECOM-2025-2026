@@ -1,6 +1,5 @@
 <div class="container mt-4">
   <h2>Order #{{ orderId }} Items</h2>
-
   @if (items.length > 0) {
     <table class="table table-striped">
       <thead>
@@ -14,7 +13,7 @@
       <tbody>
         @for (item of items; track item.id) {
           <tr>
-            <td>{{ item.product ? item.product.name : 'N/A' }}</td>
+            <td>{{ item.product?.name ?? 'N/A' }}</td>
             <td>{{ item.quantity ?? 'N/A' }}</td>
             <td>{{ item.unitPrice ?? 'N/A' }}</td>
             <td>{{ item.quantity && item.unitPrice ? item.quantity * item.unitPrice : 'N/A' }}</td>
@@ -25,4 +24,5 @@
   } @else {
     <p>No items found for this order.</p>
   }
+  <a routerLink="/payment">Back to Home</a>
 </div>

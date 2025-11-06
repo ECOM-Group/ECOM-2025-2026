@@ -1,8 +1,11 @@
-import { Route } from '@angular/router';
-import { CartComponent } from './cart.component';
+import { Routes } from '@angular/router';
 
-export const CART_ROUTE: Route = {
-  path: 'cart/:orderId', // URL: /cart/1
-  component: CartComponent,
-  data: { pageTitle: 'Cart' },
-};
+const routes: Routes = [
+  {
+    path: ':orderId',
+    loadComponent: () => import('./cart.component').then(m => m.CartComponent),
+    data: { pageTitle: 'Cart' },
+  },
+];
+
+export default routes;
