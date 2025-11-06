@@ -29,6 +29,10 @@ const routes: Routes = [
     loadChildren: () => import('./account/account.route'),
   },
   {
+    path: 'cart',
+    loadChildren: () => import('./cart/cart.route'),
+  },
+  {
     path: 'login',
     loadComponent: () => import('./login/login.component'),
     title: 'login.title',
