@@ -13,6 +13,7 @@ import { MiniFicheComponent } from '../mini-fiche/mini-fiche.component';
 })
 export default class HomePageComponent {
   topSoldProducts: IProduct[] = [];
+  connectedProducts : IProduct[] = [] 
   constructor(
     private http: HttpClient,
     private homePageService: HomePageService,
@@ -27,5 +28,15 @@ export default class HomePageComponent {
         console.error('Erreur lors de la récupération des produits les plus vendus', err);
       },
     });
+  }
+  research(motsCles : String[]): void{
+    this.homePageService.GetConnnectedProducts(motsCles).subscribe({
+      next: (products: IProduct[]) => {
+        this.connectedProducts = products;
+      },
+      error: (err: any) => {
+        console.error('Erreur lors de la récupération des produits connectes', err);
+      },
+    })
   }
 }

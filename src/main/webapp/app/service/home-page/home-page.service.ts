@@ -20,6 +20,20 @@ export class HomePageService {
       }),
     );
   }
+
+   GetConnnectedProducts(motsCles : String[]): Observable<IProduct[]> {
+    const params = new HttpParams().set('motsCles', motsCles.join(' '));
+
+    return this.http.get<IProduct[]>('/api/products/search', { params }).pipe(
+      map((products: IProduct[]) => {
+        if (!products || products.length === 0) {
+          console.log('Aucun produit trouvé dans GetConnnectedProducts');
+        }
+        return products;
+      }),
+    );
+  }
+
   /*
   GetMostSelledProducts(): Observable<IProduct[]> {
     return this.http.get<IOrderLine[]>('/api/order-lines').pipe(
