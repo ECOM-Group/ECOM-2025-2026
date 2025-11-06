@@ -4,7 +4,7 @@ import { NgIf } from '@angular/common';
 import { AdressFormComponent } from '../adress-form/adress-form.component';
 import { AdresseFormGroup } from 'app/layouts/adress-form/adress-form-group';
 import { CardFormGroup } from '../payment-card-form/payment-card-group-form';
-import { PaymentCardFormComponent } from '../payment-card-form/payment-card-form.component';
+// import { PaymentCardFormComponent } from '../payment-card-form/payment-card-form.component';
 import { EMPTY, map, of, switchMap } from 'rxjs';
 import { Router } from '@angular/router';
 import { AccountService } from 'app/core/auth/account.service';
@@ -17,7 +17,7 @@ import { loadStripe, Stripe, StripeCardElement } from '@stripe/stripe-js';
 @Component({
   standalone: true,
   selector: 'jhi-payment-tunel',
-  imports: [ReactiveFormsModule, NgIf, AdressFormComponent, PaymentCardFormComponent, LoginComponent],
+  imports: [ReactiveFormsModule, NgIf, AdressFormComponent, /* PaymentCardFormComponent ,*/ LoginComponent],
   templateUrl: './payment-tunel.component.html',
   styleUrls: ['./payment-tunel.component.scss'],
 })
@@ -162,31 +162,29 @@ export default class PaymentTunelComponent implements OnInit, AfterViewInit {
       .post<any>('/api/payement-tunnels/create-payment-intent', {
         paymentMethodId: paymentMethod.id,
       })
-      .subscribe(
-        async res => {
-          const result = await this.stripe!.confirmCardPayment(res.clientSecret);
-
+      .subscribe(res => {
+        if (res == null || res == undefined) {
+          this.message = 'Erreur serveur';
+          this.isProcessing = false;
+          return;
+        }
+        this.stripe!.confirmCardPayment(res.clientSecret).then(result => {
           if (result.error) {
             this.message = result.error.message || 'Erreur de paiement';
           } else if (result.paymentIntent.status === 'succeeded') {
-            this.message = '✅ Paiement réussi !';
+            this.message = 'Paiement réussi !';
             this.saveOrder();
           }
-
-          this.isProcessing = false;
-        },
-        () => {
-          this.message = 'Erreur serveur';
-          this.isProcessing = false;
-        },
-      );
+        });
+        this.isProcessing = false;
+      });
   }
 
   saveOrder() {
     this.http.post('/api/payement-tunnels/validate-order', {}).subscribe({
       next: () => {
-        console.log('Commande validée en base ✅');
-        this.router.navigate(['/success']);
+        console.log('Commande validée en base');
+        this.router.navigate(['/']);
       },
       error: err => {
         console.error('Erreur lors de la validation de la commande :', err);
