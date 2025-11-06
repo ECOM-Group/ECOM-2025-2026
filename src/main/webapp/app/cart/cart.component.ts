@@ -4,10 +4,11 @@ import { IOrderLine } from 'app/entities/order-line/order-line.model';
 import { ProdOrderService } from 'app/entities/prod-order/service/prod-order.service';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
+import { CartLineComponent } from './cart-line/cart-line.component';
 
 @Component({
   selector: 'jhi-cart',
-  imports: [RouterModule],
+  imports: [RouterModule, CartLineComponent],
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.scss'],
 })

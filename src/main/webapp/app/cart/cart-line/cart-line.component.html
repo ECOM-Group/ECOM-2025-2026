@@ -1,0 +1,11 @@
+<div class="cart-line">
+  <div class="info">
+    <h4 class="name">{{ orderLine.product?.name ?? 'N/A' }}</h4>
+
+    <div class="details">
+      <p>Quantity: {{ orderLine.quantity ?? 'N/A' }}</p>
+      <p>Unit Price: {{ orderLine.unitPrice ?? 'N/A' }}</p>
+      <p>Total: {{ orderLine.quantity && orderLine.unitPrice ? orderLine.quantity * orderLine.unitPrice : 'N/A' }}</p>
+    </div>
+  </div>
+</div>
