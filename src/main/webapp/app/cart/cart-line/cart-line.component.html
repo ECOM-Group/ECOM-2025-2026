@@ -1,11 +1,16 @@
 <div class="cart-line">
   <div class="info">
-    <h4 class="name">{{ orderLine.product?.name ?? 'N/A' }}</h4>
+    <p>
+      <strong>{{ orderLine.product?.name ?? 'N/A' }}</strong>
+    </p>
+    <p>Quantity: {{ orderLine.quantity ?? 'N/A' }}</p>
+    <p>Unit Price: {{ orderLine.unitPrice ?? 'N/A' }}</p>
+    <p>Total: {{ total ?? 'N/A' }}</p>
 
-    <div class="details">
-      <p>Quantity: {{ orderLine.quantity ?? 'N/A' }}</p>
-      <p>Unit Price: {{ orderLine.unitPrice ?? 'N/A' }}</p>
-      <p>Total: {{ orderLine.quantity && orderLine.unitPrice ? orderLine.quantity * orderLine.unitPrice : 'N/A' }}</p>
+    <div class="actions">
+      <button type="button" (click)="decrement()">-</button>
+      <button type="button" (click)="increment()">+</button>
+      <button type="button" (click)="delete()">🗑️</button>
     </div>
   </div>
 </div>
