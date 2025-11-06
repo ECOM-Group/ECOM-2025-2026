@@ -230,4 +230,25 @@ public class ProductResource {
         Pageable topFive = PageRequest.of(0, 5);
         return productRepository.findTopProductsBySales(topFive);
     }
+
+    /*@GetMapping("/connectedProducts")
+    public List<Product> getConnectedProducts(@RequestParam("motsCles") String motsCles) {
+        System.out.println("Mots-clés reçus : " + motsCles);
+
+        List<String> keywords = Arrays.asList(motsCles.split("\\s+"));
+        List<Product> results = productRepository.findByKeywords(keywords);
+
+        return results;
+    }*/
+   
+    @GetMapping("/search")
+    public List<Product> findByKeywords(@RequestParam("q") String query) {
+        List<String> keywords = Arrays.stream(query.split("\\s+"))
+            .filter(k -> !k.isBlank())
+            .toList();
+
+        List<Product> results = productService.findByKeywords(keywords);
+        return ResponseEntity.ok(results);
+    }
+
 }
