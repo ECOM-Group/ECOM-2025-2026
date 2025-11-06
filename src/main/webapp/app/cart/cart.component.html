@@ -1,5 +1,10 @@
 <div class="container mt-4">
-  <h2>Order #{{ orderId }} Items</h2>
+  <div id="cartHeader">
+    <h2>Order #{{ orderId }} Items</h2>
+    <button id="paymentButton">
+      <a routerLink="/payment">Payer {{ totalPrice }}€</a>
+    </button>
+  </div>
   @if (items.length > 0) {
     <table class="table table-striped">
       <thead>
@@ -24,5 +29,4 @@
   } @else {
     <p>No items found for this order.</p>
   }
-  <a routerLink="/payment">Back to Home</a>
 </div>

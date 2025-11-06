@@ -14,6 +14,7 @@ import { RouterModule } from '@angular/router';
 export class CartComponent implements OnInit {
   orderId?: number;
   items: IOrderLine[] = [];
+  totalPrice = 0;
 
   constructor(
     private route: ActivatedRoute,
@@ -35,6 +36,7 @@ export class CartComponent implements OnInit {
       next: (lines: IOrderLine[]) => {
         this.items = lines;
         console.log('✅ Lignes de commande chargées avec produits :', this.items);
+        this.totalPrice = this.items.map(i => i.total).reduce((a, b) => (a ?? 0) + (b ?? 0), 0) ?? 0;
       },
       error: err => {
         console.error('❌ Erreur lors du chargement des lignes de commande', err);
