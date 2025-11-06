@@ -34,6 +34,14 @@ const routes: Routes = [
     title: 'login.title',
   },
   {
+    path: 'fiche_produit',
+    loadChildren: () => import('./layouts/fiche-produit/fiche-route.routes'),
+  },
+  {
+    path: 'homePage',
+    loadChildren: () => import('./layouts/home-page/homePage.routes'),
+  },
+  {
     path: 'payment',
     loadComponent: () => import('./layouts/payment-tunel/payment-tunel.component'),
   },

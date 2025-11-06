@@ -1,0 +1,22 @@
+@if (isConnected) {
+  <div class="product-container">
+    <div class="product-card">
+      <div class="product-image-container">
+        <img src="../../../content/images/jhipster_family_member_1_head-384.png" alt="{{ product.desc }}" class="product-image" />
+      </div>
+
+      <div class="product-details">
+        <h1 class="product-desc">{{ product.name }}</h1>
+
+        <p class="product-desc">{{ product.desc }}</p>
+        <p class="product-price">{{ product.price }} €</p>
+
+        <div class="product-actions">
+          <button (click)="addToCart(product.id)" class="add-to-cart-button">Ajouter au panier</button>
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  <jhi-login redirectUrl="/fiche_produit/{{ product.id }}"></jhi-login>
+}
