@@ -1,7 +1,7 @@
 .cart-line {
   display: flex;
-  align-items: center; /* vertically center items */
-  justify-content: space-between; /* push info to the left, actions to the right */
+  align-items: center; /* everything vertically centered */
+  justify-content: space-between;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid #ddd;
   background-color: #fff;
@@ -9,35 +9,50 @@
   .info {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    flex: 1; /* take up all remaining space */
+    gap: 1.5rem;
+    flex: 1;
+  }
+
+  .image-wrapper {
+    display: flex;
+    flex-direction: column; /* stack image and name vertically */
+    align-items: center; /* center name under image */
+    text-align: center;
+    flex-shrink: 0; /* prevent resizing */
 
     .product-img {
-      width: 60px;
-      height: 60px;
+      width: 80px;
+      height: 80px;
       object-fit: cover;
       border-radius: 8px;
       background-color: #f5f5f5;
     }
 
-    .details {
-      display: flex;
-      flex-direction: column;
+    .product-name {
+      margin-top: 0.4rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #333;
+      text-align: center;
+      max-width: 90px; /* optional: wrap long names nicely */
+      word-wrap: break-word;
+    }
+  }
 
-      .name {
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-      }
+  .details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 
-      .price {
-        color: #555;
-      }
+    p {
+      margin: 0;
+      color: #333;
     }
   }
 
   .actions {
     display: flex;
-    gap: 0.5rem; /* horizontal spacing between buttons */
+    gap: 0.5rem;
 
     button {
       padding: 0.3rem 0.6rem;
@@ -45,6 +60,7 @@
       border-radius: 4px;
       cursor: pointer;
       background-color: #fff;
+      transition: background-color 0.2s ease;
 
       &:hover {
         background-color: #f0f0f0;

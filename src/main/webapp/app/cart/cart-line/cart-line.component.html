@@ -1,8 +1,10 @@
 <div class="cart-line">
+  <div class="product-image">
+    <img src="content/images/jhipster_family_member_0_head-192.png" />
+    <p class="product-name">{{ orderLine.product?.name ?? 'N/A' }}</p>
+  </div>
+
   <div class="info">
-    <p>
-      <strong>{{ orderLine.product?.name ?? 'N/A' }}</strong>
-    </p>
     <p>Quantity: {{ orderLine.quantity ?? 'N/A' }}</p>
     <p>Unit Price: {{ orderLine.unitPrice ?? 'N/A' }}</p>
     <p>Total: {{ total ?? 'N/A' }}</p>
