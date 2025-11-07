@@ -13,7 +13,7 @@ import { MiniFicheComponent } from '../mini-fiche/mini-fiche.component';
 })
 export default class HomePageComponent {
   topSoldProducts: IProduct[] = [];
-  connectedProducts : IProduct[] = [] 
+  searchedProducts: IProduct[] = [];
   constructor(
     private http: HttpClient,
     private homePageService: HomePageService,
@@ -29,14 +29,14 @@ export default class HomePageComponent {
       },
     });
   }
-  research(motsCles : String[]): void{
-    this.homePageService.GetConnnectedProducts(motsCles).subscribe({
+  research(motsCles: string[]): void{
+    this.homePageService.Search(motsCles).subscribe({
       next: (products: IProduct[]) => {
-        this.connectedProducts = products;
+        this.searchedProducts = products;
       },
       error: (err: any) => {
         console.error('Erreur lors de la récupération des produits connectes', err);
       },
-    })
+    });
   }
 }
