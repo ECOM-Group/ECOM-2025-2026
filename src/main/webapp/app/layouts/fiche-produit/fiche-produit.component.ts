@@ -52,29 +52,25 @@ export default class FicheProduitComponent implements OnInit {
   }
 
   public addToCart(id: number): void {
-    // Récupérer le user connecté, récupérer l'utilisateur complet depuis l'API, puis gérer la commande
     this.accountService
       .identity()
       .pipe(
         switchMap(user => {
-          if (!user || !user.login) {
+          if (!user?.login) {
             this.isConnected = false;
             throw new Error('Utilisateur non authentifié');
           }
-          return this.http.get<any>(`/api/admin/users/${user.login}`);
+          return this.http.get<any>(`/api/account`);
         }),
-        switchMap((userData: any) => {
-          console.log('Utilisateur récupéré :', userData);
-          return this.http.get<IProdOrder[]>(`/api/prod-orders`).pipe(
-            switchMap((prodOrder: IProdOrder[]) => {
-              const order = prodOrder.find((element: IProdOrder) => element.user?.id === userData.id && !element.valid);
+        switchMap(userData =>
+          this.http.get<IProdOrder[]>(`/api/prod-orders`).pipe(
+            map(orders => orders.find(o => o.user?.id === userData.id && !o.valid)),
+            switchMap(order => {
               if (order) {
-                console.log('Commande existante trouvée :', order);
                 return this.http.get<IOrderLine[]>(`/api/order-lines`).pipe(
-                  switchMap((orderLines: IOrderLine[]) => {
-                    const line = orderLines.find((element: IOrderLine) => element.product?.id === id && element.prodOrder?.id === order.id);
+                  map(lines => lines.find(l => l.product?.id === id && l.prodOrder?.id === order.id)),
+                  switchMap(line => {
                     if (line) {
-                      console.log('Ligne de commande existante trouvée :', line);
                       const newQuantity = (line.quantity ?? 0) + 1;
                       return this.http.patch(`/api/order-lines/${line.id}`, {
                         id: line.id,
@@ -82,52 +78,43 @@ export default class FicheProduitComponent implements OnInit {
                         unitPrice: this.product.price,
                         total: newQuantity * (this.product.price ?? 0),
                       });
-                    } else {
-                      console.log('Aucune ligne de commande existante trouvée, création dune nouvelle ligne.');
-                      return this.http.post(`/api/order-lines`, {
-                        product: { id },
-                        prodOrder: { id: order.id },
-                        quantity: 1,
-                        unitPrice: this.product.price,
-                        total: this.product.price,
-                      });
                     }
+                    return this.http.post(`/api/order-lines`, {
+                      product: { id },
+                      prodOrder: { id: order.id },
+                      quantity: 1,
+                      unitPrice: this.product.price,
+                      total: this.product.price,
+                    });
                   }),
                 );
-              } else {
-                console.log('Aucune commande valide trouvée, création d une nouvelle commande.');
-                return this.http
-                  .post<IProdOrder>(`/api/prod-orders`, {
-                    user: userData,
-                    valid: false,
-                    promo: 0,
-                  })
-                  .pipe(
-                    switchMap((newOrder: IProdOrder) => {
-                      return this.http.post(`/api/order-lines`, {
-                        product: { id },
-                        prodOrder: { id: newOrder.id },
-                        quantity: 1,
-                        unitPrice: this.product.price,
-                        total: this.product.price,
-                      });
-                    }),
-                  );
               }
+              // No order: create order then line
+              return this.http
+                .post<IProdOrder>(`/api/prod-orders`, {
+                  user: userData,
+                  valid: false,
+                  promo: 0,
+                })
+                .pipe(
+                  switchMap(newOrder =>
+                    this.http.post(`/api/order-lines`, {
+                      product: { id },
+                      prodOrder: { id: newOrder.id },
+                      quantity: 1,
+                      unitPrice: this.product.price,
+                      total: this.product.price,
+                    }),
+                  ),
+                );
             }),
-          );
-        }),
+          ),
+        ),
       )
       .subscribe({
-        next: response => {
-          console.log('Commande mise à jour ou créée :', response);
-          const message = `Produit ajouté au panier avec succès !`;
-          this.successMessages.push(message);
-
-          // Supprime ce message au bout de 3 secondes
-          setTimeout(() => {
-            this.successMessages.shift();
-          }, 3000);
+        next: () => {
+          this.successMessages.push('Produit ajouté au panier avec succès !');
+          setTimeout(() => this.successMessages.shift(), 3000);
         },
         error: err => {
           console.error('Erreur lors du traitement de la commande :', err);
