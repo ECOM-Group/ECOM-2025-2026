@@ -23,18 +23,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     )
     List<Product> findTopProductsBySales(Pageable pageable);
 
-    public List<Product> findByKeywords(List<String> keywords) {
-    String base = "SELECT p FROM Product p WHERE ";
-    String where = keywords.stream()
-        .map(k -> "(LOWER(p.title) LIKE :k_" + k.hashCode() + " OR LOWER(p.description) LIKE :k_" + k.hashCode() + ")")
-        .collect(Collectors.joining(" AND "));
-
-    Query query = entityManager.createQuery(base + where, Product.class);
-
-    for (String k : keywords) {
-        query.setParameter("k_" + k.hashCode(), "%" + k.toLowerCase() + "%");
-    }
-
-    return query.getResultList();
-}
+    // This method cannot be implemented as a single JPQL @Query due to dynamic keyword count.
+    // Use @Repository and implement this method in a custom repository implementation.
+    // In the interface, declare:
+    List<Product> findByKeywords(List<String> keywords);
 }

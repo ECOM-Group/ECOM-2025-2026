@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { forkJoin, map, Observable, switchMap } from 'rxjs';
 import { IProduct } from './../../entities/product/product.model';
@@ -21,7 +21,7 @@ export class HomePageService {
     );
   }
 
-   GetConnnectedProducts(motsCles : String[]): Observable<IProduct[]> {
+  GetConnnectedProducts(motsCles: String[]): Observable<IProduct[]> {
     const params = new HttpParams().set('motsCles', motsCles.join(' '));
 
     return this.http.get<IProduct[]>('/api/products/search', { params }).pipe(
