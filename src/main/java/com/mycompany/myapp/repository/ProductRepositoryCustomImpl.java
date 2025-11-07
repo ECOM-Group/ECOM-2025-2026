@@ -1,4 +1,4 @@
-package com.mycompany.myapp.service;
+package com.mycompany.myapp.repository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -6,8 +6,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Repository;
 
 import com.mycompany.myapp.domain.Product;
-import com.mycompany.myapp.repository.ProductRepository;
-import com.mycompany.myapp.repository.ProductRepositoryCustom;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -19,6 +17,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Override
     public List<Product> findByKeywords(List<String> keywords){
         if (keywords == null || keywords.isEmpty()) {
             return entityManager.createQuery("SELECT p FROM Product p", Product.class).getResultList();
