@@ -36,7 +36,7 @@ public class OrderLine implements Serializable {
     @JsonIgnoreProperties(value = { "address", "user", "orderLines" }, allowSetters = true)
     private ProdOrder prodOrder;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnoreProperties(value = { "illustrator", "reviews", "orderLines", "tags" }, allowSetters = true)
     private Product product;
 
