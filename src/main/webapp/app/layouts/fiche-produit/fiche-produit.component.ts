@@ -73,25 +73,32 @@ export default class FicheProduitComponent implements OnInit {
                     const line = orderLines.find((element: IOrderLine) => element.product?.id === id && element.prodOrder?.id === order.id);
                     if (line) {
                       console.log('Ligne de commande existante trouvée :', line);
+                      const newQuantity = (line.quantity ?? 0) + 1;
                       return this.http.patch(`/api/order-lines/${line.id}`, {
                         id: line.id,
-                        quantity: (line.quantity ?? 0) + 1,
+                        quantity: newQuantity,
+                        unitPrice: this.product.price,
+                        total: newQuantity * (this.product.price ?? 0),
                       });
                     } else {
-                      console.log('Aucune ligne de commande existante trouvée, création d’une nouvelle ligne.');
+                      console.log('Aucune ligne de commande existante trouvée, création dune nouvelle ligne.');
                       return this.http.post(`/api/order-lines`, {
                         product: { id },
                         prodOrder: { id: order.id },
                         quantity: 1,
+                        unitPrice: this.product.price,
+                        total: this.product.price,
                       });
                     }
                   }),
                 );
               } else {
-                console.log('Aucune commande valide trouvée, création d’une nouvelle commande.');
+                console.log('Aucune commande valide trouvée, création d une nouvelle commande.');
                 return this.http
                   .post<IProdOrder>(`/api/prod-orders`, {
                     user: userData,
+                    valid: false,
+                    promo: 0,
                   })
                   .pipe(
                     switchMap((newOrder: IProdOrder) => {
@@ -99,6 +106,8 @@ export default class FicheProduitComponent implements OnInit {
                         product: { id },
                         prodOrder: { id: newOrder.id },
                         quantity: 1,
+                        unitPrice: this.product.price,
+                        total: this.product.price,
                       });
                     }),
                   );
