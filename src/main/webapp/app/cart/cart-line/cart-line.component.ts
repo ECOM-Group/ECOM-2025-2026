@@ -13,10 +13,6 @@ export class CartLineComponent {
 
   constructor(private orderLineService: OrderLineService) {}
 
-  get total(): number | null {
-    return this.orderLine?.quantity && this.orderLine?.unitPrice ? this.orderLine.quantity * this.orderLine.unitPrice : null;
-  }
-
   increment(): void {
     if (!this.orderLine) return;
 
