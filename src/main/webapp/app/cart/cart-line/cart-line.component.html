@@ -7,7 +7,7 @@
   <div class="info">
     <p>Quantity: {{ orderLine.quantity ?? 'N/A' }}</p>
     <p>Unit Price: {{ orderLine.unitPrice ?? 'N/A' }}</p>
-    <p>Total: {{ total ?? 'N/A' }}</p>
+    <p>Total: {{ orderLine.total ?? 'N/A' }}</p>
 
     <div class="actions">
       <button type="button" (click)="decrement()">-</button>
