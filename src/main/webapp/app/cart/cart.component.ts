@@ -9,10 +9,11 @@ import { EMPTY, switchMap } from 'rxjs';
 import { IUser } from 'app/entities/user/user.model';
 import { IProdOrder } from 'app/entities/prod-order/prod-order.model';
 import LoginComponent from 'app/login/login.component';
+import { CartLineComponent } from './cart-line/cart-line.component';
 
 @Component({
   selector: 'jhi-cart',
-  imports: [RouterModule, LoginComponent],
+  imports: [RouterModule, LoginComponent, CartLineComponent],
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.scss'],
 })
@@ -81,5 +82,9 @@ export class CartComponent implements OnInit {
           console.error('❌ Erreur lors du chargement des lignes de commande', err);
         },
       });
+  }
+
+  onLineUpdated(line: IOrderLine): void {
+    this.items = this.items.filter(i => i.id !== line.id);
   }
 }

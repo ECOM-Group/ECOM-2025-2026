@@ -1,32 +1,15 @@
 @if (userConnected) {
   <div class="container mt-4">
     <div id="cartHeader">
-      <h2>Order #{{ orderId }} Items</h2>
+      <h2>Your current cart items:</h2>
       <button id="paymentButton">
         <a routerLink="/payment">Payer {{ totalPrice }}€</a>
       </button>
     </div>
     @if (items.length > 0) {
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Quantity</th>
-            <th>Unit Price</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (item of items; track item.id) {
-            <tr>
-              <td>{{ item.product?.name ?? 'N/A' }}</td>
-              <td>{{ item.quantity ?? 'N/A' }}</td>
-              <td>{{ item.unitPrice ?? 'N/A' }}</td>
-              <td>{{ item.quantity && item.unitPrice ? item.quantity * item.unitPrice : 'N/A' }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
+      @for (item of items; track item.id) {
+        <jhi-cart-line [orderLine]="item" (updated)="onLineUpdated($event)"></jhi-cart-line>
+      }
     } @else {
       <p>No items found for this order.</p>
     }
