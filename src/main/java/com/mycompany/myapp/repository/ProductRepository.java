@@ -22,9 +22,4 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         """
     )
     List<Product> findTopProductsBySales(Pageable pageable);
-
-    // This method cannot be implemented as a single JPQL @Query due to dynamic keyword count.
-    // Use @Repository and implement this method in a custom repository implementation.
-    // In the interface, declare:
-    List<Product> findByKeywords(List<String> keywords);
 }
