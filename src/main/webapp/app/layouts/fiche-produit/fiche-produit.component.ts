@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { NgStyle } from '@angular/common';
 import { IProduct } from '../../entities/product/product.model';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -10,7 +11,7 @@ import LoginComponent from 'app/login/login.component';
 
 @Component({
   selector: 'jhi-fiche-produit',
-  imports: [LoginComponent],
+  imports: [LoginComponent, NgStyle],
   templateUrl: './fiche-produit.component.html',
   styleUrl: './fiche-produit.component.scss',
 })
@@ -25,6 +26,7 @@ export default class FicheProduitComponent implements OnInit {
   };
   id: number = -1;
   isConnected: boolean = true;
+  successMessages: string[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -117,8 +119,19 @@ export default class FicheProduitComponent implements OnInit {
         }),
       )
       .subscribe({
-        next: response => console.log('Commande mise à jour ou créée :', response),
-        error: err => console.error('Erreur lors du traitement de la commande :', err),
+        next: response => {
+          console.log('Commande mise à jour ou créée :', response);
+          const message = `Produit ajouté au panier avec succès !`;
+          this.successMessages.push(message);
+
+          // Supprime ce message au bout de 3 secondes
+          setTimeout(() => {
+            this.successMessages.shift();
+          }, 3000);
+        },
+        error: err => {
+          console.error('Erreur lors du traitement de la commande :', err);
+        },
       });
   }
 }
