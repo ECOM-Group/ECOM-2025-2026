@@ -36,12 +36,15 @@ export class CartComponent implements OnInit {
     this.prodOrderService.getOrderLines(this.orderId).subscribe({
       next: (lines: IOrderLine[]) => {
         this.items = lines;
-        console.log('✅ Lignes de commande chargées avec produits :', this.items);
         this.totalPrice = this.items.map(i => i.total).reduce((a, b) => (a ?? 0) + (b ?? 0), 0) ?? 0;
       },
       error: err => {
-        console.error('❌ Erreur lors du chargement des lignes de commande', err);
+        console.error('Erreur lors du chargement des lignes de commande', err);
       },
     });
+  }
+
+  onLineUpdated(line: IOrderLine): void {
+    this.items = this.items.filter(i => i.id !== line.id);
   }
 }

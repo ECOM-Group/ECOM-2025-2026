@@ -9,7 +9,7 @@ import { OrderLineService } from 'app/entities/order-line/service/order-line.ser
 })
 export class CartLineComponent {
   @Input() orderLine!: IOrderLine;
-  @Output() updated = new EventEmitter<void>(); // notify parent cart
+  @Output() updated = new EventEmitter<IOrderLine>(); // notify parent cart
 
   constructor(private orderLineService: OrderLineService) {}
 
@@ -24,7 +24,6 @@ export class CartLineComponent {
       next: res => {
         if (res.body) {
           this.orderLine = res.body;
-          this.updated.emit();
         }
       },
       error: err => console.error('Error incrementing quantity', err),
@@ -41,10 +40,9 @@ export class CartLineComponent {
           // updated line
           this.orderLine = res.body as IOrderLine;
         } else {
-          // deleted line → optionally tell parent to remove this line
-          this.updated.emit();
+          // line deleted notify parent cart
+          this.updated.emit(this.orderLine);
         }
-        this.updated.emit();
       },
       error: err => console.error('Error decrementing quantity', err),
     });
@@ -54,7 +52,8 @@ export class CartLineComponent {
     if (!this.orderLine?.id) return;
 
     this.orderLineService.delete(this.orderLine.id).subscribe({
-      next: () => this.updated.emit(),
+      // line deleted notify parent cart
+      next: () => this.updated.emit(this.orderLine),
       error: err => console.error('Error deleting line', err),
     });
   }

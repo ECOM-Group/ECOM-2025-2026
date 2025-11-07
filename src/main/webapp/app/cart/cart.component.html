@@ -7,7 +7,7 @@
   </div>
   @if (items.length > 0) {
     @for (item of items; track item.id) {
-      <jhi-cart-line [orderLine]="item"></jhi-cart-line>
+      <jhi-cart-line [orderLine]="item" (updated)="onLineUpdated($event)"></jhi-cart-line>
     }
   } @else {
     <p>No items found for this order.</p>
