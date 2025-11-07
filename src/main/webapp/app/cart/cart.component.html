@@ -2,9 +2,11 @@
   <div class="container mt-4">
     <div id="cartHeader">
       <h2>Your current cart items:</h2>
-      <button id="paymentButton">
-        <a routerLink="/payment">Payer {{ totalPrice }}€</a>
-      </button>
+      @if (items.length > 0) {
+        <button id="paymentButton">
+          <a routerLink="/payment">Payer {{ totalPrice }}€</a>
+        </button>
+      }
     </div>
     @if (items.length > 0) {
       @for (item of items; track item.id) {
