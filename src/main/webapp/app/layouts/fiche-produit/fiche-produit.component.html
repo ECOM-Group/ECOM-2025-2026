@@ -13,6 +13,12 @@
 
         <div class="product-actions">
           <button (click)="addToCart(product.id)" class="add-to-cart-button">Ajouter au panier</button>
+
+          @for (msg of successMessages; track msg; let i = $index) {
+            <div class="feedback-message" [ngStyle]="{ top: 115 + i * 30 + '%', left: '42%' }">
+              {{ msg }}
+            </div>
+          }
         </div>
       </div>
     </div>

@@ -1,4 +1,11 @@
 import { Routes } from '@angular/router';
+import HomePageComponent from './home-page.component';
 
-const routes: Routes = [{ path: '', loadComponent: () => import('./home-page.component') }];
-export default routes;
+const homePageRoute: Routes = [
+  {
+    path: '',
+    component: HomePageComponent,
+  },
+];
+
+export default homePageRoute;

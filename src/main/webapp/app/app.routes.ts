@@ -8,8 +8,8 @@ import { errorRoute } from './layouts/error/error.route';
 const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./home/home.component'),
-    title: 'home.title',
+    pathMatch: 'full',
+    redirectTo: 'homePage',
   },
   {
     path: '',
@@ -44,10 +44,6 @@ const routes: Routes = [
   {
     path: 'homePage',
     loadChildren: () => import('./layouts/home-page/homePage.routes'),
-  },
-  {
-    path: 'payment',
-    loadComponent: () => import('./layouts/payment-tunel/payment-tunel.component'),
   },
   {
     path: '',
