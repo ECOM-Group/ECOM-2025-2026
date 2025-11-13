@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { NgStyle } from '@angular/common';
 import { IProduct } from '../../entities/product/product.model';
 import { ActivatedRoute } from '@angular/router';
@@ -7,15 +7,19 @@ import { map, switchMap } from 'rxjs';
 import { AccountService } from 'app/core/auth/account.service';
 import { IProdOrder } from 'app/entities/prod-order/prod-order.model';
 import { IOrderLine } from 'app/entities/order-line/order-line.model';
+import { RouterModule } from '@angular/router';
 import LoginComponent from 'app/login/login.component';
+import { CartService } from 'app/service/cart/cart.service';
 
 @Component({
   selector: 'jhi-fiche-produit',
-  imports: [LoginComponent, NgStyle],
+  imports: [LoginComponent, NgStyle, RouterModule],
   templateUrl: './fiche-produit.component.html',
   styleUrl: './fiche-produit.component.scss',
 })
 export default class FicheProduitComponent implements OnInit {
+  private cartService = inject(CartService);
+
   product: IProduct = {
     id: -1, // id temporaire
     price: null,
@@ -27,6 +31,16 @@ export default class FicheProduitComponent implements OnInit {
   id: number = -1;
   isConnected: boolean = true;
   successMessages: string[] = [];
+  showZoom = false;
+  backgroundPosition = '0% 0%';
+  zoomLevel = 200; // augmente pour zoomer plus
+  images: string[] = [
+    '../../../content/images/jhipster_family_member_0_head-384.png',
+    '../../../content/images/jhipster_family_member_1_head-384.png',
+    '../../../content/images/jhipster_family_member_2_head-384.png',
+  ];
+
+  currentIndex = 0;
 
   constructor(
     private route: ActivatedRoute,
@@ -49,6 +63,26 @@ export default class FicheProduitComponent implements OnInit {
           },
         });
     }
+  }
+  onMouseMove(event: MouseEvent): void {
+    const img = event.target as HTMLElement;
+    const rect = img.getBoundingClientRect();
+
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    const xPercent = (x / rect.width) * 100;
+    const yPercent = (y / rect.height) * 100;
+
+    this.backgroundPosition = `${xPercent}% ${yPercent}%`;
+  }
+
+  prevImage() {
+    this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+  }
+
+  nextImage() {
+    this.currentIndex = (this.currentIndex + 1) % this.images.length;
   }
 
   public addToCart(id: number): void {
@@ -115,6 +149,8 @@ export default class FicheProduitComponent implements OnInit {
         next: () => {
           this.successMessages.push('Produit ajouté au panier avec succès !');
           setTimeout(() => this.successMessages.shift(), 3000);
+
+          this.cartService.refresh();
         },
         error: err => {
           console.error('Erreur lors du traitement de la commande :', err);
