@@ -1,0 +1,23 @@
+@if (userConnected) {
+  <div class="container mt-4">
+    <div id="cartHeader">
+      <h2>Your current cart items:</h2>
+    </div>
+    @if (items.length > 0) {
+      @for (item of items; track item.id) {
+        <jhi-cart-line [orderLine]="item" (updated)="onLineUpdated($event)"></jhi-cart-line>
+      }
+
+      <div class="subtotal">
+        <h3>Subtotal: {{ totalPrice }}</h3>
+        <button id="paymentButton">
+          <a routerLink="/payment"> Pay </a>
+        </button>
+      </div>
+    } @else {
+      <p>No items found for this order.</p>
+    }
+  </div>
+} @else {
+  <jhi-login [redirectUrl]="redirectURL"></jhi-login>
+}

@@ -1,0 +1,27 @@
+<div [formGroup]="cardForm" class="card-form">
+  <h2>Paiement</h2>
+
+  <label>Numéro de carte :</label>
+  <span class="card_number" [formGroup]="cardForm.number">
+    <input type="text" formControlName="p1" maxlength="4" placeholder="xxxx" /> -
+    <input type="text" formControlName="p2" maxlength="4" placeholder="xxxx" /> -
+    <input type="text" formControlName="p3" maxlength="4" placeholder="xxxx" /> -
+    <input type="text" formControlName="p4" maxlength="4" placeholder="xxxx" /> </span
+  ><br />
+
+  <div expiration class="expiration-date">
+    <label>Date d'expiration :</label>
+    <select formControlName="expirationMonth">
+      <option value="">Mois</option>
+      <option *ngFor="let month of months" [value]="month.value">{{ month.label }}</option>
+    </select>
+    <p>/</p>
+    <select formControlName="expirationYear">
+      <option value="">Année</option>
+      <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+    </select>
+  </div>
+
+  <label>CVV :</label>
+  <input cvv type="text" formControlName="cvv" maxlength="3" placeholder="yyy" /><br />
+</div>

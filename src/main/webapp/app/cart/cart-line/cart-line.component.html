@@ -1,0 +1,18 @@
+<div class="cart-line">
+  <div class="product-image">
+    <img src="content/images/jhipster_family_member_0_head-192.png" />
+    <p class="product-name">{{ orderLine.product?.name ?? 'N/A' }}</p>
+  </div>
+
+  <div class="info">
+    <p>Quantity: {{ orderLine.quantity ?? 'N/A' }}</p>
+    <p>Unit Price: {{ orderLine.unitPrice ?? 'N/A' }}</p>
+    <p>Total: {{ orderLine.total ?? 'N/A' }}</p>
+
+    <div class="actions">
+      <button type="button" (click)="decrement()">-</button>
+      <button type="button" (click)="increment()">+</button>
+      <button type="button" (click)="delete()">🗑️</button>
+    </div>
+  </div>
+</div>

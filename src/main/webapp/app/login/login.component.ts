@@ -26,6 +26,9 @@ export default class LoginComponent implements OnInit, AfterViewInit {
   private readonly loginService = inject(LoginService);
   private readonly router = inject(Router);
 
+  @Input() redirectUrl?: string;
+  @Input() withoutRedirectUrl = false;
+
   ngOnInit(): void {
     // if already authenticated then navigate to home page
     this.accountService.identity().subscribe(() => {
@@ -39,13 +42,15 @@ export default class LoginComponent implements OnInit, AfterViewInit {
     this.username().nativeElement.focus();
   }
 
-  @Input() redirectUrl?: string;
   login(): void {
     this.loginService.login(this.loginForm.getRawValue()).subscribe({
       next: () => {
         this.authenticationError.set(false);
+
+        if (this.withoutRedirectUrl) return;
+
         if (!this.router.getCurrentNavigation()) {
-          this.router.navigate([this.redirectUrl || '']);
+          window.location.href = this.redirectUrl || '/';
         }
       },
       error: () => this.authenticationError.set(true),

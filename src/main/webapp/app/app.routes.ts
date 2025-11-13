@@ -8,8 +8,8 @@ import { errorRoute } from './layouts/error/error.route';
 const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./home/home.component'),
-    title: 'home.title',
+    pathMatch: 'full',
+    redirectTo: 'homePage',
   },
   {
     path: '',
@@ -29,9 +29,25 @@ const routes: Routes = [
     loadChildren: () => import('./account/account.route'),
   },
   {
+    path: 'cart',
+    loadChildren: () => import('./cart/cart.route'),
+  },
+  {
     path: 'login',
     loadComponent: () => import('./login/login.component'),
     title: 'login.title',
+  },
+  {
+    path: 'fiche_produit',
+    loadChildren: () => import('./layouts/fiche-produit/fiche-route.routes'),
+  },
+  {
+    path: 'homePage',
+    loadChildren: () => import('./layouts/home-page/homePage.routes'),
+  },
+  {
+    path: 'payment',
+    loadComponent: () => import('./layouts/payment-tunel/payment-tunel.component'),
   },
   {
     path: '',

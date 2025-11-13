@@ -1,0 +1,41 @@
+#cartHeader {
+  display: flex;
+  justify-content: space-between;
+}
+
+#paymentButton {
+  border-radius: 5px;
+  padding-inline: 20px;
+  background-color: #56d187;
+  color: #003122;
+  transition:
+    background-color 180ms ease,
+    transform 120ms ease,
+    box-shadow 180ms ease;
+
+  &:hover {
+    background-color: #85e9ad;
+    box-shadow: 0 10px 24px rgba(12, 59, 55, 0.12);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 6px 12px rgba(12, 59, 55, 0.1);
+  }
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Subtotal styling */
+.subtotal {
+  margin-top: 1.5rem;
+  text-align: right;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #003122;
+  padding-top: 1rem;
+}

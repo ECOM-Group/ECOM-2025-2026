@@ -1,0 +1,31 @@
+div.ng-invalid,
+span.ng-invalid {
+  border: none;
+  box-shadow: none;
+}
+label {
+  min-width: 8rem;
+}
+input {
+  margin-block: 4px;
+  text-align: center;
+}
+.card_number input {
+  width: 3rem;
+}
+div[expiration] {
+  display: flex;
+  align-items: center;
+  p {
+    margin: 0.4rem 0.2rem;
+  }
+}
+input[cvv] {
+  width: 2.5rem;
+}
+::placeholder {
+  text-align: center;
+}
+.expiration-date label {
+  margin-right: 4px;
+}

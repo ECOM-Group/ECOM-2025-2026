@@ -1,0 +1,43 @@
+@if (isConnected) {
+  <div class="flex">
+    <div class="form">
+      <form [formGroup]="paymentForm" (ngSubmit)="submit()">
+        <div formGroupName="delivery">
+          <h2>Adresse de livraison</h2>
+          <jhi-adress-form [adresseForm]="deliveryForm()"></jhi-adress-form>
+        </div>
+
+        <label>
+          <input type="checkbox" formControlName="sameAdress" />
+          Adresse de facturation identique à l'adresse de livraison
+        </label>
+
+        <div *ngIf="!isSameAdress()" formGroupName="billing">
+          <h2>Adresse de facturation</h2>
+          <jhi-adress-form [adresseForm]="billingForm()"></jhi-adress-form>
+        </div>
+
+        <!--
+        <div formGroupName="card">
+          <jhi-payment-card-form [cardForm]="cardForm()"></jhi-payment-card-form>
+        </div>
+        -->
+        <div>
+          <h2>Paiement</h2>
+          <div id="card-element" class="card-element"></div>
+          <div id="card-errors" class="error"></div>
+        </div>
+
+        <button type="submit" [disabled]="isProcessing">
+          {{ isProcessing ? 'Paiement en cours...' : 'Valider et payer' }}
+        </button>
+        <div *ngIf="message" class="message">{{ message }}</div>
+      </form>
+    </div>
+    <div class="prodOrder">
+      <h1><strong>AFFICHER LE PROD ORDER (component a faire) </strong></h1>
+    </div>
+  </div>
+} @else {
+  <jhi-login redirectUrl="payment"></jhi-login>
+}

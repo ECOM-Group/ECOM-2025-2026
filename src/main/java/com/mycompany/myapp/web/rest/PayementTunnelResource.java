@@ -1,11 +1,20 @@
 package com.mycompany.myapp.web.rest;
 
+import com.mycompany.myapp.domain.OrderLine;
 import com.mycompany.myapp.domain.PayementTunnel;
+import com.mycompany.myapp.domain.ProdOrder;
+import com.mycompany.myapp.repository.OrderLineRepository;
 import com.mycompany.myapp.repository.PayementTunnelRepository;
+import com.mycompany.myapp.repository.ProdOrderRepository;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
+import com.stripe.Stripe;
+import com.stripe.model.PaymentIntent;
+import com.stripe.param.PaymentIntentCreateParams;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -13,7 +22,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.ResponseUtil;
 
@@ -32,10 +49,57 @@ public class PayementTunnelResource {
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 
-    private final PayementTunnelRepository payementTunnelRepository;
+    @Value("${stripe.secret-key}")
+    private String stripeSecretKey;
 
-    public PayementTunnelResource(PayementTunnelRepository payementTunnelRepository) {
+    private final PayementTunnelRepository payementTunnelRepository;
+    private final ProdOrderRepository prodOrderRepository;
+    private final OrderLineRepository orderLineRepository;
+
+    public PayementTunnelResource(
+        PayementTunnelRepository payementTunnelRepository,
+        ProdOrderRepository prodOrderRepository,
+        OrderLineRepository orderLineRepository
+    ) {
         this.payementTunnelRepository = payementTunnelRepository;
+        this.prodOrderRepository = prodOrderRepository;
+        this.orderLineRepository = orderLineRepository;
+    }
+
+    @PostMapping("/create-payment-intent")
+    public ResponseEntity<Map<String, Object>> createPaymentIntent(@RequestBody Map<String, Object> data) throws Exception {
+        Stripe.apiKey = stripeSecretKey;
+
+        // Récupère le paymentMethodId envoyé par le front
+        String paymentMethodId = (String) data.get("paymentMethodId");
+
+        // Récupère le panier courant
+        ProdOrder order = prodOrderRepository.findInvalidByUserIsCurrentUser();
+        if (order == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Aucun panier actif trouvé"));
+        }
+
+        List<OrderLine> lines = orderLineRepository.findByProdOrderId(order.getId());
+        long totalAmount = 0;
+        for (OrderLine line : lines) {
+            double unitPrice = line.getUnitPrice() != null ? line.getUnitPrice() : 0.0;
+            int quantity = line.getQuantity() != null ? line.getQuantity() : 1;
+            totalAmount += Math.round(unitPrice * 100) * quantity;
+        }
+
+        PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
+            .setAmount(totalAmount)
+            .setCurrency("eur")
+            .setPaymentMethod(paymentMethodId)
+            .setConfirmationMethod(PaymentIntentCreateParams.ConfirmationMethod.AUTOMATIC)
+            .setConfirm(false)
+            .build();
+
+        PaymentIntent intent = PaymentIntent.create(params);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("clientSecret", intent.getClientSecret());
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -133,6 +197,22 @@ public class PayementTunnelResource {
             result,
             HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, payementTunnel.getId().toString())
         );
+    }
+
+    @PostMapping("/validate-order")
+    public ResponseEntity<Void> validateCurrentOrder() {
+        LOG.debug("Validation du panier en cours pour l’utilisateur connecté");
+        ProdOrder currentOrder = prodOrderRepository.findInvalidByUserIsCurrentUser();
+        if (currentOrder == null) {
+            LOG.warn("Aucun panier non validé trouvé pour cet utilisateur");
+            return ResponseEntity.badRequest().build();
+        }
+
+        currentOrder.setValid(true);
+        prodOrderRepository.save(currentOrder);
+
+        LOG.info("Commande {} validée avec succès", currentOrder.getId());
+        return ResponseEntity.ok().build();
     }
 
     /**
