@@ -36,7 +36,7 @@ export class OrderHistoryComponent implements OnInit {
       )
       .subscribe({
         next: (orders: IProdOrder[]) => {
-          this.orders = orders;
+          this.orders = orders.filter(order => order.valid).sort((a, b) => b.id - a.id);
         },
         error: err => {
           console.error('❌ Erreur lors du chargement des lignes de commande', err);
