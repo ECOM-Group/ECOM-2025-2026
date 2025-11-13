@@ -10,7 +10,7 @@ import { OrderLineService } from 'app/entities/order-line/service/order-line.ser
 export class CartLineComponent {
   @Input() isCart = true;
   @Input() orderLine!: IOrderLine;
-  @Output() updated = new EventEmitter<IOrderLine>(); // notify parent cart
+  @Output() updated = new EventEmitter<{ id: number; delete: boolean; priceDiff: number }>(); // notify parent cart
 
   constructor(private orderLineService: OrderLineService) {}
 
@@ -21,6 +21,7 @@ export class CartLineComponent {
       next: res => {
         if (res.body) {
           this.orderLine = res.body;
+          this.updated.emit({ id: this.orderLine.id, delete: false, priceDiff: this.orderLine.unitPrice ?? 0 });
         }
       },
       error: err => console.error('Error incrementing quantity', err),
@@ -36,9 +37,9 @@ export class CartLineComponent {
         if (res.body && 'id' in res.body) {
           // updated line
           this.orderLine = res.body as IOrderLine;
+          this.updated.emit({ id: this.orderLine.id, delete: false, priceDiff: -(this.orderLine.unitPrice ?? 0) });
         } else {
-          // line deleted notify parent cart
-          this.updated.emit(this.orderLine);
+          this.updated.emit({ id: this.orderLine.id, delete: true, priceDiff: -(this.orderLine.unitPrice ?? 0) });
         }
       },
       error: err => console.error('Error decrementing quantity', err),
@@ -50,7 +51,7 @@ export class CartLineComponent {
 
     this.orderLineService.delete(this.orderLine.id).subscribe({
       // line deleted notify parent cart
-      next: () => this.updated.emit(this.orderLine),
+      next: () => this.updated.emit({ id: this.orderLine.id, delete: true, priceDiff: -(this.orderLine.total ?? 0) }),
       error: err => console.error('Error deleting line', err),
     });
   }

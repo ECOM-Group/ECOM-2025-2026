@@ -3,7 +3,7 @@
     <div id="cartHeader">
       <div class="top">
         <h2>Your current cart items:</h2>
-        @if (!order?.valid) {
+        @if (!order?.valid && items.length > 0) {
           <div class="subtotal">
             <button id="paymentButton">
               <a routerLink="/payment"> Pay {{ totalPrice }}€</a>

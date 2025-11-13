@@ -103,7 +103,10 @@ export class CartComponent implements OnInit, OnChanges {
       });
   }
 
-  onLineUpdated(line: IOrderLine): void {
-    this.items = this.items.filter(i => i.id !== line.id);
+  onLineUpdated(data: { id: number; delete: boolean; priceDiff: number }): void {
+    this.totalPrice += data.priceDiff;
+    if (data.delete) {
+      this.items = this.items.filter(i => i.id !== data.id);
+    }
   }
 }
