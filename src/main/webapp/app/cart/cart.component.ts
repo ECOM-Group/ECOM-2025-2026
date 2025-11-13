@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { IOrderLine } from 'app/entities/order-line/order-line.model';
 import { ProdOrderService } from 'app/entities/prod-order/service/prod-order.service';
@@ -24,6 +24,7 @@ export class CartComponent implements OnInit {
   userId = -1;
   userConnected = true;
   redirectURL = '/';
+  @Input() order: IOrderLine | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -35,8 +36,12 @@ export class CartComponent implements OnInit {
   ngOnInit(): void {
     const orderIdString = this.route.snapshot.paramMap.get('orderId');
     this.orderId = Number(orderIdString);
-    // Number(null) = 0 donc obligé de séparer
-    if (!orderIdString || isNaN(this.orderId)) this.orderId = -1;
+    // orderId = 0, NaN, > 0 , 0 <
+
+    if (isNaN(this.orderId) || this.orderId <= 0) {
+      this.orderId = this.order?.id ?? -1;
+    }
+    // orderId = -1 ou > 0
     this.loadOrderItems();
   }
 
