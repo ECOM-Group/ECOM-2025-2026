@@ -13,7 +13,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.ResponseUtil;
 
@@ -83,7 +91,7 @@ public class OrderLineResource {
         if (!orderLineRepository.existsById(id)) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
-
+        orderLine.setTotal(orderLine.getQuantity() * orderLine.getUnitPrice());
         orderLine = orderLineRepository.save(orderLine);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, orderLine.getId().toString()))
@@ -125,7 +133,7 @@ public class OrderLineResource {
                     existingOrderLine.setUnitPrice(orderLine.getUnitPrice());
                 }
                 if (orderLine.getTotal() != null) {
-                    existingOrderLine.setTotal(orderLine.getTotal());
+                    existingOrderLine.setTotal(orderLine.getUnitPrice() * orderLine.getQuantity());
                 }
                 if (orderLine.getQuantity() != null) {
                     existingOrderLine.setQuantity(orderLine.getQuantity());
