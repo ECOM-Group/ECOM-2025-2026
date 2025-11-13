@@ -1,24 +1,27 @@
 @if (userConnected) {
   <div class="container mt-4">
     <div id="cartHeader">
-      <h2>Your current cart items:</h2>
+      <div class="top">
+        <h2>Your current cart items:</h2>
+        @if (!order?.valid) {
+          <div class="subtotal">
+            <button id="paymentButton">
+              <a routerLink="/payment"> Pay {{ totalPrice }}€</a>
+            </button>
+          </div>
+        }
+      </div>
+      <div class="white-fade"></div>
     </div>
-    @if (items.length > 0) {
-      @for (item of items; track item.id) {
-        <jhi-cart-line [orderLine]="item" [isCart]="!order?.valid" (updated)="onLineUpdated($event)"></jhi-cart-line>
+    <div id="cartMain">
+      @if (items.length > 0) {
+        @for (item of items; track item.id) {
+          <jhi-cart-line [orderLine]="item" [isCart]="!order?.valid" (updated)="onLineUpdated($event)"></jhi-cart-line>
+        }
+      } @else {
+        <p>No items found for this order.</p>
       }
-
-      @if (!order?.valid) {
-        <div class="subtotal">
-          <h3>Subtotal: {{ totalPrice }}</h3>
-          <button id="paymentButton">
-            <a routerLink="/payment"> Pay </a>
-          </button>
-        </div>
-      }
-    } @else {
-      <p>No items found for this order.</p>
-    }
+    </div>
   </div>
 } @else {
   <jhi-login [redirectUrl]="redirectURL"></jhi-login>
