@@ -280,6 +280,18 @@
               <li>
                 <a
                   class="dropdown-item"
+                  routerLink="/account/orderHistory"
+                  routerLinkActive="active"
+                  (click)="collapseNavbar()"
+                  data-cy="settings"
+                >
+                  <i class="fa-solid fa-clock-rotate-left"></i>
+                  <span>Historique</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
                   routerLink="/account/settings"
                   routerLinkActive="active"
                   (click)="collapseNavbar()"
