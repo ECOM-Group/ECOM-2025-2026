@@ -5,7 +5,7 @@ import { ProdOrderService } from 'app/entities/prod-order/service/prod-order.ser
 import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { AccountService } from 'app/core/auth/account.service';
-import { EMPTY, switchMap } from 'rxjs';
+import { EMPTY, of, switchMap } from 'rxjs';
 import { IUser } from 'app/entities/user/user.model';
 import { IProdOrder } from 'app/entities/prod-order/prod-order.model';
 import LoginComponent from 'app/login/login.component';
@@ -17,14 +17,15 @@ import { CartLineComponent } from './cart-line/cart-line.component';
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.scss'],
 })
-export class CartComponent implements OnInit {
+export class CartComponent implements OnInit, OnChanges {
   items: IOrderLine[] = [];
   totalPrice = 0;
+  orderValid = true; // false = cart, true = bought
   orderId = -1;
   userId = -1;
   userConnected = true;
   redirectURL = '/';
-  @Input() order: IOrderLine | null = null;
+  @Input() order: IProdOrder | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -45,6 +46,18 @@ export class CartComponent implements OnInit {
     this.loadOrderItems();
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['order']) {
+      const bf = changes['order'].currentValue?.id;
+      const af = changes['order'].previousValue?.id;
+      if (af === bf) return;
+      console.log('Cart reloaded');
+
+      this.orderId = bf;
+      this.loadOrderItems();
+    }
+  }
+
   loadOrderItems(): void {
     if (!this.accountService.isAuthenticated()) {
       this.userConnected = false;
@@ -63,10 +76,11 @@ export class CartComponent implements OnInit {
           console.log('User id = ', this.userId, 'orderId = ', this.orderId);
 
           if (this.orderId < 0) return this.http.get<IProdOrder>(`/api/prod-orders/${this.userId}/current`);
-          return this.http.get<IProdOrder>(`/api/prod-orders/${this.orderId}`);
+          return this.order !== null ? of(this.order) : this.http.get<IProdOrder>(`/api/prod-orders/${this.orderId}`);
         }),
         switchMap(prodOrder => {
           // Récupère les OrderLines de la prod Order
+          this.order = prodOrder;
           if (!prodOrder || prodOrder.user?.id !== this.userId) {
             console.log(`prodOrder.user : ${prodOrder.user ? 'ok' : 'null'} of ID ${prodOrder.user?.id} VS this.userID = ${this.userId}`);
             return EMPTY;

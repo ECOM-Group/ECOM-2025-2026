@@ -8,6 +8,7 @@ import { OrderLineService } from 'app/entities/order-line/service/order-line.ser
   styleUrls: ['./cart-line.component.scss'],
 })
 export class CartLineComponent {
+  @Input() isCart = true;
   @Input() orderLine!: IOrderLine;
   @Output() updated = new EventEmitter<IOrderLine>(); // notify parent cart
 
