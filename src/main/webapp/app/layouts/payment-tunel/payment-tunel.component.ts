@@ -13,11 +13,12 @@ import LoginComponent from 'app/login/login.component';
 import { IUser } from 'app/admin/user-management/user-management.model';
 import { IProdOrder } from 'app/entities/prod-order/prod-order.model';
 import { loadStripe, Stripe, StripeCardElement } from '@stripe/stripe-js';
+import { RouterLink } from '@angular/router';
 
 @Component({
   standalone: true,
   selector: 'jhi-payment-tunel',
-  imports: [ReactiveFormsModule, NgIf, AdressFormComponent, /* PaymentCardFormComponent ,*/ LoginComponent],
+  imports: [ReactiveFormsModule, NgIf, AdressFormComponent, /* PaymentCardFormComponent ,*/ LoginComponent, RouterLink],
   templateUrl: './payment-tunel.component.html',
   styleUrls: ['./payment-tunel.component.scss'],
 })
