@@ -181,6 +181,13 @@ public class ProdOrderResource {
         return ResponseUtil.wrapOrNotFound(Optional.ofNullable(prodOrder));
     }
 
+    @GetMapping("/allOfCurrentUser")
+    public ResponseEntity<List<ProdOrder>> getAllProdOrderOfUser() {
+        LOG.debug("REST request to get all prod order of the current user");
+        List<ProdOrder> prodOrder = prodOrderRepository.findByUserIsCurrentUser();
+        return ResponseUtil.wrapOrNotFound(Optional.ofNullable(prodOrder));
+    }
+
     /**
      * {@code DELETE  /prod-orders/:id} : delete the "id" prodOrder.
      *

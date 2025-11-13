@@ -1,0 +1,46 @@
+.order-history-container {
+  display: flex;
+  height: 100%;
+  background: #f9f9f9;
+}
+
+.order-list {
+  width: 250px;
+  background: #ffffff;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+}
+
+.order-item {
+  padding: 1rem;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+
+  &.selected {
+    background-color: #007bff;
+    color: #fff;
+    font-weight: 600;
+  }
+}
+
+.order-detail {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.selectable-order {
+  padding: 0.5rem 1rem;
+  margin: 0.2rem;
+  border: 1px solid black;
+  border-radius: 7px;
+}
