@@ -32,12 +32,20 @@
         @if (account() !== null) {
           <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
             <a class="nav-link" routerLink="/cart" (click)="collapseNavbar()">
-              <span>
+              <span class="position-relative">
                 <i class="fa-solid fa-cart-shopping"></i>
                 <span>Cart</span>
+
+                <span
+                  *ngIf="cartService.cartCount() > 0"
+                  class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle"
+                >
+                  {{ cartService.cartCount() }}
+                </span>
               </span>
             </a>
           </li>
+
           <li
             ngbDropdown
             class="nav-item dropdown pointer"
