@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { IOrderLine } from 'app/entities/order-line/order-line.model';
 import { ProdOrderService } from 'app/entities/prod-order/service/prod-order.service';
 import { HttpClient } from '@angular/common/http';
+import { Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AccountService } from 'app/core/auth/account.service';
 import { EMPTY, of, switchMap } from 'rxjs';
@@ -32,6 +33,7 @@ export class CartComponent implements OnInit, OnChanges {
     private prodOrderService: ProdOrderService,
     private http: HttpClient,
     private accountService: AccountService,
+    private location: Location,
   ) {}
 
   ngOnInit(): void {
@@ -56,6 +58,10 @@ export class CartComponent implements OnInit, OnChanges {
       this.orderId = bf;
       this.loadOrderItems();
     }
+  }
+
+  goback(): void {
+    this.location.back();
   }
 
   loadOrderItems(): void {

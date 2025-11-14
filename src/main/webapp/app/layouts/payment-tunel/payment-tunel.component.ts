@@ -1,6 +1,6 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { NgIf } from '@angular/common';
+import { NgIf, Location } from '@angular/common';
 import { AdressFormComponent } from '../adress-form/adress-form.component';
 import { AdresseFormGroup } from 'app/layouts/adress-form/adress-form-group';
 import { CardFormGroup } from '../payment-card-form/payment-card-group-form';
@@ -36,6 +36,7 @@ export default class PaymentTunelComponent implements OnInit, AfterViewInit {
     private router: Router,
     private http: HttpClient,
     private accountService: AccountService,
+    private location: Location,
   ) {}
 
   ngOnInit(): void {
@@ -74,6 +75,10 @@ export default class PaymentTunelComponent implements OnInit, AfterViewInit {
         next: prodOrder => console.log('ON SUBSCRIBE :', prodOrder),
         error: err => console.error('Erreur :', err),
       });
+  }
+
+  goback(): void {
+    this.location.back();
   }
 
   async ngAfterViewInit() {

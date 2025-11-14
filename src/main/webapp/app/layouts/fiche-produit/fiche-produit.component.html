@@ -1,5 +1,5 @@
 @if (isConnected) {
-  <button class="back-button" routerLink="/homePage"><i class="fa-solid fa-reply"></i>Retour aux produits</button>
+  <button class="back-button" (click)="goback()"><i class="fa-solid fa-reply"></i>Retour aux produits</button>
   <div class="product-container">
     <div class="product-card">
       <div class="product-image-carousel">
@@ -35,6 +35,9 @@
 
         <p class="product-desc">{{ product.desc }}</p>
         <p class="product-price">{{ product.price }} €</p>
+        <p class="mini-fiche-stock">
+          {{ (product.quantity ?? 0) > 0 ? 'En stock : ' + product.quantity : 'Rupture de stock' }}
+        </p>
 
         <div class="product-actions">
           <button (click)="addToCart(product.id)" class="add-to-cart-button">Ajouter au panier</button>

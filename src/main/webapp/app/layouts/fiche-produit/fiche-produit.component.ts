@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { NgStyle } from '@angular/common';
+import { NgStyle, Location } from '@angular/common';
 import { IProduct } from '../../entities/product/product.model';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -46,6 +46,7 @@ export default class FicheProduitComponent implements OnInit {
     private route: ActivatedRoute,
     private http: HttpClient,
     private accountService: AccountService,
+    private location: Location,
   ) {}
 
   ngOnInit(): void {
@@ -64,6 +65,11 @@ export default class FicheProduitComponent implements OnInit {
         });
     }
   }
+
+  goback(): void {
+    this.location.back();
+  }
+
   onMouseMove(event: MouseEvent): void {
     const img = event.target as HTMLElement;
     const rect = img.getBoundingClientRect();

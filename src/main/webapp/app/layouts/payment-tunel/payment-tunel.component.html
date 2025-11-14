@@ -1,6 +1,6 @@
 @if (isConnected) {
   <div>
-    <button [routerLink]="['/card']"><i class="fa-solid fa-reply"></i> Retour au panier</button>
+    <button class="back-button" (click)="goback()"><i class="fa-solid fa-reply"></i>Retour au panier</button>
   </div>
   <div class="flex">
     <div class="form">
