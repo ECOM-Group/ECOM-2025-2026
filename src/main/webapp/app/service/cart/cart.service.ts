@@ -58,7 +58,7 @@ export class CartService {
           this.cartCount.set(lines.length); // juste compter
         },
         error: err => {
-          console.error('❌ Erreur loadCartCount():', err);
+          console.error(' Erreur loadCartCount():', err);
           this.cartCount.set(0);
         },
       });
