@@ -6,11 +6,11 @@
   }
 
   @if (!loading && products.length > 0) {
-    <ul>
+    <div class="mini-fiche-list">
       @for (product of products; track product.id) {
-        <li>{{ product.name }}</li>
+        <jhi-mini-fiche [idProduit]="product.id"></jhi-mini-fiche>
       }
-    </ul>
+    </div>
   }
 
   @if (!loading && products.length === 0) {
