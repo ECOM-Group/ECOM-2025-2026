@@ -3,7 +3,7 @@ import { NgStyle, Location } from '@angular/common';
 import { IProduct } from '../../entities/product/product.model';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { map, switchMap } from 'rxjs';
+import { map, Observable, switchMap } from 'rxjs';
 import { AccountService } from 'app/core/auth/account.service';
 import { IProdOrder } from 'app/entities/prod-order/prod-order.model';
 import { IOrderLine } from 'app/entities/order-line/order-line.model';
@@ -91,62 +91,80 @@ export default class FicheProduitComponent implements OnInit {
     this.currentIndex = (this.currentIndex + 1) % this.images.length;
   }
 
-  public addToCart(id: number): void {
-    this.accountService
-      .identity()
+  // :one: Récupère l'utilisateur complet (comme dans le code original)
+  private getUser(): Observable<any> {
+    return this.accountService.identity().pipe(
+      switchMap(user => {
+        if (!user?.login) {
+          this.isConnected = false;
+          throw new Error('Utilisateur non authentifié');
+        }
+        // Charge l'entité utilisateur complète (exactement comme avant)
+        return this.http.get<any>(`/api/account`);
+      }),
+    );
+  }
+
+  // :two: Récupère la commande non validée du user
+  private getCurrentOrder(userId: number): Observable<IProdOrder | null> {
+    return this.http.get<IProdOrder[]>(`/api/prod-orders`).pipe(map(orders => orders.find(o => o.user?.id === userId && !o.valid) ?? null));
+  }
+
+  // :three: Récupère la ligne de commande pour un produit
+  private getOrderLine(orderId: number, productId: number): Observable<IOrderLine | null> {
+    return this.http
+      .get<IOrderLine[]>(`/api/order-lines`)
+      .pipe(map(lines => lines.find(l => l.product?.id === productId && l.prodOrder?.id === orderId) ?? null));
+  }
+
+  // :four: PATCH une ligne existante (même calcul que l'original)
+  private updateOrderLine(line: IOrderLine): Observable<any> {
+    const newQuantity = (line.quantity ?? 0) + 1;
+
+    return this.http.patch(`/api/order-lines/${line.id}`, {
+      id: line.id,
+      quantity: newQuantity,
+      unitPrice: this.product.price, // identique à l’original
+      total: newQuantity * (this.product.price ?? 0),
+    });
+  }
+
+  // :five: POST une nouvelle ligne (identique à l'original)
+  private createOrderLine(orderId: number, productId: number): Observable<any> {
+    return this.http.post(`/api/order-lines`, {
+      product: { id: productId },
+      prodOrder: { id: orderId },
+      quantity: 1,
+      unitPrice: this.product.price, // identique à l’original
+      total: this.product.price,
+    });
+  }
+
+  // :six: POST une nouvelle commande (identique à l’original)
+  private createOrder(userData: any): Observable<IProdOrder> {
+    return this.http.post<IProdOrder>(`/api/prod-orders`, {
+      user: userData,
+      valid: false,
+      promo: 0,
+    });
+  }
+
+  // :seven: Fonction principale (fidèle à l’original)
+  public addToCart(productId: number): void {
+    this.getUser()
       .pipe(
-        switchMap(user => {
-          if (!user?.login) {
-            this.isConnected = false;
-            throw new Error('Utilisateur non authentifié');
-          }
-          return this.http.get<any>(`/api/account`);
-        }),
-        switchMap(userData =>
-          this.http.get<IProdOrder[]>(`/api/prod-orders`).pipe(
-            map(orders => orders.find(o => o.user?.id === userData.id && !o.valid)),
+        switchMap(user =>
+          this.getCurrentOrder(user.id).pipe(
             switchMap(order => {
               if (order) {
-                return this.http.get<IOrderLine[]>(`/api/order-lines`).pipe(
-                  map(lines => lines.find(l => l.product?.id === id && l.prodOrder?.id === order.id)),
-                  switchMap(line => {
-                    if (line) {
-                      const newQuantity = (line.quantity ?? 0) + 1;
-                      return this.http.patch(`/api/order-lines/${line.id}`, {
-                        id: line.id,
-                        quantity: newQuantity,
-                        unitPrice: this.product.price,
-                        total: newQuantity * (this.product.price ?? 0),
-                      });
-                    }
-                    return this.http.post(`/api/order-lines`, {
-                      product: { id },
-                      prodOrder: { id: order.id },
-                      quantity: 1,
-                      unitPrice: this.product.price,
-                      total: this.product.price,
-                    });
-                  }),
+                // Il existe une commande non validée → check line
+                return this.getOrderLine(order.id, productId).pipe(
+                  switchMap(line => (line ? this.updateOrderLine(line) : this.createOrderLine(order.id, productId))),
                 );
               }
-              // No order: create order then line
-              return this.http
-                .post<IProdOrder>(`/api/prod-orders`, {
-                  user: userData,
-                  valid: false,
-                  promo: 0,
-                })
-                .pipe(
-                  switchMap(newOrder =>
-                    this.http.post(`/api/order-lines`, {
-                      product: { id },
-                      prodOrder: { id: newOrder.id },
-                      quantity: 1,
-                      unitPrice: this.product.price,
-                      total: this.product.price,
-                    }),
-                  ),
-                );
+
+              // Sinon créer une commande puis la ligne
+              return this.createOrder(user).pipe(switchMap(newOrder => this.createOrderLine(newOrder.id, productId)));
             }),
           ),
         ),
@@ -155,7 +173,6 @@ export default class FicheProduitComponent implements OnInit {
         next: () => {
           this.successMessages.push('Produit ajouté au panier avec succès !');
           setTimeout(() => this.successMessages.shift(), 3000);
-
           this.cartService.refresh();
         },
         error: err => {
