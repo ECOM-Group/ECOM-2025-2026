@@ -1,0 +1,19 @@
+<div class="container">
+  <h2>Search Results</h2>
+
+  @if (loading) {
+    <p>Loading products...</p>
+  }
+
+  @if (!loading && products.length > 0) {
+    <ul>
+      @for (product of products; track product.id) {
+        <li>{{ product.name }}</li>
+      }
+    </ul>
+  }
+
+  @if (!loading && products.length === 0) {
+    <p>No products found for "{{ query }}"</p>
+  }
+</div>
