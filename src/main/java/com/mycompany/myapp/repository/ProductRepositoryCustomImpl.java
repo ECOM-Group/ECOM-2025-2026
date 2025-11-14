@@ -1,40 +1,42 @@
 package com.mycompany.myapp.repository;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Repository;
-
+import com.mycompany.myapp.config.WebConfigurer;
 import com.mycompany.myapp.domain.Product;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
+
+    private static final Logger LOG = LoggerFactory.getLogger(WebConfigurer.class);
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Override
-    public List<Product> findByKeywords(List<String> keywords){
+    public List<Product> findByKeywords(List<String> keywords) {
+        LOG.info("Function findByKeywords called with keywords: {}", keywords);
+
         if (keywords == null || keywords.isEmpty()) {
             return entityManager.createQuery("SELECT p FROM Product p", Product.class).getResultList();
         }
 
         String base = "SELECT p FROM Product p WHERE ";
-        String where = keywords.stream()
-            .map(k -> "(LOWER(p.name) LIKE :k_" + k.hashCode() +
-                      " OR LOWER(p.desc) LIKE :k_" + k.hashCode() + ")")
-            .collect(Collectors.joining(" AND "));
+        String where = keywords
+            .stream()
+            .map(k -> "(LOWER(p.name) LIKE '%" + k.toLowerCase() + "%' " + "OR LOWER(p.desc) LIKE '%" + k.toLowerCase() + "%')")
+            .collect(Collectors.joining(" OR "));
 
-        Query query = entityManager.createQuery(base + where, Product.class);
+        String finalQuery = base + where;
+        LOG.info("Constructed JPQL query: {}", finalQuery);
 
-        for (String k : keywords) {
-            query.setParameter("k_" + k.hashCode(), "%" + k.toLowerCase() + "%");
-        }
-
+        Query query = entityManager.createQuery(finalQuery, Product.class);
         return query.getResultList();
     }
 }
