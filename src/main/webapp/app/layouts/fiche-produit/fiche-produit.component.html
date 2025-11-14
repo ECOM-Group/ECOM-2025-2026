@@ -1,9 +1,34 @@
 @if (isConnected) {
+  <button class="back-button" routerLink="/homePage"><i class="fa-solid fa-reply"></i>Retour aux produits</button>
   <div class="product-container">
     <div class="product-card">
-      <div class="product-image-container">
-        <img src="../../../content/images/jhipster_family_member_1_head-384.png" alt="{{ product.desc }}" class="product-image" />
+      <div class="product-image-carousel">
+        <button class="carousel-btn left" (click)="prevImage()">&#10094;</button>
+
+        <div
+          class="carousel-image-wrapper"
+          (mousemove)="onMouseMove($event)"
+          (mouseenter)="showZoom = true"
+          (mouseleave)="showZoom = false"
+        >
+          <img [src]="images[currentIndex]" alt="product image" class="carousel-image" #imageRef />
+        </div>
+
+        <button class="carousel-btn right" (click)="nextImage()">&#10095;</button>
       </div>
+
+      @if (showZoom) {
+        <div class="zoom-window">
+          <div
+            class="zoom-image"
+            [ngStyle]="{
+              'background-image': 'url(' + images[currentIndex] + ')',
+              'background-position': backgroundPosition,
+              'background-size': zoomLevel + '%',
+            }"
+          ></div>
+        </div>
+      }
 
       <div class="product-details">
         <h1 class="product-desc">{{ product.name }}</h1>
