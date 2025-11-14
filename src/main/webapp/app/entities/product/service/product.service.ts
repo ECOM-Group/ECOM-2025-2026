@@ -71,4 +71,10 @@ export class ProductService {
     }
     return productCollection;
   }
+
+  search(query: string): Observable<IProduct[]> {
+    return this.http.get<IProduct[]>(`${this.resourceUrl}/search`, {
+      params: { q: query },
+    });
+  }
 }
