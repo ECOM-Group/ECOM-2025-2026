@@ -2,8 +2,11 @@ package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.config.Constants;
 import com.mycompany.myapp.domain.Authority;
+import com.mycompany.myapp.domain.ProdOrder;
 import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.AuthorityRepository;
+import com.mycompany.myapp.repository.ProdOrderRepository;
+import com.mycompany.myapp.repository.ReviewRepository;
 import com.mycompany.myapp.repository.UserRepository;
 import com.mycompany.myapp.security.AuthoritiesConstants;
 import com.mycompany.myapp.security.SecurityUtils;
@@ -11,7 +14,11 @@ import com.mycompany.myapp.service.dto.AdminUserDTO;
 import com.mycompany.myapp.service.dto.UserDTO;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +42,10 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    private final ProdOrderRepository prodOrderRepository;
+
+    private final ReviewRepository reviewRepository;
+
     private final PasswordEncoder passwordEncoder;
 
     private final AuthorityRepository authorityRepository;
@@ -43,11 +54,15 @@ public class UserService {
 
     public UserService(
         UserRepository userRepository,
+        ProdOrderRepository prodOrderRepository,
+        ReviewRepository reviewRepository,
         PasswordEncoder passwordEncoder,
         AuthorityRepository authorityRepository,
         CacheManager cacheManager
     ) {
         this.userRepository = userRepository;
+        this.prodOrderRepository = prodOrderRepository;
+        this.reviewRepository = reviewRepository;
         this.passwordEncoder = passwordEncoder;
         this.authorityRepository = authorityRepository;
         this.cacheManager = cacheManager;
@@ -218,12 +233,32 @@ public class UserService {
             .map(AdminUserDTO::new);
     }
 
+    @Transactional
     public void deleteUser(String login) {
         userRepository
             .findOneByLogin(login)
             .ifPresent(user -> {
+                Long userId = user.getId();
+
+                // 1) Charger les paniers (valid = false)
+                List<ProdOrder> carts = prodOrderRepository.findByUserIdAndValid(userId, false);
+
+                // 2) Les supprimer via Hibernate (cascade OK)
+                for (ProdOrder cart : carts) {
+                    prodOrderRepository.delete(cart); // Hibernate gère orphanRemoval
+                }
+
+                // 3) Pour les ProdOrder validées, juste remettre user = null
+                prodOrderRepository.clearUserFromValidatedOrders(userId);
+
+                // 4) Reviews -> user = null
+                reviewRepository.clearUserFromReviews(userId);
+
+                // 5) Supprimer l'utilisateur
                 userRepository.delete(user);
+
                 this.clearUserCaches(user);
+
                 LOG.debug("Deleted User: {}", user);
             });
     }
