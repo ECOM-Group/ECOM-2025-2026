@@ -1,19 +1,66 @@
-<div class="container">
-  <h2>Search Results</h2>
+<div class="page-layout">
+  <!-- FILTERS (LEFT SIDEBAR) -->
+  <aside class="filters">
+    <h4>Filters</h4>
 
-  @if (loading) {
-    <p>Loading products...</p>
-  }
-
-  @if (!loading && products.length > 0) {
-    <div class="mini-fiche-list">
-      @for (product of products; track product.id) {
-        <jhi-mini-fiche [idProduit]="product.id"></jhi-mini-fiche>
+    <div class="filter-group">
+      <label class="filter-title">Color</label>
+      @for (color of getAvailableColors; track color) {
+        <div class="filter-checkbox">
+          <input type="checkbox" [checked]="colorFilterValues.includes(color)" (change)="toggleFilter('color', color)" />
+          {{ color }}
+        </div>
       }
     </div>
-  }
 
-  @if (!loading && products.length === 0) {
-    <p>No products found for "{{ query }}"</p>
-  }
+    <div class="filter-group">
+      <label class="filter-title">Price</label>
+      @for (range of priceRanges; track range) {
+        <div class="filter-checkbox">
+          <input type="checkbox" [checked]="priceFilterValues.includes(range)" (change)="toggleFilter('priceRange', range)" />
+          {{ range }}$
+        </div>
+      }
+    </div>
+
+    @if (searchFilters.hasAnyFilterSet()) {
+      <div class="active-filters">
+        <span>Active filters:</span>
+        <button class="btn btn-sm btn-outline-secondary" (click)="clearAllFilters()">Clear All</button>
+        <ul>
+          @for (searchFilter of searchFilters.filterOptions; track searchFilter) {
+            @for (value of searchFilter.values; track value) {
+              <li>
+                {{ searchFilter.name }}: {{ value }}
+                <button class="btn btn-sm btn-outline-danger" (click)="clearFilter(searchFilter.name, value)">×</button>
+              </li>
+            }
+          }
+        </ul>
+      </div>
+    }
+  </aside>
+
+  <!-- PRODUCT ZONE INSIDE BOOTSTRAP CONTAINER -->
+  <div class="container">
+    <h2>Search Results</h2>
+
+    <main class="products">
+      @if (loading) {
+        <p>Loading products...</p>
+      }
+
+      @if (!loading && products.length > 0) {
+        <div class="mini-fiche-list">
+          @for (product of filteredProducts; track product.id) {
+            <jhi-mini-fiche [idProduit]="product.id"></jhi-mini-fiche>
+          }
+        </div>
+      }
+
+      @if (!loading && products.length === 0) {
+        <p>No products found for "{{ query }}"</p>
+      }
+    </main>
+  </div>
 </div>

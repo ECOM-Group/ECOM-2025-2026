@@ -1,0 +1,26 @@
+.page-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+/* Sidebar */
+.filters {
+  width: 220px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 80px;
+  border-right: 1px solid #ddd;
+  padding-right: 1rem;
+}
+
+/* Product area */
+.products {
+  flex: 1;
+}
+
+.mini-fiche-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
