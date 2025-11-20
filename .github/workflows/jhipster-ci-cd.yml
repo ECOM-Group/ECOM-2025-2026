@@ -119,7 +119,7 @@ jobs:
 #////////////////////////////////////////////////////////////////////////////////////////
   deploy:
     if: false  
-    #Desactive pour le moment
+    #if: github.ref == 'refs/heads/main'
     needs: [build, test-unit, test-e2e]
     runs-on: ubuntu-latest
     steps:
@@ -136,8 +136,12 @@ jobs:
 
       - name: Copy files to server
         run: |
-          scp -o StrictHostKeyChecking=no target/*.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/opt/jhipster/
+          scp -o StrictHostKeyChecking=no target/*.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/opt/jhipster/app.jar
 
-      - name: Restart application
+      - name: Deploy with Docker
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "sudo systemctl restart jhipster"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          cd /opt/jhipster
+          docker-compose down
+          docker-compose up -d --build
+          EOF
