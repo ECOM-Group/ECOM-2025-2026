@@ -50,7 +50,7 @@ export default class NavbarComponent implements OnInit {
       this.inProduction = profileInfo.inProduction;
       this.openAPIEnabled = profileInfo.openAPIEnabled;
     });
-    this.cartService.loadCartCount();
+    this.cartService.notifyCartUpdated();
   }
 
   changeLanguage(languageKey: string): void {

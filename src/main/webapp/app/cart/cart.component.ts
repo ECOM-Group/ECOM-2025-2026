@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { IOrderLine } from 'app/entities/order-line/order-line.model';
 import { ProdOrderService } from 'app/entities/prod-order/service/prod-order.service';
@@ -11,6 +11,7 @@ import { IUser } from 'app/entities/user/user.model';
 import { IProdOrder } from 'app/entities/prod-order/prod-order.model';
 import LoginComponent from 'app/login/login.component';
 import { CartLineComponent } from './cart-line/cart-line.component';
+import { CartService } from 'app/service/cart/cart.service';
 
 @Component({
   selector: 'jhi-cart',
@@ -19,6 +20,7 @@ import { CartLineComponent } from './cart-line/cart-line.component';
   styleUrls: ['./cart.component.scss'],
 })
 export class CartComponent implements OnInit, OnChanges {
+  private cartService = inject(CartService);
   items: IOrderLine[] = [];
   totalPrice = 0;
   orderValid = true; // false = cart, true = bought
@@ -114,5 +116,6 @@ export class CartComponent implements OnInit, OnChanges {
     if (data.delete) {
       this.items = this.items.filter(i => i.id !== data.id);
     }
+    this.cartService.notifyCartUpdated();
   }
 }

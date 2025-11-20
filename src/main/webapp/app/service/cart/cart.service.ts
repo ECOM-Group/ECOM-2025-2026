@@ -1,30 +1,39 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AccountService } from 'app/core/auth/account.service';
-import { switchMap, of } from 'rxjs';
+import { ProdOrderService } from 'app/entities/prod-order/service/prod-order.service';
+import { switchMap, of, Subject } from 'rxjs';
+import { IUser } from 'app/entities/user/user.model';
 import { IProdOrder } from 'app/entities/prod-order/prod-order.model';
 import { IOrderLine } from 'app/entities/order-line/order-line.model';
-import { IUser } from 'app/entities/user/user.model';
-import { ProdOrderService } from 'app/entities/prod-order/service/prod-order.service';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
   private http = inject(HttpClient);
   private accountService = inject(AccountService);
-
-  cartCount = signal(0);
-
   private prodOrderService = inject(ProdOrderService);
 
+  // Signal réactif
+  cartCount = signal(0);
+
+  // Événements internes
+  private cartUpdated$ = new Subject<void>();
+
   constructor() {
+    // Recharge le panier quand l'app démarre
     this.loadCartCount();
+
+    // Recharge automatiquement après chaque modification du panier
+    this.cartUpdated$.subscribe(() => this.loadCartCount());
   }
 
-  refresh(): void {
-    this.loadCartCount();
+  /** Appel public : permet à toutes les actions d’indiquer que le panier a changé */
+  notifyCartUpdated(): void {
+    this.cartUpdated$.next();
   }
 
-  loadCartCount(): void {
+  /** Recharge la quantité du panier */
+  private loadCartCount(): void {
     if (!this.accountService.isAuthenticated()) {
       this.cartCount.set(0);
       return;
@@ -35,32 +44,19 @@ export class CartService {
       .pipe(
         switchMap(user => {
           if (!user) return of(null);
-
-          const userId = user.id;
-
-          // même logique que loadOrderItems
-          return this.http.get<IProdOrder>(`/api/prod-orders/${userId}/current`);
+          return this.http.get<IProdOrder>(`/api/prod-orders/${user.id}/current`).pipe(
+            // si `/current` renvoie null → convertir en null propre
+            switchMap(order => of(order ?? null)),
+          );
         }),
-        switchMap(prodOrder => {
-          if (!prodOrder) return of([]);
-
-          // IMPORTANT : même vérification que ton code qui marche
-          if (!prodOrder.user || prodOrder.user.id !== prodOrder.user.id) {
-            return of([]);
-          }
-
-          // APPEL FONCTIONNEL (ton code)
-          return this.prodOrderService.getOrderLines(prodOrder.id);
+        switchMap(order => {
+          if (!order) return of([]); // <-- IMPORTANT : toujours un tableau
+          return this.prodOrderService.getOrderLines(order.id);
         }),
       )
       .subscribe({
-        next: (lines: IOrderLine[]) => {
-          this.cartCount.set(lines.length); // juste compter
-        },
-        error: err => {
-          console.error(' Erreur loadCartCount():', err);
-          this.cartCount.set(0);
-        },
+        next: (lines: IOrderLine[]) => this.cartCount.set((lines ?? []).length), // <-- sécurisation
+        error: () => this.cartCount.set(0),
       });
   }
 }

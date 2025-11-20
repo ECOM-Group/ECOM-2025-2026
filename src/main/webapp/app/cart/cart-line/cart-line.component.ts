@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { IOrderLine } from 'app/entities/order-line/order-line.model';
 import { OrderLineService } from 'app/entities/order-line/service/order-line.service';
+import { CartService } from 'app/service/cart/cart.service';
 
 @Component({
   selector: 'jhi-cart-line',
@@ -11,6 +12,8 @@ export class CartLineComponent {
   @Input() isCart = true;
   @Input() orderLine!: IOrderLine;
   @Output() updated = new EventEmitter<{ id: number; delete: boolean; priceDiff: number }>(); // notify parent cart
+
+  private cartService = inject(CartService);
 
   constructor(private orderLineService: OrderLineService) {}
 
@@ -40,6 +43,7 @@ export class CartLineComponent {
           this.updated.emit({ id: this.orderLine.id, delete: false, priceDiff: -(this.orderLine.unitPrice ?? 0) });
         } else {
           this.updated.emit({ id: this.orderLine.id, delete: true, priceDiff: -(this.orderLine.unitPrice ?? 0) });
+          //this.cartService.notifyCartUpdated();
         }
       },
       error: err => console.error('Error decrementing quantity', err),
@@ -51,7 +55,10 @@ export class CartLineComponent {
 
     this.orderLineService.delete(this.orderLine.id).subscribe({
       // line deleted notify parent cart
-      next: () => this.updated.emit({ id: this.orderLine.id, delete: true, priceDiff: -(this.orderLine.total ?? 0) }),
+      next: () => {
+        this.updated.emit({ id: this.orderLine.id, delete: true, priceDiff: -(this.orderLine.total ?? 0) });
+        // this.cartService.notifyCartUpdated();
+      },
       error: err => console.error('Error deleting line', err),
     });
   }

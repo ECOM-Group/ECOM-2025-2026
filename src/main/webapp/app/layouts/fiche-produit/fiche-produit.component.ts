@@ -173,7 +173,7 @@ export default class FicheProduitComponent implements OnInit {
         next: () => {
           this.successMessages.push('Produit ajouté au panier avec succès !');
           setTimeout(() => this.successMessages.shift(), 3000);
-          this.cartService.refresh();
+          this.cartService.notifyCartUpdated();
         },
         error: err => {
           console.error('Erreur lors du traitement de la commande :', err);
