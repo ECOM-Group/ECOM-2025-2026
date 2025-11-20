@@ -240,21 +240,21 @@ public class UserService {
             .ifPresent(user -> {
                 Long userId = user.getId();
 
-                // 1) Charger les paniers (valid = false)
+                // Charger les paniers (valid = false)
                 List<ProdOrder> carts = prodOrderRepository.findByUserIdAndValid(userId, false);
 
-                // 2) Les supprimer via Hibernate (cascade OK)
+                // Les supprimer via Hibernate
                 for (ProdOrder cart : carts) {
-                    prodOrderRepository.delete(cart); // Hibernate gère orphanRemoval
+                    prodOrderRepository.delete(cart); // Hibernate pour la cascade
                 }
 
-                // 3) Pour les ProdOrder validées, juste remettre user = null
+                // Pour les ProdOrder validées, juste remettre user = null
                 prodOrderRepository.clearUserFromValidatedOrders(userId);
 
-                // 4) Reviews -> user = null
+                // Reviews -> user = null
                 reviewRepository.clearUserFromReviews(userId);
 
-                // 5) Supprimer l'utilisateur
+                // Supprimer l'utilisateur
                 userRepository.delete(user);
 
                 this.clearUserCaches(user);
