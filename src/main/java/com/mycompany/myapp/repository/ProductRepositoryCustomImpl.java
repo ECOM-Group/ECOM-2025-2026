@@ -19,6 +19,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<Product> findByKeywords(List<String> keywords) {
         LOG.info("Function findByKeywords called with keywords: {}", keywords);
