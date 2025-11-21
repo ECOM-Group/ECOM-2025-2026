@@ -22,18 +22,25 @@ jobs:
 
   #////////////////////////////////////////////////////////////////////////////////////////
   build:
-    needs: lint  # Le build attend la fin du lint, mais n'est pas bloqué par ses erreurs
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22.20.0"
-      - name: Install dependencies
-        run: npm install
-      - name: Build the application
-        run: npm run webapp:build:prod
+  needs: lint
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: "17"
+        distribution: "temurin"
+
+    - name: Build JHipster app (backend + frontend)
+      run: ./mvnw -Pprod -DskipTests package
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: jhipster-app
+        path: target/*.jar
 
   #////////////////////////////////////////////////////////////////////////////////////////
   # Le reste de votre pipeline (test-unit, test-e2e, deploy) reste inchangé
