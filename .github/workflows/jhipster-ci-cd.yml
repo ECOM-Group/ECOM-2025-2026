@@ -12,25 +12,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      # Backend + Frontend build (JHipster = Maven s'occupe du front)
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
-
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-
-      # 👉 Build complet (frontend + backend) géré par Maven
+      # 👇 Ajoute ces étapes pour installer les dépendances npm
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+      - name: Install npm dependencies
+        run: npm ci
+      # 👇 Ensuite, lance le build Maven
       - name: Build full JHipster app
         run: ./mvnw -ntp -Pprod clean verify
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
