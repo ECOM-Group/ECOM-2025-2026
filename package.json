@@ -62,7 +62,7 @@
     "webapp:dev-ssl": "ng serve --ssl",
     "webapp:dev-verbose": "ng serve --verbose",
     "webapp:prod": "npm run clean-www && npm run webapp:build:prod",
-    "webapp:test": "npm run test --"
+    "webapp:test": "ng test --coverage --log-heap-usage --watch=false"
   },
   "config": {
     "backend_port": 8080,
