@@ -1,74 +1,83 @@
 name: JHipster CI/CD
+
 on:
   push:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+
 jobs:
   #////////////////////////////////////////////////////////////////////////////////////////
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22.20.0"
+
       - name: Install dependencies
         run: npm install
+
       - name: Run linting (warnings only)
         run: npm run lint || echo "Linting errors found, but build will continue"
-        continue-on-error: true  # <-- Ne bloque pas le pipeline
+        continue-on-error: true
 
   #////////////////////////////////////////////////////////////////////////////////////////
   build:
-  needs: lint
-  runs-on: ubuntu-latest
-  steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: "17"
-        distribution: "temurin"
-
-    - name: Build JHipster app (backend + frontend)
-      run: ./mvnw -Pprod -DskipTests package
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: jhipster-app
-        path: target/*.jar
-
-  #////////////////////////////////////////////////////////////////////////////////////////
-  # Le reste de votre pipeline (test-unit, test-e2e, deploy) reste inchangé
-  test-unit:
-    needs: build
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: "17"
           distribution: "temurin"
+
+      - name: Build JHipster app (backend + frontend)
+        run: ./mvnw -Pprod -DskipTests package
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jhipster-app
+          path: target/*.jar
+
+  #////////////////////////////////////////////////////////////////////////////////////////
+  test-unit:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
       - name: Run Java unit tests
         run: ./mvnw test
-      - name: Skip frontend unit tests
-        run: echo "Pas de tests unitaires frontend pour l'instant" && exit 0
 
+      - name: Skip frontend unit tests
+        run: echo "Pas de tests unitaires frontend pour l'instant"
+
+  #////////////////////////////////////////////////////////////////////////////////////////
   test-e2e:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Skip E2E tests
-        run: echo "Pas de tests E2E pour l'instant" && exit 0
 
+      - name: Skip E2E tests
+        run: echo "Pas de tests E2E pour l'instant"
+
+  #////////////////////////////////////////////////////////////////////////////////////////
   deploy:
-    if: false
     needs: [build, test-unit, test-e2e]
     runs-on: ubuntu-latest
     steps:
@@ -76,13 +85,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: jhipster-app
+
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
-      - name: Copy files to server
+
+      - name: Copy JAR to server
         run: scp -o StrictHostKeyChecking=no target/*.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/opt/jhipster/app.jar
+
       - name: Deploy with Docker
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
