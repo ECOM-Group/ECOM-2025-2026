@@ -22,7 +22,7 @@ export class ProductSearchComponent implements OnInit {
   maxPrice = 0;
   sliderPrice = 0; // current selected max price
 
-  // Filters for the page (only color and priceRange)
+  // Filters for the page (currently static with only color and priceRange)
   searchFilters = new FilterOptions([new FilterOption('color'), new FilterOption('priceRange')]);
 
   constructor(
@@ -60,8 +60,7 @@ export class ProductSearchComponent implements OnInit {
       const price = product.price ?? 0;
       return price >= this.minPrice && price <= this.sliderPrice;
     });
-
-    // Apply other filters (color, etc.)
+    // Filter by other options
     this.filteredProducts = this.filteredProducts.filter(product =>
       this.searchFilters.filterOptions.every(filter => {
         if (!filter.isSet()) return true;
@@ -76,7 +75,6 @@ export class ProductSearchComponent implements OnInit {
     );
   }
 
-  // Methods to update filters dynamically
   toggleFilter(name: string, value: string): void {
     const existing = this.searchFilters.getFilterOptionByName(name);
     if (existing?.values.includes(value)) {

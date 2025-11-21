@@ -10,10 +10,9 @@
   width: 220px;
   flex-shrink: 0;
   top: 80px;
-  background-color: #f7f7f7; /* monotone light grey */
-  border-right: 1px solid #ddd; /* solid border along the edge */
-  padding: 1rem; /* inner spacing */
-  border-radius: 4px 0 0 4px; /* optional: round only left edges */
+  background-color: #f7f7f7;
+  padding: 1rem;
+  border-radius: 4px 0 0 4px;
 }
 
 /* Filter groups inside sidebar */
@@ -86,16 +85,16 @@ input[type='range']::-moz-range-track {
   border-radius: 3px;
 }
 
-/* Thumb (the draggable circle) */
+/* Thumb  */
 input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #1a73e8; // blue thumb
+  background: #1a73e8;
   border: none;
   cursor: pointer;
-  margin-top: -5px; // centers thumb on track
+  margin-top: -5px;
 }
 
 input[type='range']::-moz-range-thumb {
