@@ -22,23 +22,6 @@
         </div>
       }
     </div>
-
-    @if (searchFilters.hasAnyFilterSet()) {
-      <div class="active-filters">
-        <span>Active filters:</span>
-        <button class="btn btn-sm btn-outline-secondary" (click)="clearAllFilters()">Clear All</button>
-        <ul>
-          @for (searchFilter of searchFilters.filterOptions; track searchFilter) {
-            @for (value of searchFilter.values; track value) {
-              <li>
-                {{ searchFilter.name }}: {{ value }}
-                <button class="btn btn-sm btn-outline-danger" (click)="clearFilter(searchFilter.name, value)">×</button>
-              </li>
-            }
-          }
-        </ul>
-      </div>
-    }
   </aside>
 
   <!-- PRODUCT ZONE INSIDE BOOTSTRAP CONTAINER -->

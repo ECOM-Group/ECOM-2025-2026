@@ -1,7 +1,8 @@
 .page-layout {
   display: flex;
   align-items: flex-start;
-  gap: 2rem;
+  gap: 2rem; /* space between sidebar and products */
+  padding: 1rem;
 }
 
 /* Sidebar */
@@ -10,8 +11,29 @@
   flex-shrink: 0;
   position: sticky;
   top: 80px;
-  border-right: 1px solid #ddd;
-  padding-right: 1rem;
+  background-color: #f7f7f7; /* monotone light grey */
+  border-right: 1px solid #ddd; /* solid border along the edge */
+  padding: 1rem; /* inner spacing */
+  border-radius: 4px 0 0 4px; /* optional: round only left edges */
+}
+
+/* Filter groups inside sidebar */
+.filters .filter-group {
+  margin-bottom: 1.5rem;
+}
+
+.filters .filter-title {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.filters .filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
 }
 
 /* Product area */
@@ -19,6 +41,7 @@
   flex: 1;
 }
 
+/* Mini fiche / product list layout */
 .mini-fiche-list {
   display: flex;
   flex-wrap: wrap;
