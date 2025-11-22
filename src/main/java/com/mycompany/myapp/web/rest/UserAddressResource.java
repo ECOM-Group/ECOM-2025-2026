@@ -42,6 +42,7 @@ public class UserAddressResource {
 
     @PostMapping("/{userId}/address")
     public ResponseEntity<Address> createOrAttachAddress(@PathVariable Long userId, @RequestBody Address input) {
+        User user = userRepository.findById(userId).orElseThrow();
         // Chercher une adresse identique
         Optional<Address> existing = addressRepository.findByStreetAndZipcodeAndCity(
             input.getStreet(),
@@ -53,11 +54,22 @@ public class UserAddressResource {
 
         if (existing.isPresent()) {
             finalAddress = existing.get();
-        } else {
+        } else { // Adresses modifier ou créé
+            Long id = input.getId();
+
+            if (id != null) { // Adresse modifier : Delete l'ancienne adresse
+                Address address = addressRepository.findById(id).orElseThrow();
+                address.removeId(user);
+                addressRepository.save(address);
+                // Del l'adresse si elle n'est plus relié
+                if (address.getIds().isEmpty()) addressRepository.delete(address);
+
+                // Pour qu'il considère que c'est une nouvelle address si c'était une ancienne adresse
+                input.setId(null);
+            }
             finalAddress = addressRepository.save(input);
         }
 
-        User user = userRepository.findById(userId).orElseThrow();
         finalAddress.addId(user);
         addressRepository.save(finalAddress);
 
