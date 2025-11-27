@@ -6,7 +6,7 @@ WORKDIR /app
 COPY pom.xml mvnw ./
 COPY .mvn .mvn
 COPY src src
-COPY sonar-project.properties .   # fichier manquant
+#COPY sonar-project.properties .   # fichier manquant
 # Si tu as d'autres fichiers de config à la racine, copier aussi
 
 # Build prod
