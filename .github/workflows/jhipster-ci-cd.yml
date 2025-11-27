@@ -91,6 +91,7 @@ jobs:
       - name: Build Docker image for Heroku
         run: |
           docker build \
+            -f src/main/docker/Dockerfile \
             --build-arg SPRING_PROFILES_ACTIVE=prod \
             -t registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web .
   
