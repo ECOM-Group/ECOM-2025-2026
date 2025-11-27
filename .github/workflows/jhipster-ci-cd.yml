@@ -81,7 +81,7 @@ jobs:
   deploy-heroku:
     # Le déploiement ne s'effectue qu'après la construction et uniquement sur la branche 'main' (push)
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: build
+    needs: test-unit
     runs-on: ubuntu-latest
     environment: production # Optionnel: Utilisez un environnement GitHub pour Heroku
     steps:
@@ -99,9 +99,15 @@ jobs:
         run: echo "jar_path=$(find target -name "*.jar" -print -quit)" >> $GITHUB_OUTPUT
 
       - name: Deploy pre-built JAR to Heroku
-        uses: jakejarvis/deploy-heroku@master
+        # NOUVELLE ACTION: Remplacement de jakejarvis/deploy-heroku par une action compatible
+        uses: dokku/github-action@v1.0.4
         with:
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-          heroku_email: ${{ secrets.HEROKU_EMAIL }}
-          path: ${{ steps.find_jar.outputs.jar_path }} # Chemin d'accès au JAR trouvé
+          # Configuration spécifique pour Heroku
+          git_remote_url: "https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git"
+          ssh_private_key: "" # Non utilisé pour Heroku (déploiement via HTTP/S avec la clé API)
+          branch: "HEAD:master" # Déploie la branche courante vers la branche 'master' d'Heroku
+          deployment_path: ${{ steps.find_jar.outputs.jar_path }}
+          
+      - name: Cleanup artifact (optional)
+        # Nettoyage de l'artefact pour s'assurer que le fichier téléchargé ne pose pas de problème
+        run: rm -f ${{ steps.find_jar.outputs.jar_path }}
