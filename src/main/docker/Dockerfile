@@ -10,20 +10,15 @@ COPY sonar-project.properties ./
 COPY package.json ./
 COPY package-lock.json ./ 
 
-# 1. Installer Node et NPM (Nécessaire avant d'utiliser la commande npm)
-# Cette étape est correcte, elle télécharge les binaires.
+# 1. Installer Node et NPM
 RUN ./mvnw frontend:install-node-and-npm
 
-# 2. Installer les dépendances NPM (L'ÉTAPE CORRIGÉE)
-# Nous devons modifier le PATH pour que 'npm' soit trouvé
-RUN export PATH="$PATH:/app/target/node/node_modules/npm/bin" && \
-    export PATH="$PATH:/app/target/node/bin" && \
-    npm ci --loglevel verbose
+# 2. Installer les dépendances NPM (Correction du chemin)
+# Exécution explicite du script NPM via le binaire Node
+RUN /app/target/node/node /app/target/node/node_modules/npm/bin/npm-cli.js ci --loglevel verbose
 
-# 3. Exécuter le build de production front-end (Doit être corrigé de la même manière)
-RUN export PATH="$PATH:/app/target/node/node_modules/npm/bin" && \
-    export PATH="$PATH:/app/target/node/bin" && \
-    npm run webapp:prod -- --loglevel debug || (echo ">>> ERREUR DE COMPILATION FRONTEND: VÉRIFIER LE LOG CI-DESSUS <<<" && exit 1)
+# 3. Exécuter le build de production front-end (Correction du chemin)
+RUN /app/target/node/node /app/target/node/node_modules/npm/bin/npm-cli.js run webapp:prod -- --loglevel debug || (echo ">>> ERREUR DE COMPILATION FRONTEND: VÉRIFIER LE LOG CI-DESSUS <<<" && exit 1)
 
 # 4. Finaliser le package Maven
 RUN ./mvnw -Pprod -DskipTests -DskipSonar -DskipClient package
