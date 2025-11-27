@@ -993,7 +993,7 @@
                         <groupId>com.github.eirslett</groupId>
                         <artifactId>frontend-maven-plugin</artifactId>
                         <configuration>
-                            <nodeCustomArguments>--max-old-space-size=4096</nodeCustomArguments>
+                            <nodeCustomArguments>--max-old-space-size=8192</nodeCustomArguments>
                         </configuration>
                         <executions>
                             <execution>
@@ -1026,6 +1026,7 @@
                                 </goals>
                                 <phase>generate-resources</phase>
                                 <configuration>
+                                    <nodeCustomArguments>--max-old-space-size=8192</nodeCustomArguments>
                                     <arguments>run webapp:prod</arguments>
                                     <environmentVariables>
                                         <APP_VERSION>${project.version}</APP_VERSION>
