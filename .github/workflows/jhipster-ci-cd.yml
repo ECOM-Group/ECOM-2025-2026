@@ -108,7 +108,8 @@ jobs:
           echo "web: java -jar ${JAR_FILENAME}" > ${{ env.DEPLOY_DIR }}/Procfile
 
       - name: Deploy pre-built JAR to Heroku
-        # CORRECTION : working-directory est désormais correctement positionné
+        # CORRECTION MAJEURE: working-directory, uses et with doivent être indentés
+        # sous le nom de l'étape.
         working-directory: ${{ env.DEPLOY_DIR }}
         uses: dokku/github-action@v1
         with:
