@@ -108,16 +108,14 @@ jobs:
           echo "web: java -jar ${JAR_FILENAME}" > ${{ env.DEPLOY_DIR }}/Procfile
 
       - name: Deploy pre-built JAR to Heroku
-        # CORRECTION: Suppression de 'working-directory' des inputs de l'action
-        # et ajout de la propriété standard 'working-directory' à l'étape entière.
+        # CORRECTION : working-directory est désormais correctement positionné
+        working-directory: ${{ env.DEPLOY_DIR }}
         uses: dokku/github-action@v1
         with:
           # Configuration spécifique pour Heroku
           git_remote_url: "https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git"
           ssh_private_key: "" # Non utilisé pour Heroku (déploiement via HTTP/S avec la clé API)
           branch: "HEAD:master" # Déploie la branche courante vers la branche 'master' d'Heroku
-        # La propriété 'working-directory' est déplacée ici pour être appliquée à l'action.
-        working-directory: ${{ env.DEPLOY_DIR }}
 
       - name: Cleanup deployment directory (optional)
         # Nettoyage du répertoire temporaire
