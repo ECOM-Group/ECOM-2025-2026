@@ -13,7 +13,8 @@ COPY package-lock.json ./
 
 
 # Build prod
-RUN ./mvnw -Pprod -DskipTests -DskipSonar package
+RUN ./mvnw -X -Pprod -DskipTests -DskipSonar package
+#RUN ./mvnw -Pprod -DskipTests -DskipSonar package
 
 # Étape 2 : runtime
 FROM eclipse-temurin:17-jdk-alpine
