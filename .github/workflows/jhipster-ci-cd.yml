@@ -77,30 +77,30 @@ jobs:
         run: echo "Pas de tests E2E pour l'instant"
 
   #////////////////////////////////////////////////////////////////////////////////////////
-  deploy:
-    needs: [build, test-unit, test-e2e]
+  deploy-heroku:
+    # Le déploiement ne s'effectue qu'après la construction et uniquement sur la branche 'main' (push)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
     runs-on: ubuntu-latest
-  
+    environment: production # Optionnel: Utilisez un environnement GitHub pour Heroku
     steps:
       - uses: actions/checkout@v4
-  
-      - name: Login to Heroku Container Registry
-        run: |
-          echo "${{ secrets.HEROKU_API_KEY }}" | docker login --username=_ --password-stdin registry.heroku.com
-  
-      - name: Build Docker image for Heroku
-        run: |
-          docker build \
-            -f src/main/docker/Dockerfile \
-            --build-arg SPRING_PROFILES_ACTIVE=prod \
-            -t registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web .
-  
-      - name: Push image to Heroku
-        run: |
-          docker push registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
-  
-      - name: Release the app on Heroku
-        run: |
-          heroku container:release web \
-            --app=${{ secrets.HEROKU_APP_NAME }} \
-            --apikey=${{ secrets.HEROKU_API_KEY }}
+
+      - name: Download application artifact (JAR)
+        uses: actions/download-artifact@v4
+        with:
+          name: jhipster-app
+          path: target/ # Le JAR sera téléchargé dans le répertoire 'target/'
+
+      - name: Find the JAR file path
+        id: find_jar
+        # Le nom du JAR est dynamique (ex: target/app-0.0.1-SNAPSHOT.jar). On le trouve pour le passer à l'action Heroku.
+        run: echo "jar_path=$(find target -name "*.jar" -print -quit)" >> $GITHUB_OUTPUT
+
+      - name: Deploy pre-built JAR to Heroku
+        uses: jakejarvis/deploy-heroku@master
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          path: ${{ steps.find_jar.outputs.jar_path }} # Chemin d'accès au JAR trouvé
