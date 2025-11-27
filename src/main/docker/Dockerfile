@@ -7,7 +7,10 @@ COPY pom.xml mvnw ./
 COPY .mvn .mvn
 COPY src src
 COPY sonar-project.properties ./
-# Si tu as d'autres fichiers de config à la racine, copier aussi
+
+COPY package.json ./
+COPY package-lock.json ./
+
 
 # Build prod
 RUN ./mvnw -Pprod -DskipTests -DskipSonar package
