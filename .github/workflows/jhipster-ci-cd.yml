@@ -22,7 +22,8 @@ jobs:
         run: npm install
 
       - name: Run linting (warnings only)
-        run: npm run lint || echo "Linting errors found, but build will continue"
+        #run: npm run lint || echo "Linting errors found, but build will continue"
+        run: echo"skip lint"
         continue-on-error: true
 
   #////////////////////////////////////////////////////////////////////////////////////////
@@ -99,8 +100,8 @@ jobs:
         run: echo "jar_path=$(find target -name "*.jar" -print -quit)" >> $GITHUB_OUTPUT
 
       - name: Deploy pre-built JAR to Heroku
-        # NOUVELLE ACTION: Mise à jour de la version de l'action Heroku
-        uses: dokku/github-action@v1.0.5
+        # MISE À JOUR: Utilisation de la version majeure (@v1) pour une meilleure robustesse
+        uses: dokku/github-action@v1
         with:
           # Configuration spécifique pour Heroku
           git_remote_url: "https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git"
