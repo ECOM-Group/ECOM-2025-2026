@@ -22,8 +22,8 @@ jobs:
         run: npm install
 
       - name: Run linting (warnings only)
-        #run: npm run lint || echo "Linting errors found, but build will continue"
         run: echo"skip lint"
+        #run: npm run lint || echo "Linting errors found, but build will continue"
         continue-on-error: true
 
   #////////////////////////////////////////////////////////////////////////////////////////
@@ -40,6 +40,7 @@ jobs:
           distribution: "temurin"
 
       - name: Build JHipster app (backend + frontend)
+        # Note: Le profil prod est utilisé, ce qui construit la partie frontend avec Webpack.
         run: ./mvnw -Pprod -DskipTests package
 
       - name: Upload artifact
@@ -47,6 +48,7 @@ jobs:
         with:
           name: jhipster-app
           path: target/*.jar
+          retention-days: 1 # Conserver l'artefact juste le temps du déploiement
 
   #////////////////////////////////////////////////////////////////////////////////////////
   test-unit:
@@ -62,8 +64,8 @@ jobs:
           distribution: "temurin"
 
       - name: Run Java unit tests
+        run: echo"skip test unit"
         #run: ./mvnw test
-        run: echo "skip tests"
 
       - name: Skip frontend unit tests
         run: echo "Pas de tests unitaires frontend pour l'instant"
@@ -88,27 +90,37 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Définir un répertoire temporaire pour le déploiement
+      - name: Set deployment directory
+        run: echo "DEPLOY_DIR=./deploy-temp" >> $GITHUB_ENV
+
       - name: Download application artifact (JAR)
         uses: actions/download-artifact@v4
         with:
           name: jhipster-app
-          path: target/ # Le JAR sera téléchargé dans le répertoire 'target/'
+          path: ${{ env.DEPLOY_DIR }}/ # Le JAR sera téléchargé dans le répertoire './deploy-temp/'
 
-      - name: Find the JAR file path
-        id: find_jar
-        # Le nom du JAR est dynamique (ex: target/app-0.0.1-SNAPSHOT.jar). On le trouve pour le passer à l'action Heroku.
-        run: echo "jar_path=$(find target -name "*.jar" -print -quit)" >> $GITHUB_OUTPUT
+      - name: Create Procfile
+        # Heroku a besoin d'un Procfile pour savoir comment démarrer l'application.
+        # On suppose que le JAR est exécutable via 'java -jar'.
+        # Note: On utilise le chemin du répertoire où le JAR a été téléchargé.
+        run: |
+          JAR_NAME=$(find ${{ env.DEPLOY_DIR }} -name "*.jar" -print -quit)
+          JAR_FILENAME=$(basename $JAR_NAME)
+          echo "web: java -jar ${JAR_FILENAME}" > ${{ env.DEPLOY_DIR }}/Procfile
 
       - name: Deploy pre-built JAR to Heroku
-        # MISE À JOUR: Utilisation de la version majeure (@v1) pour une meilleure robustesse
+        # NOUVELLE MISE À JOUR: Déploiement du contenu du répertoire temporaire, pas du fichier spécifique.
         uses: dokku/github-action@v1
         with:
           # Configuration spécifique pour Heroku
           git_remote_url: "https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git"
           ssh_private_key: "" # Non utilisé pour Heroku (déploiement via HTTP/S avec la clé API)
           branch: "HEAD:master" # Déploie la branche courante vers la branche 'master' d'Heroku
-          deployment_path: ${{ steps.find_jar.outputs.jar_path }}
-          
-      - name: Cleanup artifact (optional)
-        # Nettoyage de l'artefact pour s'assurer que le fichier téléchargé ne pose pas de problème
-        run: rm -f ${{ steps.find_jar.outputs.jar_path }}
+          # IMPORTANT: On utilise l'argument 'working-directory' qui est valide pour cette action
+          # pour s'assurer que seuls le JAR et le Procfile sont poussés.
+          working-directory: ${{ env.DEPLOY_DIR }}
+
+      - name: Cleanup deployment directory (optional)
+        # Nettoyage du répertoire temporaire
+        run: rm -rf ${{ env.DEPLOY_DIR }}
