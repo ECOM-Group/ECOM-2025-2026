@@ -10,7 +10,6 @@ COPY src src
 # Si tu as d'autres fichiers de config à la racine, copier aussi
 
 # Build prod
-RUN ./mvnw -Pprod -DskipTests package
 RUN ./mvnw -Pprod -DskipTests -DskipSonar package
 
 # Étape 2 : runtime
