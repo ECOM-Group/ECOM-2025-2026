@@ -80,25 +80,26 @@ jobs:
   deploy:
     needs: [build, test-unit, test-e2e]
     runs-on: ubuntu-latest
+  
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: jhipster-app
-
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
-
-      - name: Copy JAR to server
-        run: scp -o StrictHostKeyChecking=no target/*.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/opt/jhipster/app.jar
-
-      - name: Deploy with Docker
+      - uses: actions/checkout@v4
+  
+      - name: Login to Heroku Container Registry
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          cd /opt/jhipster
-          docker-compose down
-          docker-compose up -d --build
-          EOF
+          echo "${{ secrets.HEROKU_API_KEY }}" | docker login --username=_ --password-stdin registry.heroku.com
+  
+      - name: Build Docker image for Heroku
+        run: |
+          docker build \
+            --build-arg SPRING_PROFILES_ACTIVE=prod \
+            -t registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web .
+  
+      - name: Push image to Heroku
+        run: |
+          docker push registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
+  
+      - name: Release the app on Heroku
+        run: |
+          heroku container:release web \
+            --app=${{ secrets.HEROKU_APP_NAME }} \
+            --apikey=${{ secrets.HEROKU_API_KEY }}
