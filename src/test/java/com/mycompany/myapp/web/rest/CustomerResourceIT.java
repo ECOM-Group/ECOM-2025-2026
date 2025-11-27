@@ -1,11 +1,19 @@
 package com.mycompany.myapp.web.rest;
 
-import static com.mycompany.myapp.domain.CustomerAsserts.*;
+import static com.mycompany.myapp.domain.CustomerAsserts.assertCustomerAllPropertiesEquals;
+import static com.mycompany.myapp.domain.CustomerAsserts.assertCustomerAllUpdatablePropertiesEquals;
+import static com.mycompany.myapp.domain.CustomerAsserts.assertCustomerUpdatableFieldsEquals;
 import static com.mycompany.myapp.web.rest.TestUtil.createUpdateProxyForBean;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mycompany.myapp.IntegrationTest;
@@ -73,7 +81,7 @@ class CustomerResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Customer createEntity() {
-        return new Customer().firstName(DEFAULT_FIRST_NAME).lastName(DEFAULT_LAST_NAME).email(DEFAULT_EMAIL).password(DEFAULT_PASSWORD);
+        return new Customer().firstName(DEFAULT_FIRST_NAME).lastName(DEFAULT_LAST_NAME);
     }
 
     /**
@@ -83,7 +91,7 @@ class CustomerResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Customer createUpdatedEntity() {
-        return new Customer().firstName(UPDATED_FIRST_NAME).lastName(UPDATED_LAST_NAME).email(UPDATED_EMAIL).password(UPDATED_PASSWORD);
+        return new Customer().firstName(UPDATED_FIRST_NAME).lastName(UPDATED_LAST_NAME);
     }
 
     @BeforeEach
@@ -193,7 +201,7 @@ class CustomerResourceIT {
         Customer updatedCustomer = customerRepository.findById(customer.getId()).orElseThrow();
         // Disconnect from session so that the updates on updatedCustomer are not directly saved in db
         em.detach(updatedCustomer);
-        updatedCustomer.firstName(UPDATED_FIRST_NAME).lastName(UPDATED_LAST_NAME).email(UPDATED_EMAIL).password(UPDATED_PASSWORD);
+        updatedCustomer.firstName(UPDATED_FIRST_NAME).lastName(UPDATED_LAST_NAME);
 
         restCustomerMockMvc
             .perform(
@@ -271,7 +279,7 @@ class CustomerResourceIT {
         Customer partialUpdatedCustomer = new Customer();
         partialUpdatedCustomer.setId(customer.getId());
 
-        partialUpdatedCustomer.firstName(UPDATED_FIRST_NAME).lastName(UPDATED_LAST_NAME).email(UPDATED_EMAIL);
+        partialUpdatedCustomer.firstName(UPDATED_FIRST_NAME).lastName(UPDATED_LAST_NAME);
 
         restCustomerMockMvc
             .perform(
@@ -299,7 +307,7 @@ class CustomerResourceIT {
         Customer partialUpdatedCustomer = new Customer();
         partialUpdatedCustomer.setId(customer.getId());
 
-        partialUpdatedCustomer.firstName(UPDATED_FIRST_NAME).lastName(UPDATED_LAST_NAME).email(UPDATED_EMAIL).password(UPDATED_PASSWORD);
+        partialUpdatedCustomer.firstName(UPDATED_FIRST_NAME).lastName(UPDATED_LAST_NAME);
 
         restCustomerMockMvc
             .perform(
