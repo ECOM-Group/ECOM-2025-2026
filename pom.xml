@@ -1027,7 +1027,7 @@
                                 <phase>generate-resources</phase>
                                 <configuration>
                                     <nodeCustomArguments>--max-old-space-size=8192</nodeCustomArguments>
-                                    <arguments>run webapp:prod</arguments>
+                                    <arguments>run webapp:prod -- --verbose</arguments>
                                     <environmentVariables>
                                         <APP_VERSION>${project.version}</APP_VERSION>
                                     </environmentVariables>
