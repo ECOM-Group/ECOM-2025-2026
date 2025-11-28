@@ -54,6 +54,13 @@
                 <fa-icon class="p-1" icon="sort"></fa-icon>
               </div>
             </th>
+            <th scope="col" jhiSortBy="userId">
+              <div class="d-flex">
+                <span jhiTranslate="ecom20252026App.customer.userId">Jhi User Id</span>
+
+                <fa-icon class="p-1" icon="sort"></fa-icon>
+              </div>
+            </th>
             <th scope="col"></th>
           </tr>
         </thead>
@@ -65,6 +72,7 @@
               </td>
               <td>{{ customer.firstName }}</td>
               <td>{{ customer.lastName }}</td>
+              <td>{{ customer.userId }}</td>
               <td class="text-end">
                 <div class="btn-group">
                   <a [routerLink]="['/customer', customer.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">

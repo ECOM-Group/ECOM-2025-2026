@@ -37,7 +37,7 @@ public class Customer implements Serializable {
     private String lastName;
 
     @OneToOne
-    @JoinColumn(name = "user_id", unique = true)
+    @JoinColumn(name = "jhi_user_id", unique = true)
     private User user;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
