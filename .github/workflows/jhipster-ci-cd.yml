@@ -110,7 +110,6 @@ jobs:
 
       - name: Deploy JAR to Heroku
         run: |
-          heroku login --apikey $HEROKU_API_KEY
           heroku deploy:jar target/*.jar \
             --app $HEROKU_APP_NAME \
             --jdk 17 \
