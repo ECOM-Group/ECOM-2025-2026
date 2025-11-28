@@ -17,40 +17,6 @@
       @if (settingsForm.value.login) {
         <form name="form" (ngSubmit)="save()" [formGroup]="settingsForm" novalidate>
           <div class="mb-3">
-            <label class="form-label" for="firstName" jhiTranslate="settings.form.firstname">Prénom</label>
-            <input
-              type="text"
-              class="form-control"
-              id="firstName"
-              name="firstName"
-              placeholder="{{ 'settings.form.firstname.placeholder' | translate }}"
-              formControlName="firstName"
-              data-cy="firstname"
-            />
-
-            @let firstNameRef = settingsForm.get('firstName')!;
-            @if (firstNameRef.invalid && (firstNameRef.dirty || firstNameRef.touched)) {
-              <div>
-                @if (firstNameRef?.errors?.required) {
-                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.firstname.required">
-                    Votre prénom est requis.
-                  </small>
-                }
-                @if (firstNameRef?.errors?.minlength) {
-                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.firstname.minlength">
-                    Votre prénom doit comporter au moins un caractère.
-                  </small>
-                }
-                @if (firstNameRef?.errors?.maxlength) {
-                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.firstname.maxlength">
-                    Votre prénom ne doit pas comporter plus de 50 caractères.
-                  </small>
-                }
-              </div>
-            }
-          </div>
-
-          <div class="mb-3">
             <label class="form-label" for="lastName" jhiTranslate="settings.form.lastname">Nom</label>
             <input
               type="text"
@@ -78,6 +44,40 @@
                 @if (lastNameRef?.errors?.maxlength) {
                   <small class="form-text text-danger" jhiTranslate="settings.messages.validate.lastname.maxlength">
                     Votre nom ne doit pas comporter plus de 50 caractères.
+                  </small>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="firstName" jhiTranslate="settings.form.firstname">Prénom</label>
+            <input
+              type="text"
+              class="form-control"
+              id="firstName"
+              name="firstName"
+              placeholder="{{ 'settings.form.firstname.placeholder' | translate }}"
+              formControlName="firstName"
+              data-cy="firstname"
+            />
+
+            @let firstNameRef = settingsForm.get('firstName')!;
+            @if (firstNameRef.invalid && (firstNameRef.dirty || firstNameRef.touched)) {
+              <div>
+                @if (firstNameRef?.errors?.required) {
+                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.firstname.required">
+                    Votre prénom est requis.
+                  </small>
+                }
+                @if (firstNameRef?.errors?.minlength) {
+                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.firstname.minlength">
+                    Votre prénom doit comporter au moins un caractère.
+                  </small>
+                }
+                @if (firstNameRef?.errors?.maxlength) {
+                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.firstname.maxlength">
+                    Votre prénom ne doit pas comporter plus de 50 caractères.
                   </small>
                 }
               </div>
