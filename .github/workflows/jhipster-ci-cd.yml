@@ -79,45 +79,43 @@ jobs:
         run: echo "Pas de tests E2E pour l'instant"
 
   #////////////////////////////////////////////////////////////////////////////////////////
-  deploy-heroku:
-    # Le déploiement ne s'effectue qu'après la construction et uniquement sur la branche 'main' (push)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: build
+  deploy:
     runs-on: ubuntu-latest
-    environment: production # Optionnel: Utilisez un environnement GitHub pour Heroku
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # Définir un répertoire temporaire pour le déploiement
-      - name: Set deployment directory
-        run: echo "DEPLOY_DIR=./deploy-temp" >> $GITHUB_ENV
-
-      - name: Download application artifact (JAR)
-        uses: actions/download-artifact@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
         with:
-          name: jhipster-app
-          path: ${{ env.DEPLOY_DIR }}/ # Le JAR sera téléchargé dans le répertoire './deploy-temp/'
+          java-version: "17"
+          distribution: "temurin"
 
-      - name: Create Procfile
-        # Heroku a besoin d'un Procfile pour savoir comment démarrer l'application.
-        # On suppose que le JAR est exécutable via 'java -jar'.
-        # Note: On utilise le chemin du répertoire où le JAR a été téléchargé.
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-
+
+      - name: Build JHipster (Maven prod)
         run: |
-          JAR_NAME=$(find ${{ env.DEPLOY_DIR }} -name "*.jar" -print -quit)
-          JAR_FILENAME=$(basename $JAR_NAME)
-          echo "web: java -jar ${JAR_FILENAME}" > ${{ env.DEPLOY_DIR }}/Procfile
+          ./mvnw -Pprod -DskipTests package
 
-      - name: Deploy pre-built JAR to Heroku
-        # CORRECTION MAJEURE: working-directory, uses et with doivent être indentés
-        # sous le nom de l'étape.
-        working-directory: ${{ env.DEPLOY_DIR }}
-        uses: dokku/github-action@v1
-        with:
-          # Configuration spécifique pour Heroku
-          git_remote_url: "https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git"
-          ssh_private_key: "" # Non utilisé pour Heroku (déploiement via HTTP/S avec la clé API)
-          branch: "HEAD:master" # Déploie la branche courante vers la branche 'master' d'Heroku
+      - name: Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
 
-      - name: Cleanup deployment directory (optional)
-        # Nettoyage du répertoire temporaire
-        run: rm -rf ${{ env.DEPLOY_DIR }}
+      - name: Deploy JAR to Heroku
+        run: |
+          heroku login --apikey $HEROKU_API_KEY
+          heroku deploy:jar target/*.jar \
+            --app $HEROKU_APP_NAME \
+            --jdk 17 \
+            --procfile Procfile
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
+          HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }}
