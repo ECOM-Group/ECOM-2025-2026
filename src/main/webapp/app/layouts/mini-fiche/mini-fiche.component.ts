@@ -30,7 +30,7 @@ export class MiniFicheComponent implements OnInit {
         this.product = product;
 
         this.http.get<any>(`/api/product-images/first-by-product/${this.idProduit}`).subscribe(img => {
-          this.imageUrl = img?.url ?? 'assets/images/no-image.png';
+          this.imageUrl = img?.url ?? '';
         });
       });
     }

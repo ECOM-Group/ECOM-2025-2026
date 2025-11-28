@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { IOrderLine } from 'app/entities/order-line/order-line.model';
 import { OrderLineService } from 'app/entities/order-line/service/order-line.service';
@@ -13,9 +14,23 @@ export class CartLineComponent {
   @Input() orderLine!: IOrderLine;
   @Output() updated = new EventEmitter<{ id: number; delete: boolean; priceDiff: number }>(); // notify parent cart
 
+  imageUrl: string | null = null;
+
   private cartService = inject(CartService);
 
-  constructor(private orderLineService: OrderLineService) {}
+  constructor(
+    private orderLineService: OrderLineService,
+    private http: HttpClient,
+  ) {}
+
+  ngOnInit(): void {
+    const idProduit = this.orderLine?.product?.id;
+    if (idProduit) {
+      this.http.get<any>(`/api/product-images/first-by-product/${idProduit}`).subscribe(img => {
+        this.imageUrl = img?.url ?? 'assets/images/no-image.png';
+      });
+    }
+  }
 
   increment(): void {
     if (!this.orderLine) return;

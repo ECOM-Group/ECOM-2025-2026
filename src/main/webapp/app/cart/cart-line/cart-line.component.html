@@ -1,13 +1,15 @@
 <div class="cart-line">
-  <div class="product-image">
-    <img src="content/images/jhipster_family_member_0_head-192.png" />
+  <div class="image-wrapper">
+    <img class="product-img" [src]="imageUrl || ''" alt="{{ orderLine.product?.name }}" />
     <p class="product-name">{{ orderLine.product?.name ?? 'N/A' }}</p>
   </div>
 
   <div class="info">
-    <p>Quantity: {{ orderLine.quantity ?? 'N/A' }}</p>
-    <p>Unit Price: {{ orderLine.unitPrice ?? 'N/A' }}</p>
-    <p>Total: {{ orderLine.total ?? 'N/A' }}</p>
+    <div class="details">
+      <p>Quantity: {{ orderLine.quantity ?? 'N/A' }}</p>
+      <p>Unit Price: {{ orderLine.unitPrice ?? 'N/A' }}</p>
+      <p>Total: {{ orderLine.total ?? 'N/A' }}</p>
+    </div>
 
     @if (isCart) {
       <div class="actions">
