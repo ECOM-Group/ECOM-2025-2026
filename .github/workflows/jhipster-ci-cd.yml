@@ -83,38 +83,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: "17"
-          distribution: "temurin"
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-m2-
-
-      - name: Build JHipster (Maven prod)
-        run: |
-          ./mvnw -Pprod -DskipTests package
-
-      - name: Install Heroku CLI
-        run: |
-          curl https://cli-assets.heroku.com/install.sh | sh
-
-      - name: Deploy JAR to Heroku
-        run: |
-          heroku deploy:jar target/*.jar \
-            --app $HEROKU_APP_NAME \
-            --jdk 17 \
-            --procfile Procfile
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
-          HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }}
+        # 1. Télécharger l'artefact (le JAR)
+        - name: Download application artifact (JAR)
+          uses: actions/download-artifact@v4
+          with:
+            name: jhipster-app
+            path: target/ # Le JAR est placé dans target/
+        
+        # 2. Installer la CLI Heroku (cette étape semble déjà fonctionner d'après vos logs)
+        - name: Install Heroku CLI
+          run: curl https://cli-assets.heroku.com/install.sh | sh
+        
+        # 3. Installer le plugin nécessaire pour deploy:jar
+        - name: Install Heroku Deploy Plugin (Java)
+          run: heroku plugins:install java
+        
+        # 4. Déploiement du JAR
+        - name: Deploy JHipster JAR to Heroku
+          run: |
+            # heroku deploy:jar s'authentifie automatiquement via HEROKU_API_KEY
+            heroku deploy:jar target/*.jar \
+              --app $HEROKU_APP_NAME \
+              --jdk 17 \
+              --procfile Procfile
+          shell: /usr/bin/bash -e {0}
+          env:
+            # Assurez-vous que les secrets sont passés ici
+            HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }} 
+            HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
+            HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }} # Non nécessaire, mais peut rester
