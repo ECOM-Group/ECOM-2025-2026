@@ -1,31 +1,58 @@
-# Étape 1 : build JHipster
-FROM maven:3.9.2-eclipse-temurin-17 AS build
-WORKDIR /app
+# -----------------------------------------------------------------------------------
+# ÉTAPE 1: Build (facultatif si le build est fait par CI, mais inclus pour l'exhaustivité)
+# On utilise une image de base avec JDK 17 et Maven pour effectuer le build.
+# Si votre CI produit déjà le JAR et le passe au contexte Docker, cette étape est ignorée.
+# -----------------------------------------------------------------------------------
+FROM maven:3.9.6-eclipse-temurin-17 AS builder
 
-# Copier tous les fichiers nécessaires (conserver ces COPY)
-COPY pom.xml mvnw ./
-COPY .mvn .mvn
-COPY src src
-COPY sonar-project.properties ./
-COPY package.json ./
-COPY package-lock.json ./ 
+# Définir le répertoire de travail
+WORKDIR /usr/src/app
 
-# 1. Installer Node et NPM
-RUN ./mvnw frontend:install-node-and-npm
+# Copier le fichier de configuration Maven (pour accélérer si déjà mis en cache)
+COPY pom.xml .
 
-# 2. Installer les dépendances NPM (Correction du chemin)
-# Exécution explicite du script NPM via le binaire Node
-RUN /app/target/node/node /app/target/node/node_modules/npm/bin/npm-cli.js ci --loglevel verbose
+# Copier le code source de l'application
+COPY src /usr/src/app/src
 
-# 3. Exécuter le build de production front-end (Correction du chemin)
-RUN /app/target/node/node /app/target/node/node_modules/npm/bin/npm-cli.js run webapp:prod -- --loglevel debug || (echo ">>> ERREUR DE COMPILATION FRONTEND: VÉRIFIER LE LOG CI-DESSUS <<<" && exit 1)
+# Construire l'application JHipster. 
+# On utilise le profil 'prod' pour inclure le frontend compilé et 'jib' pour optimiser 
+# les couches du JAR, même si nous ne créons pas l'image avec Jib directement ici.
+# Le profil 'skipTests' est souvent utilisé pour un build Docker rapide.
+# La commande 'mvn package' génère le JAR dans target/.
+RUN ./mvnw -Pprod,skipTests package -DskipTests
 
-# 4. Finaliser le package Maven
-RUN ./mvnw -Pprod -DskipTests -DskipSonar -DskipClient package
+# -----------------------------------------------------------------------------------
+# ÉTAPE 2: Image d'exécution (Runtime)
+# Utilise une image JRE légère pour minimiser la taille finale de l'image.
+# C'est l'image finale qui sera déployée.
+# -----------------------------------------------------------------------------------
+FROM eclipse-temurin:17-jre-focal AS runtime
 
-# Étape 2 : runtime
-FROM eclipse-temurin:17-jdk-alpine
-WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+# Installer curl et/ou d'autres utilitaires nécessaires au diagnostic si besoin
+# RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Définir des variables d'environnement
+# JHipster utilise traditionnellement le profil 'prod' par défaut pour Docker
+ENV SPRING_PROFILES_ACTIVE=prod
+# JHipster est souvent configuré pour écouter sur le port 8080
+ENV SERVER_PORT=8080
+
+# Exposer le port par défaut de l'application
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","app.jar"]
+
+# Définir le répertoire de travail
+WORKDIR /app
+
+# Copier l'application JAR depuis l'étape de build
+# Le nom du JAR est généralement 'jhipster-app.jar' ou le nom du projet suivi de la version.
+# Adapter le nom du JAR si nécessaire.
+COPY --from=builder /usr/src/app/target/*.jar app.jar
+
+# Copier le script d'entrée (entrypoint) qui gère le démarrage
+COPY src/main/docker/entrypoint.sh entrypoint.sh
+RUN chmod +x entrypoint.sh
+
+# Commande d'entrée pour démarrer l'application
+# Le 'entrypoint.sh' assure un démarrage robuste et l'exécution du JAR.
+ENTRYPOINT ["./entrypoint.sh"]
+CMD ["java", "-jar", "/app/app.jar"]
