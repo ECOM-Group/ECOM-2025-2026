@@ -34,11 +34,7 @@ export default class FicheProduitComponent implements OnInit {
   showZoom = false;
   backgroundPosition = '0% 0%';
   zoomLevel = 200; // augmente pour zoomer plus
-  images: string[] = [
-    '../../../content/images/jhipster_family_member_0_head-384.png',
-    '../../../content/images/jhipster_family_member_1_head-384.png',
-    '../../../content/images/jhipster_family_member_2_head-384.png',
-  ];
+  images: string[] = [];
 
   currentIndex = 0;
 
@@ -51,18 +47,26 @@ export default class FicheProduitComponent implements OnInit {
 
   ngOnInit(): void {
     this.id = Number(this.route.snapshot.paramMap.get('id') ?? '-1');
+
     if (!isNaN(this.id) && this.id >= 0) {
-      this.http
-        .get(`/api/products/${this.id}`)
-        .pipe(map((d: any): IProduct => d))
-        .subscribe({
-          next: data => {
-            this.product = data;
-          },
-          error: err => {
-            console.error('Erreur lors du chargement du produit :', err);
-          },
-        });
+      this.http.get<IProduct>(`/api/products/${this.id}`).subscribe({
+        next: product => {
+          this.product = product;
+
+          // Récupérer toutes les images du produit
+          this.http.get<any[]>(`/api/product-images/by-product/${this.id}`).subscribe(images => {
+            if (images.length > 0) {
+              this.images = images.map(img => img.url);
+            } else {
+              // fallback si aucune image
+              this.images = [''];
+            }
+          });
+        },
+        error: err => {
+          console.error('Erreur lors du chargement du produit :', err);
+        },
+      });
     }
   }
 

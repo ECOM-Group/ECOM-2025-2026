@@ -22,20 +22,17 @@ export class MiniFicheComponent implements OnInit {
   };
 
   constructor(private http: HttpClient) {}
+  imageUrl: string | null = null;
 
   ngOnInit(): void {
     if (this.idProduit) {
-      this.http
-        .get(`/api/products/${this.idProduit}`)
-        .pipe(map((d: any): IProduct => d))
-        .subscribe({
-          next: data => {
-            this.product = data;
-          },
-          error: err => {
-            console.error('Erreur lors de la récupération du produit');
-          },
+      this.http.get<IProduct>(`/api/products/${this.idProduit}`).subscribe(product => {
+        this.product = product;
+
+        this.http.get<any>(`/api/product-images/first-by-product/${this.idProduit}`).subscribe(img => {
+          this.imageUrl = img?.url ?? 'assets/images/no-image.png';
         });
+      });
     }
   }
 }

@@ -135,6 +135,18 @@
               <li>
                 <a
                   class="dropdown-item"
+                  routerLink="/product-image"
+                  routerLinkActive="active"
+                  [routerLinkActiveOptions]="{ exact: true }"
+                  (click)="collapseNavbar()"
+                >
+                  <fa-icon icon="asterisk" [fixedWidth]="true"></fa-icon>
+                  <span>Product Image</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
                   routerLink="/order-line"
                   routerLinkActive="active"
                   [routerLinkActiveOptions]="{ exact: true }"

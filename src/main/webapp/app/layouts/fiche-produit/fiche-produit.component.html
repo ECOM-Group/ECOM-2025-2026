@@ -3,7 +3,9 @@
   <div class="product-container">
     <div class="product-card">
       <div class="product-image-carousel">
-        <button class="carousel-btn left" (click)="prevImage()">&#10094;</button>
+        @if (images.length > 1) {
+          <button class="carousel-btn left" (click)="prevImage()">&#10094;</button>
+        }
 
         <div
           class="carousel-image-wrapper"
@@ -14,7 +16,9 @@
           <img [src]="images[currentIndex]" alt="product image" class="carousel-image" #imageRef />
         </div>
 
-        <button class="carousel-btn right" (click)="nextImage()">&#10095;</button>
+        @if (images.length > 1) {
+          <button class="carousel-btn right" (click)="nextImage()">&#10095;</button>
+        }
       </div>
 
       @if (showZoom) {
