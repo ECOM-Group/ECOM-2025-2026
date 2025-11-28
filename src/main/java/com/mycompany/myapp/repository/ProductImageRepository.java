@@ -12,4 +12,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductImageRepository extends JpaRepository<ProductImage, Long> {
     List<ProductImage> findByProductId(Long productId);
+
+    ProductImage findFirstByProductIdOrderByIdAsc(Long productId);
 }

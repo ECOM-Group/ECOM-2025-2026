@@ -220,15 +220,8 @@ public class ProductImageResource {
     }
 
     @GetMapping("/first-by-product/{productId}")
-    public ResponseEntity<ProductImage> getFirstImageByProduct(@PathVariable Long productId) {
-        Optional<ProductImage> image = productImageRepository
-            .findAll()
-            .stream()
-            .filter(img -> img.getProduct() != null) // éviter les NPE
-            .filter(img -> productId.equals(img.getProduct().getId()))
-            .findFirst();
-
-        return ResponseUtil.wrapOrNotFound(image);
+    public ProductImage getFirstImageByProduct(@PathVariable Long productId) {
+        return productImageRepository.findFirstByProductIdOrderByIdAsc(productId);
     }
 
     @GetMapping("/by-product/{productId}")
