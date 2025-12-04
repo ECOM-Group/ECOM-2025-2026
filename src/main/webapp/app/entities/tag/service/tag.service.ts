@@ -69,6 +69,10 @@ export class TagService {
     return tagCollection;
   }
 
+  findAll(): Observable<EntityArrayResponseType> {
+    return this.http.get<ITag[]>(this.resourceUrl, { observe: 'response' });
+  }
+
   // temp fix because ManyToMany relation not handled properly
   attachToProduct(productId: number, tagId: number): Observable<void> {
     return this.http.post<void>(this.applicationConfigService.getEndpointFor(`api/products-tags/${productId}/tags`), [tagId]);
