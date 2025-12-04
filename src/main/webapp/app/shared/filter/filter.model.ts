@@ -145,9 +145,9 @@ export class FilterOptions implements IFilterOptions {
     return new FilterOptions(this.filterOptions.map(option => new FilterOption(option.name, option.values.concat())));
   }
 
-  protected getFilterOptionByName(name: string, add: true): FilterOption;
-  protected getFilterOptionByName(name: string, add?: false): FilterOption | null;
-  protected getFilterOptionByName(name: string, add = false): FilterOption | null {
+  public getFilterOptionByName(name: string, add: true): FilterOption;
+  public getFilterOptionByName(name: string, add?: false): FilterOption | null;
+  public getFilterOptionByName(name: string, add = false): FilterOption | null {
     const addOption = (option: FilterOption): FilterOption => {
       this._filterOptions.push(option);
       return option;

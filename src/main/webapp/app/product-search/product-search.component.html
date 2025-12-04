@@ -1,0 +1,66 @@
+<div class="page-layout">
+  <!-- FILTERS (LEFT SIDEBAR) -->
+  <aside class="filters">
+    <h4>Filters</h4>
+
+    <div class="filter-group">
+      <label class="filter-title">Color</label>
+      @for (color of getAvailableColors; track color) {
+        <label class="filter-checkbox">
+          <input type="checkbox" [checked]="colorFilterValues.includes(color)" (change)="toggleFilter('color', color)" />
+          <span class="checkbox-label-text">{{ color }}</span>
+        </label>
+      }
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-title">
+        Max Price:
+        <input
+          type="number"
+          [min]="0"
+          [max]="maxPrice"
+          [(ngModel)]="sliderPrice"
+          (input)="onSliderChange()"
+          (blur)="onEmptyPrice()"
+          class="inline-price-input"
+        />
+        €
+      </label>
+
+      <input
+        type="range"
+        [min]="0"
+        [max]="maxPrice"
+        [(ngModel)]="sliderPrice"
+        (input)="onSliderChange()"
+        style="width: 100%; margin-top: 8px"
+      />
+    </div>
+  </aside>
+
+  <!-- PRODUCT ZONE INSIDE BOOTSTRAP CONTAINER -->
+  <div class="container">
+    <h2>
+      Search Results for: <span style="color: #1a73e8; font-weight: 600">"{{ query }}"</span>
+    </h2>
+
+    <main class="products">
+      @if (loading) {
+        <p>Loading products...</p>
+      }
+
+      @if (!loading && products.length > 0) {
+        <div class="mini-fiche-list">
+          @for (product of filteredProducts; track product.id) {
+            <jhi-mini-fiche [idProduit]="product.id"></jhi-mini-fiche>
+          }
+        </div>
+      }
+
+      @if (!loading && products.length === 0) {
+        <p>No products found for "{{ query }}"</p>
+      }
+    </main>
+  </div>
+</div>
