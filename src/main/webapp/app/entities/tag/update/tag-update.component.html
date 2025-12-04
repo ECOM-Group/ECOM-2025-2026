@@ -8,6 +8,7 @@
       <div>
         <jhi-alert-error />
 
+        <!-- Tag ID (readonly if exists) -->
         @if (editForm.controls.id.value !== null) {
           <div class="mb-3">
             <label class="form-label" for="field_id" jhiTranslate="ecom20252026App.tag.id">Id</label>
@@ -15,21 +16,14 @@
           </div>
         }
 
+        <!-- Tag Name -->
         <div class="mb-3">
           <label class="form-label" for="field_name" jhiTranslate="ecom20252026App.tag.name">Name</label>
           <input type="text" class="form-control" name="name" id="field_name" data-cy="name" formControlName="name" />
         </div>
-
-        <div class="mb-3">
-          <label for="field_ids" jhiTranslate="ecom20252026App.tag.id">Id</label>
-          <select class="form-control" id="field_ids" data-cy="id" multiple name="ids" formControlName="ids" [compareWith]="compareProduct">
-            @for (productOption of productsSharedCollection; track $index) {
-              <option [ngValue]="productOption">{{ productOption.id }}</option>
-            }
-          </select>
-        </div>
       </div>
 
+      <!-- Form actions -->
       <div>
         <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" (click)="previousState()">
           <fa-icon icon="ban"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Annuler</span>
@@ -46,5 +40,31 @@
         </button>
       </div>
     </form>
+
+    <!-- Checkbox list for attaching products -->
+    <div class="mb-3">
+      <label>Attach Products</label>
+
+      <div *ngFor="let product of productsSharedCollection" class="form-check">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          [id]="'product-' + product.id"
+          [value]="product"
+          [checked]="isSelected(product)"
+          (change)="toggleProductSelection($event, product)"
+        />
+        <label class="form-check-label" [for]="'product-' + product.id">{{ product.name }}</label>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-success mt-2"
+        [disabled]="!selectedProducts || selectedProducts.length === 0"
+        (click)="attachMultipleProductsToTag(selectedProducts)"
+      >
+        <fa-icon icon="link"></fa-icon>&nbsp;Attach
+      </button>
+    </div>
   </div>
 </div>

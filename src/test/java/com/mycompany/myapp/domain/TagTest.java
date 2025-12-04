@@ -30,16 +30,16 @@ class TagTest {
         Tag tag = getTagRandomSampleGenerator();
         Product productBack = getProductRandomSampleGenerator();
 
-        tag.addId(productBack);
-        assertThat(tag.getIds()).containsOnly(productBack);
+        tag.addProduct(productBack);
+        assertThat(tag.getProducts()).containsOnly(productBack);
 
-        tag.removeId(productBack);
-        assertThat(tag.getIds()).doesNotContain(productBack);
+        tag.removeProduct(productBack);
+        assertThat(tag.getProducts()).doesNotContain(productBack);
 
-        tag.ids(new HashSet<>(Set.of(productBack)));
-        assertThat(tag.getIds()).containsOnly(productBack);
+        tag.products(new HashSet<>(Set.of(productBack)));
+        assertThat(tag.getProducts()).containsOnly(productBack);
 
-        tag.setIds(new HashSet<>());
-        assertThat(tag.getIds()).doesNotContain(productBack);
+        tag.setProducts(new HashSet<>());
+        assertThat(tag.getProducts()).doesNotContain(productBack);
     }
 }

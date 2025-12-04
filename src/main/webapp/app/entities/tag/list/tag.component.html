@@ -21,7 +21,6 @@
   </h2>
 
   <jhi-alert-error />
-
   <jhi-alert />
 
   @if (tags().length === 0) {
@@ -36,21 +35,18 @@
             <th scope="col" jhiSortBy="id">
               <div class="d-flex">
                 <span jhiTranslate="ecom20252026App.tag.id">Id</span>
-
                 <fa-icon class="p-1" icon="sort"></fa-icon>
               </div>
             </th>
             <th scope="col" jhiSortBy="name">
               <div class="d-flex">
                 <span jhiTranslate="ecom20252026App.tag.name">Name</span>
-
                 <fa-icon class="p-1" icon="sort"></fa-icon>
               </div>
             </th>
-            <th scope="col" jhiSortBy="id.id">
+            <th scope="col">
               <div class="d-flex">
-                <span jhiTranslate="ecom20252026App.tag.id">Id</span>
-                <fa-icon class="p-1" icon="sort"></fa-icon>
+                <span jhiTranslate="ecom20252026App.tag.products">Products</span>
               </div>
             </th>
             <th scope="col"></th>
@@ -64,11 +60,15 @@
               </td>
               <td>{{ tag.name }}</td>
               <td>
-                @for (id of tag.ids; track $index; let last = $last) {
-                  <span>
-                    <a class="form-control-static" [routerLink]="['/product', id.id, 'view']">{{ id.id }}</a
-                    >{{ last ? '' : ', ' }}
-                  </span>
+                @if (tag.productIds && tag.productIds.length > 0) {
+                  @for (id of tag.productIds; track $index; let last = $last) {
+                    <span>
+                      <a class="form-control-static" [routerLink]="['/product', id, 'view']">{{ id }}</a
+                      >{{ last ? '' : ', ' }}
+                    </span>
+                  }
+                } @else {
+                  <span class="text-muted">—</span>
                 }
               </td>
               <td class="text-end">

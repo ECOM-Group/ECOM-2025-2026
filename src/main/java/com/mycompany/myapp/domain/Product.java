@@ -388,10 +388,10 @@ public class Product implements Serializable {
 
     public void setTags(Set<Tag> tags) {
         if (this.tags != null) {
-            this.tags.forEach(i -> i.removeId(this));
+            this.tags.forEach(i -> i.removeProduct(this));
         }
         if (tags != null) {
-            tags.forEach(i -> i.addId(this));
+            tags.forEach(i -> i.addProduct(this));
         }
         this.tags = tags;
     }
@@ -403,13 +403,13 @@ public class Product implements Serializable {
 
     public Product addTags(Tag tag) {
         this.tags.add(tag);
-        tag.getIds().add(this);
+        tag.getProducts().add(this);
         return this;
     }
 
     public Product removeTags(Tag tag) {
         this.tags.remove(tag);
-        tag.getIds().remove(this);
+        tag.getProducts().remove(this);
         return this;
     }
 

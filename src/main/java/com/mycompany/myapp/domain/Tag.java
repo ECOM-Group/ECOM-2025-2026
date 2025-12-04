@@ -32,6 +32,7 @@ public class Tag implements Serializable {
     @JoinTable(name = "rel_tag__id", joinColumns = @JoinColumn(name = "tag_id"), inverseJoinColumns = @JoinColumn(name = "id_id"))
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @JsonIgnoreProperties(value = { "illustrator", "reviews", "orderLines", "tags" }, allowSetters = true)
+    // products associated with this tag
     private Set<Product> ids = new HashSet<>();
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
@@ -62,25 +63,25 @@ public class Tag implements Serializable {
         this.name = name;
     }
 
-    public Set<Product> getIds() {
+    public Set<Product> getProducts() {
         return this.ids;
     }
 
-    public void setIds(Set<Product> products) {
+    public void setProducts(Set<Product> products) {
         this.ids = products;
     }
 
-    public Tag ids(Set<Product> products) {
-        this.setIds(products);
+    public Tag products(Set<Product> products) {
+        this.setProducts(products);
         return this;
     }
 
-    public Tag addId(Product product) {
+    public Tag addProduct(Product product) {
         this.ids.add(product);
         return this;
     }
 
-    public Tag removeId(Product product) {
+    public Tag removeProduct(Product product) {
         this.ids.remove(product);
         return this;
     }

@@ -3,8 +3,10 @@
   <aside class="filters">
     <h4>Filters</h4>
 
+    <!-- COLOR FILTER -->
     <div class="filter-group">
       <label class="filter-title">Color</label>
+
       @for (color of getAvailableColors; track color) {
         <label class="filter-checkbox">
           <input type="checkbox" [checked]="colorFilterValues.includes(color)" (change)="toggleFilter('color', color)" />
@@ -13,6 +15,7 @@
       }
     </div>
 
+    <!-- PRICE FILTER -->
     <div class="filter-group">
       <label class="filter-title">
         Max Price:
@@ -37,12 +40,26 @@
         style="width: 100%; margin-top: 8px"
       />
     </div>
+
+    <!-- TAG FILTER -->
+    <div class="filter-group">
+      <label class="filter-title">Tags</label>
+
+      @if (tags.length > 0) {
+        @for (tag of tags; track tag.id) {
+          <app-tag-label [tag]="tag" [selected]="selectedTagIds.includes(tag.id!)" (toggled)="onTagToggled($event)"></app-tag-label>
+        }
+      } @else {
+        <p>No tags</p>
+      }
+    </div>
   </aside>
 
-  <!-- PRODUCT ZONE INSIDE BOOTSTRAP CONTAINER -->
+  <!-- PRODUCT ZONE -->
   <div class="container">
     <h2>
-      Search Results for: <span style="color: #1a73e8; font-weight: 600">"{{ query }}"</span>
+      Search Results for:
+      <span style="color: #1a73e8; font-weight: 600">"{{ query }}"</span>
     </h2>
 
     <main class="products">
@@ -50,15 +67,15 @@
         <p>Loading products...</p>
       }
 
-      @if (!loading && products.length > 0) {
+      @if (!loading && filteredProducts.length > 0) {
         <div class="mini-fiche-list">
           @for (product of filteredProducts; track product.id) {
-            <jhi-mini-fiche [idProduit]="product.id"></jhi-mini-fiche>
+            <jhi-mini-fiche [idProduit]="product.id!"></jhi-mini-fiche>
           }
         </div>
       }
 
-      @if (!loading && products.length === 0) {
+      @if (!loading && filteredProducts.length === 0) {
         <p>No products found for "{{ query }}"</p>
       }
     </main>

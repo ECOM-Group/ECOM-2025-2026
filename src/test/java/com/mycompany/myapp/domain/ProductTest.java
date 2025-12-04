@@ -91,18 +91,18 @@ class ProductTest {
 
         product.addTags(tagBack);
         assertThat(product.getTags()).containsOnly(tagBack);
-        assertThat(tagBack.getIds()).containsOnly(product);
+        assertThat(tagBack.getProducts()).containsOnly(product);
 
         product.removeTags(tagBack);
         assertThat(product.getTags()).doesNotContain(tagBack);
-        assertThat(tagBack.getIds()).doesNotContain(product);
+        assertThat(tagBack.getProducts()).doesNotContain(product);
 
         product.tags(new HashSet<>(Set.of(tagBack)));
         assertThat(product.getTags()).containsOnly(tagBack);
-        assertThat(tagBack.getIds()).containsOnly(product);
+        assertThat(tagBack.getProducts()).containsOnly(product);
 
         product.setTags(new HashSet<>());
         assertThat(product.getTags()).doesNotContain(tagBack);
-        assertThat(tagBack.getIds()).doesNotContain(product);
+        assertThat(tagBack.getProducts()).doesNotContain(product);
     }
 }
