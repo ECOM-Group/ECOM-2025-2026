@@ -56,6 +56,7 @@ export class ProductSearchComponent implements OnInit {
   searchProducts(query: string): void {
     this.loading = true;
     // Reset selected tags when starting a new search
+    this.clearAllFilters();
     this.clearAllTags();
 
     this.productService.search(query).subscribe({
