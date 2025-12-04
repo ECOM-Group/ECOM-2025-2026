@@ -56,8 +56,9 @@ const routes: Routes = [
   },
   {
     path: 'search',
-    component: ProductSearchComponent,
+    loadChildren: () => import('./product-search/product-search.routes'),
   },
+
   ...errorRoute,
 ];
 
