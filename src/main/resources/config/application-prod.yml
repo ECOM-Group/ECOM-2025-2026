@@ -64,7 +64,6 @@ server:
 
 # ===================================================================
 # JHipster specific properties
-# ... (omitted JHipster comments)
 # ===================================================================
 
 jhipster:
@@ -75,8 +74,9 @@ jhipster:
     ehcache: # Ehcache configuration
       time-to-live-seconds: 3600 # By default objects stay 1 hour in the cache
       max-entries: 1000 # Number of objects in each cache entry
+  # --- Correction de l'indentation ici (Décalage de 'security') ---
   security:
-      content-security-policy: "default-src 'self'; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://res.cloudinary.com ; connect-src 'self'; font-src 'self' data:"
+    content-security-policy: "default-src 'self'; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://res.cloudinary.com ; connect-src 'self'; font-src 'self' data:"
     authentication:
       jwt:
         # This token must be encoded using Base64 and be at least 256 bits long (you can type `openssl rand -base64 64` on your command line to generate a 512 bits one)
