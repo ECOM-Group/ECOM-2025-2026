@@ -1,12 +1,20 @@
 package com.mycompany.myapp.web.rest;
 
+import com.mycompany.myapp.domain.Product;
+import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.repository.ProductRepository;
+import com.mycompany.myapp.repository.ProductRepositoryCustom;
+import com.mycompany.myapp.service.OrderLineService;
+import com.mycompany.myapp.service.UserService;
+import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,12 +32,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.mycompany.myapp.domain.Product;
-import com.mycompany.myapp.repository.ProductRepository;
-import com.mycompany.myapp.repository.ProductRepositoryCustom;
-import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
-
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.ResponseUtil;
 
@@ -50,10 +52,19 @@ public class ProductResource {
 
     private final ProductRepository productRepository;
     private final ProductRepositoryCustom productRepositoryCustom;
+    private final OrderLineService orderLineService;
+    private final UserService userService;
 
-    public ProductResource(ProductRepository productRepository, ProductRepositoryCustom productRepositoryCustom) {
+    public ProductResource(
+        ProductRepository productRepository,
+        ProductRepositoryCustom productRepositoryCustom,
+        OrderLineService orderLineService,
+        UserService userService
+    ) {
         this.productRepository = productRepository;
         this.productRepositoryCustom = productRepositoryCustom;
+        this.orderLineService = orderLineService;
+        this.userService = userService;
     }
 
     /**
@@ -248,14 +259,39 @@ public class ProductResource {
 
         return results;
     }*/
-   
+
     @GetMapping("/search")
     public List<Product> findByKeywords(@RequestParam("q") String query) {
-        List<String> keywords = Arrays.stream(query.split("\\s+"))
-            .filter(k -> !k.isBlank())
-            .toList();
+        List<String> keywords = Arrays.stream(query.split("\\s+")).filter(k -> !k.isBlank()).toList();
 
         List<Product> results = productRepositoryCustom.findByKeywords(keywords);
         return results;
+    }
+
+    /*
+    public ProductPurchaseResource(OrderLineService orderLineService, UserService userService) {
+        this.orderLineService = orderLineService;
+        this.userService = userService;
+    }*/
+
+    @GetMapping("/has-been-purchased/{productId}")
+    public ResponseEntity<Boolean> hasPurchased(@PathVariable Long productId) {
+        Optional<User> user = userService.getUserWithAuthorities();
+        if (user.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.SC_UNAUTHORIZED).build();
+        }
+
+        boolean purchased = orderLineService.hasUserPurchasedProduct(user.get().getId(), productId);
+        return ResponseEntity.ok(purchased);
+    }
+
+    @GetMapping("/get-all-purchased-procucts-by-user")
+    public ResponseEntity<List<Long>> getAllPurchasedProcudtsByUser(@PathVariable Long userId) {
+        Optional<User> user = userService.getUserWithAuthorities();
+        if (user.isEmpty()) {
+            return ResponseEntity.ok(new ArrayList<Long>()); // "aucun achat"
+        }
+
+        return ResponseEntity.ok(orderLineService.getPurchasedProductIdsByUser(userId));
     }
 }

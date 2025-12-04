@@ -1,10 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { IProduct } from 'app/entities/product/product.model';
-import { EMPTY, switchMap } from 'rxjs';
+import { EMPTY, switchMap, tap } from 'rxjs';
 import { HomePageService } from 'app/service/home-page/home-page.service';
 import { MiniFicheComponent } from '../mini-fiche/mini-fiche.component';
 import { CartService } from 'app/service/cart/cart.service';
+import internal from 'stream';
+import { OrderLineService } from 'app/entities/order-line/service/order-line.service';
+import { UserService } from 'app/entities/user/service/user.service';
 
 @Component({
   selector: 'jhi-home-page',
@@ -14,8 +17,12 @@ import { CartService } from 'app/service/cart/cart.service';
 })
 export default class HomePageComponent {
   private cartService = inject(CartService);
+
   topSoldProducts: IProduct[] = [];
   searchedProducts: IProduct[] = [];
+
+  canComment: Array<CanComment> = [];
+
   constructor(
     private http: HttpClient,
     private homePageService: HomePageService,
@@ -25,11 +32,21 @@ export default class HomePageComponent {
 
   ngOnInit(): void {
     this.cartService.notifyCartUpdated();
-    this.homePageService
-      .GetMostSelledProducts()
+    let purchasedProduct_id: Array<number> = [];
+
+    this.http
+      .get<number[]>('/api/products/get-all-purchased-procucts-by-user')
       .pipe(
+        tap(ids => (purchasedProduct_id = ids)),
+        switchMap(() => {
+          return this.homePageService.GetMostSelledProducts();
+        }),
         switchMap((products: IProduct[]) => {
           this.topSoldProducts = products;
+
+          products.forEach(p => {
+            this.canComment.push(new CanComment(p.id, purchasedProduct_id.includes(p.id)));
+          });
 
           return this.topSoldProducts.length > this.MIN_DISPLAYED_PRODUCTS ? EMPTY : this.http.get<IProduct[]>('/api/products');
         }),
@@ -43,6 +60,10 @@ export default class HomePageComponent {
           const additionalProducts = products
             .filter(p => !topSoldProductsId.includes(p.id))
             .slice(0, this.MIN_DISPLAYED_PRODUCTS - this.topSoldProducts.length);
+
+          additionalProducts.forEach(p => {
+            this.canComment.push(new CanComment(p.id, purchasedProduct_id.includes(p.id)));
+          });
 
           this.topSoldProducts.push(...additionalProducts);
         },
@@ -61,4 +82,10 @@ export default class HomePageComponent {
       },
     });
   }
+}
+class CanComment {
+  constructor(
+    public prod_id: number,
+    public canComment: boolean,
+  ) {}
 }
