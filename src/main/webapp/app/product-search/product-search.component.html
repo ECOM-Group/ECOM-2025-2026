@@ -41,7 +41,7 @@
       />
     </div>
 
-    <!-- TAG FILTER -->
+    <!-- TAG FILTER a revoir
     <div class="filter-group">
       <label class="filter-title">Tags</label>
 
@@ -53,30 +53,44 @@
         <p>No tags</p>
       }
     </div>
+    -->
   </aside>
 
   <!-- PRODUCT ZONE -->
   <div class="container">
-    <h2>
-      Search Results for:
-      <span style="color: #1a73e8; font-weight: 600">"{{ query }}"</span>
-    </h2>
-
     <main class="products">
-      @if (loading) {
+      <!-- Loading message -->
+      @if (loading && (query || selectedTagIds.length > 0)) {
         <p>Loading products...</p>
       }
 
-      @if (!loading && filteredProducts.length > 0) {
+      <!-- Search results -->
+      @if (!loading) {
+        <h2>
+          Search results
+          @if (query) {
+            for: <span style="color: #1a73e8; font-weight: 600">"{{ query }}"</span>
+          } @else {
+            for tag: <span style="color: #1a73e8; font-weight: 600">"{{ selectedTagName }}"</span>
+          }
+        </h2>
+
+        <p>
+          @if (filteredProducts.length === 0) {
+            No products found
+            @if (query) {
+              for: "{{ query }}"
+            } @else {
+              for tag: "{{ selectedTagName }}"
+            }
+          }
+        </p>
+
         <div class="mini-fiche-list">
           @for (product of filteredProducts; track product.id) {
             <jhi-mini-fiche [idProduit]="product.id!"></jhi-mini-fiche>
           }
         </div>
-      }
-
-      @if (!loading && filteredProducts.length === 0) {
-        <p>No products found for "{{ query }}"</p>
       }
     </main>
   </div>
