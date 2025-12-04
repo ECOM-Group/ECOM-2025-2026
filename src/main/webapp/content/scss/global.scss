@@ -70,6 +70,8 @@ Generic styles
   padding: 1.5%;
   margin-top: 20px;
   border: none;
+  background-color: transparent !important;
+  box-shadow: none !important; /* optionnel, sinon elle garde son ombre */
 }
 
 .error {
@@ -289,4 +291,16 @@ Style back button
     transform: scale(0.98);
     box-shadow: 0 1px 4px rgba(0, 96, 100, 0.12);
   }
+}
+
+/* ==========================================================================
+Global site background
+========================================================================== */
+
+body {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)),
+    url(https://external-preview.redd.it/k6iZb2V_UuLCQ2nrmPngb3aP37xkmHKoyHuRJcKtY_s.jpg?auto=webp&s=5c1e3c3b35237983f46ec8dee73c310daacbdc08);
+  background-size: cover;
+  background-attachment: fixed;
 }

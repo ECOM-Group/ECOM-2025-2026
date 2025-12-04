@@ -3,10 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { IProduct } from 'app/entities/product/product.model';
 import { map } from 'rxjs';
 import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'jhi-mini-fiche',
-  imports: [RouterModule],
+  imports: [RouterModule, CommonModule],
   templateUrl: './mini-fiche.component.html',
   styleUrl: './mini-fiche.component.scss',
 })
@@ -21,6 +22,8 @@ export class MiniFicheComponent implements OnInit {
     tags: [],
   };
 
+  rarityList = ['common', 'rare', 'sr', 'ur', 'mythic'];
+
   constructor(private http: HttpClient) {}
   imageUrl: string | null = null;
 
@@ -34,5 +37,10 @@ export class MiniFicheComponent implements OnInit {
         });
       });
     }
+  }
+
+  get rarity(): string {
+    const id = this.product?.id ?? 0;
+    return this.rarityList[id % this.rarityList.length];
   }
 }
