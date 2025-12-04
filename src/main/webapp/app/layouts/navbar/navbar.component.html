@@ -58,6 +58,7 @@
 
             <!-- Entities menu -->
             <li
+              *jhiHasAnyAuthority="'ROLE_ADMIN'"
               ngbDropdown
               class="nav-item dropdown pointer"
               display="dynamic"
@@ -111,6 +112,13 @@
                   <a class="dropdown-item" routerLink="/prod-order" (click)="collapseNavbar()">
                     <fa-icon icon="asterisk" [fixedWidth]="true"></fa-icon>
                     <span jhiTranslate="global.menu.entities.prodOrder">Prod Order</span>
+                  </a>
+                </li>
+
+                <li>
+                  <a class="dropdown-item" routerLink="/product-image" (click)="collapseNavbar()">
+                    <fa-icon icon="asterisk" [fixedWidth]="true"></fa-icon>
+                    <span>Product Image</span>
                   </a>
                 </li>
 
