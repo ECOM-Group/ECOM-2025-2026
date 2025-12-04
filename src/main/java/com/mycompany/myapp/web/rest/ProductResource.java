@@ -34,7 +34,7 @@ import tech.jhipster.web.util.ResponseUtil;
  * REST controller for managing {@link com.mycompany.myapp.domain.Product}.
  */
 @RestController
-@RequestMapping("/api/products_jhi")
+@RequestMapping("/api/products")
 @Transactional
 public class ProductResource {
 

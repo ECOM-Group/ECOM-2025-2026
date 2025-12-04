@@ -34,4 +34,9 @@ public class ProductTagRepository {
             .setParameter("pId", productId)
             .getResultList();
     }
+
+    @SuppressWarnings("unchecked")
+    public List<Long> findProductIdsForTag(Long tagId) {
+        return em.createNativeQuery("SELECT id_id FROM rel_tag__id WHERE tag_id = :tId").setParameter("tId", tagId).getResultList();
+    }
 }

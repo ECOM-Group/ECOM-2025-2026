@@ -2,6 +2,7 @@ package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.Tag;
 import com.mycompany.myapp.repository.ProductTagRepository;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -22,5 +23,10 @@ public class ProductTagService {
 
     public List<Tag> getTags(Long productId) {
         return repository.findTagsForProduct(productId);
+    }
+
+    @Transactional
+    public List<Long> getProductIdsByTag(Long tagId) {
+        return repository.findProductIdsForTag(tagId);
     }
 }

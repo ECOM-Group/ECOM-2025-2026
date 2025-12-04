@@ -1,6 +1,6 @@
 import { Component, NgZone, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Data, ParamMap, Router, RouterModule } from '@angular/router';
-import { Observable, Subscription, combineLatest, filter, tap } from 'rxjs';
+import { Observable, Subscription, combineLatest, filter, forkJoin, tap } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import SharedModule from 'app/shared/shared.module';
@@ -60,9 +60,43 @@ export class TagComponent implements OnInit {
   }
 
   load(): void {
-    this.queryBackend().subscribe({
-      next: (res: EntityArrayResponseType) => {
-        this.onResponseSuccess(res);
+    this.isLoading = true;
+
+    // 1️⃣ Fetch normal tags
+    this.tagService.query({ sort: this.sortService.buildSortParam(this.sortState()) }).subscribe({
+      next: res => {
+        const tags = res.body ?? [];
+
+        console.log(
+          'Fetched tags:',
+          tags.map(t => ({ id: t.id, name: t.name })),
+        );
+
+        // fetch product IDs for each tag
+        const fetchProductIds = tags.map(tag =>
+          this.tagService.getProductIdsByTag(tag.id).pipe(
+            tap(productIds => {
+              console.log(`Tag ${tag.id} productIds:`, productIds);
+              tag.productIds = productIds; // attach to tag
+            }),
+          ),
+        );
+
+        // 3️⃣ Run all product ID fetches in parallel
+        forkJoin(fetchProductIds).subscribe({
+          next: () => {
+            this.tags.set(this.refineData(tags));
+            this.isLoading = false;
+          },
+          error: () => {
+            // still display tags even if productIds fail
+            this.tags.set(this.refineData(tags));
+            this.isLoading = false;
+          },
+        });
+      },
+      error: () => {
+        this.isLoading = false;
       },
     });
   }
