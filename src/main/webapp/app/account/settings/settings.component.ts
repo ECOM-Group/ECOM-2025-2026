@@ -143,6 +143,10 @@ export default class SettingsComponent implements OnInit {
         this.addressesArray.controls.forEach(addrControl => {
           const addr = addrControl.getRawValue();
 
+          if (!addr.id && addr.deleted) {
+            return;
+          }
+
           if (addr.deleted && addr.id) {
             this.http.delete(`/api/useraddress/${user.id}/address/${addr.id}`).subscribe(() => {
               addrControl.patchValue({ deleted: false });
