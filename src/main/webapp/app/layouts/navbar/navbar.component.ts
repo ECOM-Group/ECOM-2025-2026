@@ -13,12 +13,14 @@ import { EntityNavbarItems } from 'app/entities/entity-navbar-items';
 import { environment } from 'environments/environment';
 import ActiveMenuDirective from './active-menu.directive';
 import NavbarItem from './navbar-item.model';
+import { CartService } from 'app/service/cart/cart.service';
+import { SearchBarComponent } from 'app/layouts/search-bar/search-bar.component';
 
 @Component({
   selector: 'jhi-navbar',
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
-  imports: [RouterModule, SharedModule, HasAnyAuthorityDirective, ActiveMenuDirective],
+  imports: [RouterModule, SharedModule, HasAnyAuthorityDirective, ActiveMenuDirective, SearchBarComponent],
 })
 export default class NavbarComponent implements OnInit {
   inProduction?: boolean;
@@ -28,6 +30,7 @@ export default class NavbarComponent implements OnInit {
   version = '';
   account = inject(AccountService).trackCurrentAccount();
   entitiesNavbarItems: NavbarItem[] = [];
+  cartService = inject(CartService);
 
   private readonly loginService = inject(LoginService);
   private readonly translateService = inject(TranslateService);
@@ -48,6 +51,7 @@ export default class NavbarComponent implements OnInit {
       this.inProduction = profileInfo.inProduction;
       this.openAPIEnabled = profileInfo.openAPIEnabled;
     });
+    this.cartService.notifyCartUpdated();
   }
 
   changeLanguage(languageKey: string): void {

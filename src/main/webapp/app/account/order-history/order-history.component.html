@@ -1,0 +1,19 @@
+<div class="order-history-container">
+  <div class="order-list">
+    @for (order of orders; track order.id) {
+      <div class="selectable-order" [class.selected]="order.id == selectedOrder?.id" (click)="selectOrder(order)">
+        Commande N°{{ order.id }}
+      </div>
+    } @empty {
+      <small>Aucune commande dans l'historique des commandes</small>
+    }
+  </div>
+
+  @if (selectedOrder != null) {
+    <div class="order-detail">
+      <jhi-cart [order]="selectedOrder"></jhi-cart>
+    </div>
+  } @else {
+    <small>Selectionnez une commande....</small>
+  }
+</div>

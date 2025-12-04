@@ -53,6 +53,7 @@ spring:
 
 stripe:
   secret-key: sk_test_51SL1eH9mZN1DQFxyQLFYRbgpScDCp7UDifPo64XvuHNZRYo5PmFReW8Eu9s3SAtE4lAaoeGDsLKq1uMIZDhrmwDl004r5vKtzg
+  public-key: 'pk_test_51SL1eH9mZN1DQFxykNy0gNXhNOGZgIgHZkLX48pw9TWxyFCWx2gPDSzNNaUAGFChLmoQs05oFbJgDWXuWZqHqtkV00dDaJneYm'
 
 server:
   port: 8080
@@ -108,3 +109,7 @@ jhipster:
 # ===================================================================
 
 # application:
+cloudinary:
+  cloud_name: 'dmjxurbkz'
+  api_key: '391891454315665'
+  api_secret: '80rOZIK5ydK6L6fo9XB8mPVzWwU'

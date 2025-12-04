@@ -1,6 +1,20 @@
 #cartHeader {
-  display: flex;
-  justify-content: space-between;
+  padding-top: 0;
+  position: sticky;
+  top: 0;
+  .top {
+    background-color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding-block: 2rem;
+  }
+  .white-fade {
+    padding: 20px 150px;
+    border: red;
+    background: linear-gradient(to bottom, white 0%, white 60%, transparent);
+  }
 }
 
 #paymentButton {
@@ -32,10 +46,7 @@ a {
 
 /* Subtotal styling */
 .subtotal {
-  margin-top: 1.5rem;
-  text-align: right;
   font-size: 1.4rem;
   font-weight: bold;
   color: #003122;
-  padding-top: 1rem;
 }

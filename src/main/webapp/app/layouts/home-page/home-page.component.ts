@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { IProduct } from 'app/entities/product/product.model';
 import { switchMap } from 'rxjs';
 import { HomePageService } from 'app/service/home-page/home-page.service';
 import { MiniFicheComponent } from '../mini-fiche/mini-fiche.component';
+import { CartService } from 'app/service/cart/cart.service';
 
 @Component({
   selector: 'jhi-home-page',
@@ -12,6 +13,7 @@ import { MiniFicheComponent } from '../mini-fiche/mini-fiche.component';
   styleUrl: './home-page.component.scss',
 })
 export default class HomePageComponent {
+  private cartService = inject(CartService);
   topSoldProducts: IProduct[] = [];
   searchedProducts: IProduct[] = [];
   constructor(
@@ -20,6 +22,7 @@ export default class HomePageComponent {
   ) {}
 
   ngOnInit(): void {
+    this.cartService.notifyCartUpdated();
     this.homePageService.GetMostSelledProducts().subscribe({
       next: (products: IProduct[]) => {
         this.topSoldProducts = products;
@@ -29,7 +32,7 @@ export default class HomePageComponent {
       },
     });
   }
-  research(motsCles: string[]): void{
+  research(motsCles: string[]): void {
     this.homePageService.Search(motsCles).subscribe({
       next: (products: IProduct[]) => {
         this.searchedProducts = products;

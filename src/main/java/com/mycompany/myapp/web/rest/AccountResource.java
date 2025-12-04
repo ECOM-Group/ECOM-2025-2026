@@ -1,22 +1,31 @@
 package com.mycompany.myapp.web.rest;
 
+import com.mycompany.myapp.domain.Address;
 import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.repository.AddressRepository;
 import com.mycompany.myapp.repository.UserRepository;
 import com.mycompany.myapp.security.SecurityUtils;
 import com.mycompany.myapp.service.MailService;
 import com.mycompany.myapp.service.UserService;
 import com.mycompany.myapp.service.dto.AdminUserDTO;
 import com.mycompany.myapp.service.dto.PasswordChangeDTO;
-import com.mycompany.myapp.web.rest.errors.*;
+import com.mycompany.myapp.web.rest.errors.EmailAlreadyUsedException;
+import com.mycompany.myapp.web.rest.errors.InvalidPasswordException;
 import com.mycompany.myapp.web.rest.vm.KeyAndPasswordVM;
 import com.mycompany.myapp.web.rest.vm.ManagedUserVM;
+import com.mycompany.myapp.web.rest.vm.RegisterVM;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import java.util.*;
+import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST controller for managing the current user's account.
@@ -35,25 +44,31 @@ public class AccountResource {
     private static final Logger LOG = LoggerFactory.getLogger(AccountResource.class);
 
     private final UserRepository userRepository;
-
+    private final AddressRepository addressRepository;
     private final UserService userService;
 
     private final MailService mailService;
 
-    public AccountResource(UserRepository userRepository, UserService userService, MailService mailService) {
+    public AccountResource(
+        UserRepository userRepository,
+        UserService userService,
+        MailService mailService,
+        AddressRepository addressRepository
+    ) {
         this.userRepository = userRepository;
         this.userService = userService;
         this.mailService = mailService;
+        this.addressRepository = addressRepository;
     }
 
-    /**
+    /*
      * {@code POST  /register} : register the user.
      *
      * @param managedUserVM the managed user View Model.
      * @throws InvalidPasswordException {@code 400 (Bad Request)} if the password is incorrect.
      * @throws EmailAlreadyUsedException {@code 400 (Bad Request)} if the email is already used.
      * @throws LoginAlreadyUsedException {@code 400 (Bad Request)} if the login is already used.
-     */
+     *
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public void registerAccount(@Valid @RequestBody ManagedUserVM managedUserVM) {
@@ -61,6 +76,40 @@ public class AccountResource {
             throw new InvalidPasswordException();
         }
         User user = userService.registerUser(managedUserVM, managedUserVM.getPassword());
+        mailService.sendActivationEmail(user);
+    }
+    */
+    @PostMapping("/register")
+    @Transactional
+    public void register(@Valid @RequestBody RegisterVM registerVM) {
+        if (isPasswordLengthInvalid(registerVM.getPassword())) {
+            throw new InvalidPasswordException();
+        }
+
+        User user = userService.registerUser(registerVM, registerVM.getPassword());
+
+        if (registerVM.getAddresses() != null) {
+            for (RegisterVM.AddressVM a : registerVM.getAddresses()) {
+                Optional<Address> existing = addressRepository.findByStreetAndZipcodeAndCity(a.street, a.zipcode, a.city);
+
+                Address finalAddress;
+
+                if (existing.isPresent()) {
+                    finalAddress = existing.get();
+                } else {
+                    finalAddress = new Address();
+                    finalAddress.setCountry(a.country);
+                    finalAddress.setCity(a.city);
+                    finalAddress.setStreet(a.street);
+                    finalAddress.setZipcode(a.zipcode);
+                    addressRepository.save(finalAddress);
+                }
+
+                finalAddress.addId(user);
+                addressRepository.save(finalAddress);
+            }
+        }
+
         mailService.sendActivationEmail(user);
     }
 

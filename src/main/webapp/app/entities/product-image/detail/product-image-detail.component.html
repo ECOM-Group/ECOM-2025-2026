@@ -1,0 +1,42 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (productImage(); as productImageRef) {
+      <div>
+        <h2 data-cy="productImageDetailsHeading"><span jhiTranslate="ecom20252026App.productImage.detail.title">Product Image</span></h2>
+
+        <hr />
+
+        <jhi-alert-error />
+
+        <jhi-alert />
+
+        <dl class="row-md jh-entity-details">
+          <dt><span jhiTranslate="global.field.id">ID</span></dt>
+          <dd>
+            <span>{{ productImageRef.id }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.productImage.url">Url</span></dt>
+          <dd>
+            <span>{{ productImageRef.url }}</span>
+          </dd>
+          <dt><span jhiTranslate="ecom20252026App.productImage.product">Product</span></dt>
+          <dd>
+            @if (productImage()!.product) {
+              <div>
+                <a [routerLink]="['/product', productImage()!.product?.id, 'view']">{{ productImageRef.product?.id }}</a>
+              </div>
+            }
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back">Retour</span>
+        </button>
+
+        <button type="button" [routerLink]="['/product-image', productImageRef.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit">Editer</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

@@ -1,22 +1,28 @@
 @if (userConnected) {
+  <button class="back-button" (click)="goback()"><i class="fa-solid fa-reply"></i>Retour</button>
   <div class="container mt-4">
     <div id="cartHeader">
-      <h2>Your current cart items:</h2>
-    </div>
-    @if (items.length > 0) {
-      @for (item of items; track item.id) {
-        <jhi-cart-line [orderLine]="item" (updated)="onLineUpdated($event)"></jhi-cart-line>
-      }
-
-      <div class="subtotal">
-        <h3>Subtotal: {{ totalPrice }}</h3>
-        <button id="paymentButton">
-          <a routerLink="/payment"> Pay </a>
-        </button>
+      <div class="top">
+        <h2>Your current cart items:</h2>
+        @if (!order?.valid && items.length > 0) {
+          <div class="subtotal">
+            <button id="paymentButton">
+              <a routerLink="/payment"> Pay {{ totalPrice }}€</a>
+            </button>
+          </div>
+        }
       </div>
-    } @else {
-      <p>No items found for this order.</p>
-    }
+      <div class="white-fade"></div>
+    </div>
+    <div id="cartMain">
+      @if (items.length > 0) {
+        @for (item of items; track item.id) {
+          <jhi-cart-line [orderLine]="item" [isCart]="!order?.valid" (updated)="onLineUpdated($event)"></jhi-cart-line>
+        }
+      } @else {
+        <p>No items found for this order.</p>
+      }
+    </div>
   </div>
 } @else {
   <jhi-login [redirectUrl]="redirectURL"></jhi-login>

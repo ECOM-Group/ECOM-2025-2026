@@ -1,18 +1,52 @@
 @if (isConnected) {
+  <button class="back-button" (click)="goback()"><i class="fa-solid fa-reply"></i>Retour aux produits</button>
   <div class="product-container">
     <div class="product-card">
-      <div class="product-image-container">
-        <img src="../../../content/images/jhipster_family_member_1_head-384.png" alt="{{ product.desc }}" class="product-image" />
+      <div class="product-image-carousel">
+        @if (images.length > 1) {
+          <button class="carousel-btn left" (click)="prevImage()">&#10094;</button>
+        }
+
+        <div
+          class="carousel-image-wrapper"
+          (mousemove)="onMouseMove($event)"
+          (mouseenter)="showZoom = true"
+          (mouseleave)="showZoom = false"
+        >
+          <img [src]="images[currentIndex]" alt="product image" class="carousel-image" #imageRef />
+        </div>
+
+        @if (images.length > 1) {
+          <button class="carousel-btn right" (click)="nextImage()">&#10095;</button>
+        }
       </div>
+
+      @if (showZoom) {
+        <div class="zoom-window">
+          <div
+            class="zoom-image"
+            [ngStyle]="{
+              'background-image': 'url(' + images[currentIndex] + ')',
+              'background-position': backgroundPosition,
+              'background-size': zoomLevel + '%',
+            }"
+          ></div>
+        </div>
+      }
 
       <div class="product-details">
         <h1 class="product-desc">{{ product.name }}</h1>
 
         <p class="product-desc">{{ product.desc }}</p>
         <p class="product-price">{{ product.price }} €</p>
+        <p class="mini-fiche-stock">
+          {{ (product.quantity ?? 0) > 0 ? 'En stock : ' + product.quantity : 'Rupture de stock' }}
+        </p>
 
         <div class="product-actions">
-          <button (click)="addToCart(product.id)" class="add-to-cart-button">Ajouter au panier</button>
+          <button (click)="addToCart(product.id)" class="add-to-cart-button" [disabled]="(product.quantity ?? 0) === 0">
+            Ajouter au panier
+          </button>
 
           @for (msg of successMessages; track msg; let i = $index) {
             <div class="feedback-message" [ngStyle]="{ top: 115 + i * 30 + '%', left: '42%' }">

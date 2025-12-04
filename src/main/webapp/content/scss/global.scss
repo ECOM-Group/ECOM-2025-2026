@@ -234,3 +234,59 @@ angular-cli removes postcss-rtl processed inline css, processed rules must be ad
   }
 }
 /* jhipster-needle-scss-add-main JHipster will add new css style */
+
+/* ==========================================================================
+Style back button
+========================================================================== */
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.6em 1.4em 0.6em 1em;
+  background: linear-gradient(90deg, #e0f7fa 0%, #b2ebf2 100%);
+  color: #006064;
+  font-weight: 600;
+  font-size: 1.05rem;
+  border: none;
+  border-radius: 2em;
+  box-shadow:
+    0 2px 8px rgba(0, 96, 100, 0.08),
+    0 1.5px 0 #b2ebf2 inset;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    box-shadow 0.2s,
+    transform 0.1s;
+  position: relative;
+  overflow: hidden;
+
+  &:before {
+    display: inline-block;
+    width: 1.2em;
+    height: 1.2em;
+    margin-right: 0.3em;
+    background: linear-gradient(135deg, #006064 60%, #b2ebf2 100%);
+    mask-size: cover;
+    mask-repeat: no-repeat;
+    vertical-align: middle;
+    transition: background 0.2s;
+  }
+
+  &:hover,
+  &:focus {
+    box-shadow:
+      0 4px 16px rgba(0, 96, 100, 0.16),
+      0 1.5px 0 #b2ebf2 inset;
+    transform: translateY(-2px) scale(1.03);
+    outline: none;
+    color: #004d40;
+    &:before {
+      background: linear-gradient(135deg, #004d40 60%, #b2ebf2 100%);
+    }
+  }
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 4px rgba(0, 96, 100, 0.12);
+  }
+}

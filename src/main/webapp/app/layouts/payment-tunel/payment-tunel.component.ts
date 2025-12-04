@@ -1,6 +1,6 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { NgIf } from '@angular/common';
+import { NgIf, Location } from '@angular/common';
 import { AdressFormComponent } from '../adress-form/adress-form.component';
 import { AdresseFormGroup } from 'app/layouts/adress-form/adress-form-group';
 import { CardFormGroup } from '../payment-card-form/payment-card-group-form';
@@ -13,15 +13,18 @@ import LoginComponent from 'app/login/login.component';
 import { IUser } from 'app/admin/user-management/user-management.model';
 import { IProdOrder } from 'app/entities/prod-order/prod-order.model';
 import { loadStripe, Stripe, StripeCardElement } from '@stripe/stripe-js';
+import { RouterLink } from '@angular/router';
+import { CartService } from 'app/service/cart/cart.service';
 
 @Component({
   standalone: true,
   selector: 'jhi-payment-tunel',
-  imports: [ReactiveFormsModule, NgIf, AdressFormComponent, /* PaymentCardFormComponent ,*/ LoginComponent],
+  imports: [ReactiveFormsModule, NgIf, AdressFormComponent, /* PaymentCardFormComponent ,*/ LoginComponent, RouterLink],
   templateUrl: './payment-tunel.component.html',
   styleUrls: ['./payment-tunel.component.scss'],
 })
 export default class PaymentTunelComponent implements OnInit, AfterViewInit {
+  private cartService = inject(CartService);
   paymentForm!: FormGroup;
   isConnected = true;
 
@@ -35,6 +38,7 @@ export default class PaymentTunelComponent implements OnInit, AfterViewInit {
     private router: Router,
     private http: HttpClient,
     private accountService: AccountService,
+    private location: Location,
   ) {}
 
   ngOnInit(): void {
@@ -73,6 +77,10 @@ export default class PaymentTunelComponent implements OnInit, AfterViewInit {
         next: prodOrder => console.log('ON SUBSCRIBE :', prodOrder),
         error: err => console.error('Erreur :', err),
       });
+  }
+
+  goback(): void {
+    this.location.back();
   }
 
   async ngAfterViewInit() {

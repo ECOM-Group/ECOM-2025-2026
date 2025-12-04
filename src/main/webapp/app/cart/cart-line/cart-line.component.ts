@@ -1,6 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { IOrderLine } from 'app/entities/order-line/order-line.model';
 import { OrderLineService } from 'app/entities/order-line/service/order-line.service';
+import { CartService } from 'app/service/cart/cart.service';
 
 @Component({
   selector: 'jhi-cart-line',
@@ -8,10 +10,27 @@ import { OrderLineService } from 'app/entities/order-line/service/order-line.ser
   styleUrls: ['./cart-line.component.scss'],
 })
 export class CartLineComponent {
+  @Input() isCart = true;
   @Input() orderLine!: IOrderLine;
-  @Output() updated = new EventEmitter<IOrderLine>(); // notify parent cart
+  @Output() updated = new EventEmitter<{ id: number; delete: boolean; priceDiff: number }>(); // notify parent cart
 
-  constructor(private orderLineService: OrderLineService) {}
+  imageUrl: string | null = null;
+
+  private cartService = inject(CartService);
+
+  constructor(
+    private orderLineService: OrderLineService,
+    private http: HttpClient,
+  ) {}
+
+  ngOnInit(): void {
+    const idProduit = this.orderLine?.product?.id;
+    if (idProduit) {
+      this.http.get<any>(`/api/product-images/first-by-product/${idProduit}`).subscribe(img => {
+        this.imageUrl = img?.url ?? 'assets/images/no-image.png';
+      });
+    }
+  }
 
   increment(): void {
     if (!this.orderLine) return;
@@ -20,6 +39,7 @@ export class CartLineComponent {
       next: res => {
         if (res.body) {
           this.orderLine = res.body;
+          this.updated.emit({ id: this.orderLine.id, delete: false, priceDiff: this.orderLine.unitPrice ?? 0 });
         }
       },
       error: err => console.error('Error incrementing quantity', err),
@@ -35,9 +55,10 @@ export class CartLineComponent {
         if (res.body && 'id' in res.body) {
           // updated line
           this.orderLine = res.body as IOrderLine;
+          this.updated.emit({ id: this.orderLine.id, delete: false, priceDiff: -(this.orderLine.unitPrice ?? 0) });
         } else {
-          // line deleted notify parent cart
-          this.updated.emit(this.orderLine);
+          this.updated.emit({ id: this.orderLine.id, delete: true, priceDiff: -(this.orderLine.unitPrice ?? 0) });
+          //this.cartService.notifyCartUpdated();
         }
       },
       error: err => console.error('Error decrementing quantity', err),
@@ -49,7 +70,10 @@ export class CartLineComponent {
 
     this.orderLineService.delete(this.orderLine.id).subscribe({
       // line deleted notify parent cart
-      next: () => this.updated.emit(this.orderLine),
+      next: () => {
+        this.updated.emit({ id: this.orderLine.id, delete: true, priceDiff: -(this.orderLine.total ?? 0) });
+        // this.cartService.notifyCartUpdated();
+      },
       error: err => console.error('Error deleting line', err),
     });
   }

@@ -1,69 +1,85 @@
 .cart-line {
   display: flex;
-  align-items: center; /* everything vertically centered */
+  align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1rem;
+  gap: 1rem;
+  padding: 1rem;
   border-bottom: 1px solid #ddd;
   background-color: #fff;
 
-  .info {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    flex: 1;
+  /* Responsive alignment for mobile */
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .image-wrapper {
     display: flex;
-    flex-direction: column; /* stack image and name vertically */
-    align-items: center; /* center name under image */
+    flex-direction: column;
+    align-items: center;
     text-align: center;
-    flex-shrink: 0; /* prevent resizing */
+    flex-shrink: 0;
 
+    /* Image always same size */
     .product-img {
-      width: 80px;
-      height: 80px;
+      width: 90px;
+      height: 90px;
       object-fit: cover;
       border-radius: 8px;
       background-color: #f5f5f5;
     }
 
     .product-name {
-      margin-top: 1rem;
+      margin-top: 0.5rem;
       font-weight: 600;
-      font-size: 0.1rem;
+      font-size: 0.9rem;
       color: #333;
-      text-align: center;
-      max-width: 90px; /* optional: wrap long names nicely */
+      max-width: 100px;
       word-wrap: break-word;
     }
   }
 
-  .details {
+  .info {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    flex: 1;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
 
-    p {
-      margin: 0;
-      color: #333;
+    @media (max-width: 600px) {
+      width: 100%;
+      flex-direction: column;
+      align-items: flex-start;
     }
-  }
 
-  .actions {
-    display: flex;
-    gap: 0.5rem;
+    .details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
 
-    button {
-      padding: 0.3rem 0.6rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      cursor: pointer;
-      background-color: #fff;
-      transition: background-color 0.2s ease;
+      p {
+        margin: 0;
+        color: #333;
+        font-size: 0.95rem;
+      }
+    }
 
-      &:hover {
-        background-color: #f0f0f0;
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+
+      button {
+        padding: 0.35rem 0.75rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        cursor: pointer;
+        background-color: #fff;
+        font-size: 1rem;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background-color: #f0f0f0;
+        }
       }
     }
   }

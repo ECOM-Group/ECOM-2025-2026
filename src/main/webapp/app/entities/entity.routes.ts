@@ -37,6 +37,11 @@ const routes: Routes = [
     loadChildren: () => import('./prod-order/prod-order.routes'),
   },
   {
+    path: 'product-image',
+    data: { pageTitle: 'ecom20252026App.productImage.home.title' },
+    loadChildren: () => import('./product-image/product-image.routes'),
+  },
+  {
     path: 'order-line',
     data: { pageTitle: 'ecom20252026App.orderLine.home.title' },
     loadChildren: () => import('./order-line/order-line.routes'),

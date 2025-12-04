@@ -2,11 +2,15 @@
   <!-- Afficher l'image du produit et ces informations en dessous-->
   <a routerLink="/fiche_produit/{{ product.id }}" class="mini-fiche-link">
     <!-- TODO: corriger src pour les images -->
-    <img src="" alt="{{ product.name }}" class="mini-fiche-image" />
+    <img [src]="imageUrl || ''" alt="{{ product.name }}" class="mini-fiche-image" />
+
     <div class="mini-fiche-info">
       <h2 class="mini-fiche-name">{{ product.name }}</h2>
       <p class="mini-fiche-description">{{ product.desc }}</p>
       <p class="mini-fiche-price">{{ product.price }} €</p>
+      <p class="mini-fiche-stock">
+        {{ (product?.quantity ?? 0) > 0 ? 'En stock : ' + product.quantity : 'Rupture de stock' }}
+      </p>
     </div>
   </a>
 </div>

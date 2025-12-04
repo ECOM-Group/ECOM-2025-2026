@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.*;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -27,4 +29,24 @@ public interface AddressRepository extends AddressRepositoryWithBagRelationships
     default Page<Address> findAllWithEagerRelationships(Pageable pageable) {
         return this.fetchBagRelationships(this.findAll(pageable));
     }
+
+    @Query(
+        value = "SELECT a.* FROM address a " + "JOIN rel_address__id ra ON a.id = ra.address_id " + "WHERE ra.id_id = :userId",
+        nativeQuery = true
+    )
+    List<Address> findAllByUsersId(@Param("userId") Long userId);
+
+    @Query(
+        """
+            SELECT a FROM Address a
+            WHERE a.street = :street
+            AND a.zipcode = :zipcode
+            AND a.city = :city
+        """
+    )
+    Optional<Address> findByStreetAndZipcodeAndCity(
+        @Param("street") String street,
+        @Param("zipcode") Integer zipcode,
+        @Param("city") String city
+    );
 }

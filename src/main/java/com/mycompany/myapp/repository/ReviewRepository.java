@@ -2,7 +2,10 @@ package com.mycompany.myapp.repository;
 
 import com.mycompany.myapp.domain.Review;
 import java.util.List;
-import org.springframework.data.jpa.repository.*;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -13,4 +16,8 @@ import org.springframework.stereotype.Repository;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("select review from Review review where review.user.login = ?#{authentication.name}")
     List<Review> findByUserIsCurrentUser();
+
+    @Modifying
+    @Query("update Review r set r.user = null where r.user.id = :userId")
+    void clearUserFromReviews(@Param("userId") Long userId);
 }

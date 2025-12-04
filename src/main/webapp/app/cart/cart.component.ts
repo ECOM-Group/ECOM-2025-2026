@@ -1,15 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { IOrderLine } from 'app/entities/order-line/order-line.model';
 import { ProdOrderService } from 'app/entities/prod-order/service/prod-order.service';
 import { HttpClient } from '@angular/common/http';
+import { Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AccountService } from 'app/core/auth/account.service';
-import { EMPTY, switchMap } from 'rxjs';
+import { EMPTY, of, switchMap } from 'rxjs';
 import { IUser } from 'app/entities/user/user.model';
 import { IProdOrder } from 'app/entities/prod-order/prod-order.model';
 import LoginComponent from 'app/login/login.component';
 import { CartLineComponent } from './cart-line/cart-line.component';
+import { CartService } from 'app/service/cart/cart.service';
 
 @Component({
   selector: 'jhi-cart',
@@ -17,27 +19,51 @@ import { CartLineComponent } from './cart-line/cart-line.component';
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.scss'],
 })
-export class CartComponent implements OnInit {
+export class CartComponent implements OnInit, OnChanges {
+  private cartService = inject(CartService);
   items: IOrderLine[] = [];
   totalPrice = 0;
+  orderValid = true; // false = cart, true = bought
   orderId = -1;
   userId = -1;
   userConnected = true;
   redirectURL = '/';
+  @Input() order: IProdOrder | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private prodOrderService: ProdOrderService,
     private http: HttpClient,
     private accountService: AccountService,
+    private location: Location,
   ) {}
 
   ngOnInit(): void {
     const orderIdString = this.route.snapshot.paramMap.get('orderId');
     this.orderId = Number(orderIdString);
-    // Number(null) = 0 donc obligé de séparer
-    if (!orderIdString || isNaN(this.orderId)) this.orderId = -1;
+    // orderId = 0, NaN, > 0 , 0 <
+
+    if (isNaN(this.orderId) || this.orderId <= 0) {
+      this.orderId = this.order?.id ?? -1;
+    }
+    // orderId = -1 ou > 0
     this.loadOrderItems();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['order']) {
+      const bf = changes['order'].currentValue?.id;
+      const af = changes['order'].previousValue?.id;
+      if (af === bf) return;
+      console.log('Cart reloaded');
+
+      this.orderId = bf;
+      this.loadOrderItems();
+    }
+  }
+
+  goback(): void {
+    this.location.back();
   }
 
   loadOrderItems(): void {
@@ -58,10 +84,11 @@ export class CartComponent implements OnInit {
           console.log('User id = ', this.userId, 'orderId = ', this.orderId);
 
           if (this.orderId < 0) return this.http.get<IProdOrder>(`/api/prod-orders/${this.userId}/current`);
-          return this.http.get<IProdOrder>(`/api/prod-orders/${this.orderId}`);
+          return this.order !== null ? of(this.order) : this.http.get<IProdOrder>(`/api/prod-orders/${this.orderId}`);
         }),
         switchMap(prodOrder => {
           // Récupère les OrderLines de la prod Order
+          this.order = prodOrder;
           if (!prodOrder || prodOrder.user?.id !== this.userId) {
             console.log(`prodOrder.user : ${prodOrder.user ? 'ok' : 'null'} of ID ${prodOrder.user?.id} VS this.userID = ${this.userId}`);
             return EMPTY;
@@ -84,7 +111,11 @@ export class CartComponent implements OnInit {
       });
   }
 
-  onLineUpdated(line: IOrderLine): void {
-    this.items = this.items.filter(i => i.id !== line.id);
+  onLineUpdated(data: { id: number; delete: boolean; priceDiff: number }): void {
+    this.totalPrice += data.priceDiff;
+    if (data.delete) {
+      this.items = this.items.filter(i => i.id !== data.id);
+    }
+    this.cartService.notifyCartUpdated();
   }
 }

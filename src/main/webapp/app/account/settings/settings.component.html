@@ -17,42 +17,6 @@
       @if (settingsForm.value.login) {
         <form name="form" (ngSubmit)="save()" [formGroup]="settingsForm" novalidate>
           <div class="mb-3">
-            <label class="form-label" for="firstName" jhiTranslate="settings.form.firstname">Prénom</label>
-            <input
-              type="text"
-              class="form-control"
-              id="firstName"
-              name="firstName"
-              placeholder="{{ 'settings.form.firstname.placeholder' | translate }}"
-              formControlName="firstName"
-              data-cy="firstname"
-            />
-
-            @let firstNameRef = settingsForm.get('firstName')!;
-            @if (firstNameRef.invalid && (firstNameRef.dirty || firstNameRef.touched)) {
-              <div>
-                @if (firstNameRef?.errors?.required) {
-                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.firstname.required"
-                    >Votre prénom est requis.</small
-                  >
-                }
-
-                @if (firstNameRef?.errors?.minlength) {
-                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.firstname.minlength"
-                    >Votre prénom doit comporter au moins un caractère.</small
-                  >
-                }
-
-                @if (firstNameRef?.errors?.maxlength) {
-                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.firstname.maxlength"
-                    >Votre prénom ne doit pas comporter plus de 50 caractères.</small
-                  >
-                }
-              </div>
-            }
-          </div>
-
-          <div class="mb-3">
             <label class="form-label" for="lastName" jhiTranslate="settings.form.lastname">Nom</label>
             <input
               type="text"
@@ -68,21 +32,53 @@
             @if (lastNameRef.invalid && (lastNameRef.dirty || lastNameRef.touched)) {
               <div>
                 @if (lastNameRef?.errors?.required) {
-                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.lastname.required"
-                    >Votre nom est requis.</small
-                  >
+                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.lastname.required">
+                    Votre nom est requis.
+                  </small>
                 }
-
                 @if (lastNameRef?.errors?.minlength) {
-                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.lastname.minlength"
-                    >Votre nom doit comporter au moins un caractère.</small
-                  >
+                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.lastname.minlength">
+                    Votre nom doit comporter au moins un caractère.
+                  </small>
                 }
-
                 @if (lastNameRef?.errors?.maxlength) {
-                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.lastname.maxlength"
-                    >Votre nom ne doit pas comporter plus de 50 caractères.</small
-                  >
+                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.lastname.maxlength">
+                    Votre nom ne doit pas comporter plus de 50 caractères.
+                  </small>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="firstName" jhiTranslate="settings.form.firstname">Prénom</label>
+            <input
+              type="text"
+              class="form-control"
+              id="firstName"
+              name="firstName"
+              placeholder="{{ 'settings.form.firstname.placeholder' | translate }}"
+              formControlName="firstName"
+              data-cy="firstname"
+            />
+
+            @let firstNameRef = settingsForm.get('firstName')!;
+            @if (firstNameRef.invalid && (firstNameRef.dirty || firstNameRef.touched)) {
+              <div>
+                @if (firstNameRef?.errors?.required) {
+                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.firstname.required">
+                    Votre prénom est requis.
+                  </small>
+                }
+                @if (firstNameRef?.errors?.minlength) {
+                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.firstname.minlength">
+                    Votre prénom doit comporter au moins un caractère.
+                  </small>
+                }
+                @if (firstNameRef?.errors?.maxlength) {
+                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.firstname.maxlength">
+                    Votre prénom ne doit pas comporter plus de 50 caractères.
+                  </small>
                 }
               </div>
             }
@@ -104,27 +100,24 @@
             @if (emailRef.invalid && (emailRef.dirty || emailRef.touched)) {
               <div>
                 @if (emailRef?.errors?.required) {
-                  <small class="form-text text-danger" jhiTranslate="global.messages.validate.email.required"
-                    >Votre email est requis.</small
-                  >
+                  <small class="form-text text-danger" jhiTranslate="global.messages.validate.email.required">
+                    Votre email est requis.
+                  </small>
                 }
-
                 @if (emailRef?.errors?.email) {
-                  <small class="form-text text-danger" jhiTranslate="global.messages.validate.email.invalid"
-                    >Votre email n&apos;est pas valide.</small
-                  >
+                  <small class="form-text text-danger" jhiTranslate="global.messages.validate.email.invalid">
+                    Votre email n&apos;est pas valide.
+                  </small>
                 }
-
                 @if (emailRef?.errors?.minlength) {
-                  <small class="form-text text-danger" jhiTranslate="global.messages.validate.email.minlength"
-                    >Votre email doit comporter au moins 5 caractères.</small
-                  >
+                  <small class="form-text text-danger" jhiTranslate="global.messages.validate.email.minlength">
+                    Votre email doit comporter au moins 5 caractères.
+                  </small>
                 }
-
                 @if (emailRef?.errors?.maxlength) {
-                  <small class="form-text text-danger" jhiTranslate="global.messages.validate.email.maxlength"
-                    >Votre email ne doit pas comporter plus de 50 caractères.</small
-                  >
+                  <small class="form-text text-danger" jhiTranslate="global.messages.validate.email.maxlength">
+                    Votre email ne doit pas comporter plus de 50 caractères.
+                  </small>
                 }
               </div>
             }
@@ -141,6 +134,92 @@
             </div>
           }
 
+          <!-- Adresses -->
+          <div class="mb-3">
+            <div class="addresses-section mt-4">
+              <h3>Mes adresses</h3>
+
+              <!-- Liste des adresses si présentes -->
+              @if (addressesArray && addressesArray.length > 0) {
+                @for (addr of addressesArray.controls; track $index) {
+                  <div
+                    [formGroup]="getAddressFormGroup(addr)"
+                    class="mb-3 p-2 border rounded position-relative"
+                    [class.bg-light]="addr.get('deleted')?.value"
+                  >
+                    <div class="d-flex justify-content-end gap-2 position-absolute top-0 end-0">
+                      <button type="button" class="btn btn-sm btn-secondary" (click)="resetAddress($index)">Reset</button>
+                      <button type="button" class="btn btn-sm btn-danger" (click)="toggleDelete($index)" style="width: 85px">
+                        @if (addr.get('deleted')?.value) {
+                          Restaurer
+                        } @else {
+                          Supprimer
+                        }
+                      </button>
+                    </div>
+                    <div class="mb-2">
+                      <label for="country-{{ $index }}" class="form-label">Pays</label>
+                      <input
+                        id="country-{{ $index }}"
+                        type="text"
+                        class="form-control"
+                        formControlName="country"
+                        [class.is-invalid]="addr.get('country')?.invalid && addr.get('country')?.touched"
+                        (input)="markModified($index, 'country')"
+                      />
+                    </div>
+
+                    <div class="mb-2">
+                      <label for="city-{{ $index }}" class="form-label">Ville</label>
+                      <input
+                        id="city-{{ $index }}"
+                        type="text"
+                        class="form-control"
+                        formControlName="city"
+                        [class.is-invalid]="addr.get('city')?.invalid && addr.get('city')?.touched"
+                        (input)="markModified($index, 'city')"
+                      />
+                    </div>
+
+                    <div class="mb-2">
+                      <label for="street-{{ $index }}" class="form-label">Rue</label>
+                      <input
+                        id="street-{{ $index }}"
+                        type="text"
+                        class="form-control"
+                        formControlName="street"
+                        [class.is-invalid]="addr.get('street')?.invalid && addr.get('street')?.touched"
+                        (input)="markModified($index, 'street')"
+                      />
+                    </div>
+
+                    <div class="mb-2">
+                      <label for="zipcode-{{ $index }}" class="form-label">Code postal</label>
+                      <input
+                        id="zipcode-{{ $index }}"
+                        type="text"
+                        class="form-control"
+                        formControlName="zipcode"
+                        [class.is-invalid]="addr.get('zipcode')?.invalid && addr.get('zipcode')?.touched"
+                        (input)="markModified($index, 'zipcode')"
+                      />
+                    </div>
+
+                    @if (addr.get('modified')?.value) {
+                      <div class="text-warning small">Modifié</div>
+                    }
+                  </div>
+                }
+              } @else {
+                <div class="alert alert-info">Aucune adresse disponible</div>
+              }
+
+              <!-- Bouton Ajouter une adresse toujours visible -->
+              <button type="button" class="btn btn-sm btn-primary mt-2" (click)="addAddress()">Ajouter une adresse</button>
+            </div>
+          </div>
+
+          <!-- Bouton sauvegarder -->
           <button
             type="submit"
             [disabled]="settingsForm.invalid"
