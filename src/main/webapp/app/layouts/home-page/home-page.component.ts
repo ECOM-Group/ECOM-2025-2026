@@ -7,6 +7,7 @@ import { MiniFicheComponent } from '../mini-fiche/mini-fiche.component';
 import { CartService } from 'app/service/cart/cart.service';
 import { TagService } from 'app/entities/tag/service/tag.service';
 import { TagLabelComponent } from 'app/entities/tag/tag-label/tag-label.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'jhi-home-page',
@@ -25,6 +26,7 @@ export default class HomePageComponent {
     private http: HttpClient,
     private homePageService: HomePageService,
     private tagService: TagService,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -61,8 +63,13 @@ export default class HomePageComponent {
   }
 
   onTagClicked(tagId: number): void {
-    this.selectedTagIds = [tagId];
     const tagName = this.tags.find(t => t.id === tagId)?.name;
-    if (tagName) this.research([tagName]);
+
+    if (!tagName) return;
+    this.router.navigate(['/search'], {
+      queryParams: {
+        tag: tagId,
+      },
+    });
   }
 }
