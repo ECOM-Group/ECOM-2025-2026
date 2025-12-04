@@ -1,14 +1,7 @@
 <div class="mini-fiche-container">
   <a routerLink="/fiche_produit/{{ product.id }}" class="mini-fiche-link">
-    <!-- BADGE DE RARETÉ (pseudo-aléatoire via TS) -->
-    <div class="rarity-badge" [ngClass]="rarity">
-      {{ rarity }}
-    </div>
-
-    <!-- IMAGE DU PRODUIT -->
     <img [src]="imageUrl || ''" alt="{{ product.name }}" class="mini-fiche-image" />
 
-    <!-- INFORMATIONS DU PRODUIT -->
     <div class="mini-fiche-info">
       <h2 class="mini-fiche-name">{{ product.name }}</h2>
 
