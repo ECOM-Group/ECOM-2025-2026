@@ -5,29 +5,38 @@ import { ProductService } from 'app/entities/product/service/product.service';
 import { MiniFicheComponent } from 'app/layouts/mini-fiche/mini-fiche.component';
 import { FilterOptions, FilterOption } from 'app/shared/filter/filter.model';
 import { FormsModule } from '@angular/forms';
+import { TagService } from 'app/entities/tag/service/tag.service';
+import { ITag } from 'app/entities/tag/tag.model';
+import { TagLabelComponent } from 'app/entities/tag/tag-label/tag-label.component';
 
 @Component({
   selector: 'jhi-product-search',
   templateUrl: './product-search.component.html',
   styleUrls: ['./product-search.component.scss'],
-  imports: [MiniFicheComponent, FormsModule],
+  imports: [MiniFicheComponent, FormsModule, TagLabelComponent],
 })
 export class ProductSearchComponent implements OnInit {
   query: string | null = null;
+
   products: IProduct[] = [];
   filteredProducts: IProduct[] = [];
+
+  tags: ITag[] = [];
+  selectedTagIds: number[] = [];
+  tagFilteredProductIds: number[] | null = null;
+
   loading = false;
 
   minPrice = 0;
   maxPrice = 0;
-  sliderPrice = 0; // current selected max price
+  sliderPrice = 0;
 
-  // Filters for the page (currently static with only color and priceRange)
   searchFilters = new FilterOptions([new FilterOption('color'), new FilterOption('priceRange')]);
 
   constructor(
     private route: ActivatedRoute,
     private productService: ProductService,
+    private tagService: TagService,
   ) {}
 
   ngOnInit(): void {
@@ -36,17 +45,23 @@ export class ProductSearchComponent implements OnInit {
       if (this.query) this.searchProducts(this.query);
     });
 
-    // Subscribe to filter changes to update results dynamically
+    this.tagService.findAll().subscribe({
+      next: res => (this.tags = res.body ?? []),
+      error: err => console.error('Failed to load tags', err),
+    });
+
     this.searchFilters.filterChanges.subscribe(() => this.applyFilters());
   }
 
   searchProducts(query: string): void {
     this.loading = true;
+    // Reset selected tags when starting a new search
+    this.clearAllTags();
 
     this.productService.search(query).subscribe({
       next: (products: IProduct[]) => {
         this.products = products;
-        this.filteredProducts = [...products]; // initially show all results
+        this.filteredProducts = [...products];
         this.setupPriceSlider();
         this.loading = false;
       },
@@ -55,13 +70,12 @@ export class ProductSearchComponent implements OnInit {
   }
 
   applyFilters(): void {
-    // Filter by slider price
-    this.filteredProducts = this.products.filter(product => {
+    let result = this.products.filter(product => {
       const price = product.price ?? 0;
       return price >= this.minPrice && price <= this.sliderPrice;
     });
-    // Filter by other options
-    this.filteredProducts = this.filteredProducts.filter(product =>
+
+    result = result.filter(product =>
       this.searchFilters.filterOptions.every(filter => {
         if (!filter.isSet()) return true;
 
@@ -73,6 +87,12 @@ export class ProductSearchComponent implements OnInit {
         }
       }),
     );
+
+    if (this.tagFilteredProductIds && this.selectedTagIds.length > 0) {
+      result = result.filter(product => product.id != null && this.tagFilteredProductIds!.includes(product.id));
+    }
+
+    this.filteredProducts = result;
   }
 
   toggleFilter(name: string, value: string): void {
@@ -86,13 +106,13 @@ export class ProductSearchComponent implements OnInit {
 
   clearAllFilters(): void {
     this.searchFilters.clear();
+    this.clearAllTags();
   }
 
   clearFilter(name: string, value: string): void {
     this.searchFilters.removeFilter(name, value);
   }
 
-  /** Price Slider Setup and Handlers */
   setupPriceSlider(): void {
     const prices = this.products.map(p => p.price).filter((p): p is number => p != null);
 
@@ -109,7 +129,7 @@ export class ProductSearchComponent implements OnInit {
   }
 
   onSliderChange(): void {
-    this.applyFilters(); // fully reactive live filtering
+    this.applyFilters();
   }
 
   onEmptyPrice(): void {
@@ -119,7 +139,48 @@ export class ProductSearchComponent implements OnInit {
     }
   }
 
-  /* Getters for Filter Options */
+  /** MULTI TAG TOGGLE */
+  onTagToggled(tagId: number): void {
+    if (this.selectedTagIds.includes(tagId)) {
+      this.selectedTagIds = this.selectedTagIds.filter(id => id !== tagId);
+    } else {
+      this.selectedTagIds.push(tagId);
+    }
+
+    this.applyMultiTagFilter();
+  }
+
+  applyMultiTagFilter(): void {
+    if (this.selectedTagIds.length === 0) {
+      this.tagFilteredProductIds = null;
+      this.applyFilters();
+      return;
+    }
+
+    const requests = this.selectedTagIds.map(id => this.tagService.getProductIdsByTag(id));
+
+    Promise.all(requests.map(r => r.toPromise()))
+      .then(resultSets => {
+        const cleanResults: number[][] = resultSets.map(r => r ?? []);
+
+        const intersection = cleanResults.reduce((a, b) => a.filter(id => b.includes(id)), cleanResults[0] ?? []);
+
+        this.tagFilteredProductIds = intersection;
+        this.applyFilters();
+      })
+      .catch(err => {
+        console.error('Tag filter failed', err);
+        this.tagFilteredProductIds = null;
+        this.applyFilters();
+      });
+  }
+
+  clearAllTags(): void {
+    this.selectedTagIds = [];
+    this.tagFilteredProductIds = null;
+    this.applyFilters();
+  }
+
   get colorFilterValues(): string[] {
     return this.searchFilters.filterOptions.find(f => f.name === 'color')?.values ?? [];
   }

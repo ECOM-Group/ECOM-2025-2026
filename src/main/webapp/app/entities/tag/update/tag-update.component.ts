@@ -23,6 +23,7 @@ export class TagUpdateComponent implements OnInit {
   tag: ITag | null = null;
 
   productsSharedCollection: IProduct[] = [];
+  selectedProducts: IProduct[] = [];
 
   protected tagService = inject(TagService);
   protected tagFormService = inject(TagFormService);
@@ -40,7 +41,6 @@ export class TagUpdateComponent implements OnInit {
       if (tag) {
         this.updateForm(tag);
       }
-
       this.loadRelationshipsOptions();
     });
   }
@@ -96,5 +96,47 @@ export class TagUpdateComponent implements OnInit {
         map((products: IProduct[]) => this.productService.addProductToCollectionIfMissing<IProduct>(products, ...(this.tag?.ids ?? []))),
       )
       .subscribe((products: IProduct[]) => (this.productsSharedCollection = products));
+  }
+
+  // NEW method for multiple products
+  attachMultipleProductsToTag(products: IProduct[]): void {
+    if (!products.length || !this.tag?.id) return;
+
+    const tagId = this.tag.id;
+    const attachObservables: Observable<void>[] = [];
+
+    products.forEach(product => {
+      if (product.id) {
+        attachObservables.push(this.tagService.attachToProduct(product.id, tagId));
+      }
+    });
+
+    // Subscribe to all attach requests individually
+    attachObservables.forEach(obs =>
+      obs.subscribe({
+        next: () => console.log(`Attached product to tag ${tagId}`),
+        error: err => console.error('Failed to attach product', err),
+      }),
+    );
+
+    // Clear selection after attaching
+    this.selectedProducts = [];
+  }
+
+  // check if a product is already selected
+  isSelected(product: IProduct): boolean {
+    return this.selectedProducts.some(p => p.id === product.id);
+  }
+
+  // toggle selection when checkbox changes
+  toggleProductSelection(event: Event, product: IProduct): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    if (checked) {
+      if (!this.isSelected(product)) {
+        this.selectedProducts.push(product);
+      }
+    } else {
+      this.selectedProducts = this.selectedProducts.filter(p => p.id !== product.id);
+    }
   }
 }

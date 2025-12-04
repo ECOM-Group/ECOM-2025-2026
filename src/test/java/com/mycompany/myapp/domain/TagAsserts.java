@@ -59,6 +59,6 @@ public class TagAsserts {
     public static void assertTagUpdatableRelationshipsEquals(Tag expected, Tag actual) {
         assertThat(actual)
             .as("Verify Tag relationships")
-            .satisfies(a -> assertThat(a.getIds()).as("check ids").isEqualTo(expected.getIds()));
+            .satisfies(a -> assertThat(a.getProducts()).as("check ids").isEqualTo(expected.getProducts()));
     }
 }

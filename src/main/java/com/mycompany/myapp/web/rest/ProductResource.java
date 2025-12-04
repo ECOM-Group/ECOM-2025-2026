@@ -1,12 +1,15 @@
 package com.mycompany.myapp.web.rest;
 
+import com.mycompany.myapp.domain.Product;
+import com.mycompany.myapp.repository.ProductRepository;
+import com.mycompany.myapp.repository.ProductRepositoryCustom;
+import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,12 +27,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.mycompany.myapp.domain.Product;
-import com.mycompany.myapp.repository.ProductRepository;
-import com.mycompany.myapp.repository.ProductRepositoryCustom;
-import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
-
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.ResponseUtil;
 
@@ -248,12 +245,10 @@ public class ProductResource {
 
         return results;
     }*/
-   
+
     @GetMapping("/search")
     public List<Product> findByKeywords(@RequestParam("q") String query) {
-        List<String> keywords = Arrays.stream(query.split("\\s+"))
-            .filter(k -> !k.isBlank())
-            .toList();
+        List<String> keywords = Arrays.stream(query.split("\\s+")).filter(k -> !k.isBlank()).toList();
 
         List<Product> results = productRepositoryCustom.findByKeywords(keywords);
         return results;
