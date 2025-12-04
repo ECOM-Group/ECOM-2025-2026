@@ -10,10 +10,11 @@ import { IOrderLine } from 'app/entities/order-line/order-line.model';
 import { RouterModule } from '@angular/router';
 import LoginComponent from 'app/login/login.component';
 import { CartService } from 'app/service/cart/cart.service';
+import { CommentComponent } from '../comment/comment.component';
 
 @Component({
   selector: 'jhi-fiche-produit',
-  imports: [LoginComponent, NgStyle, RouterModule],
+  imports: [LoginComponent, NgStyle, RouterModule, CommentComponent],
   templateUrl: './fiche-produit.component.html',
   styleUrl: './fiche-produit.component.scss',
 })

@@ -1,7 +1,9 @@
 package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.domain.Review;
+import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.ReviewRepository;
+import com.mycompany.myapp.service.UserService;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -11,6 +13,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -33,9 +36,11 @@ public class ReviewResource {
     private String applicationName;
 
     private final ReviewRepository reviewRepository;
+    private final UserService userService;
 
-    public ReviewResource(ReviewRepository reviewRepository) {
+    public ReviewResource(ReviewRepository reviewRepository, UserService userService) {
         this.reviewRepository = reviewRepository;
+        this.userService = userService;
     }
 
     /**
@@ -51,6 +56,11 @@ public class ReviewResource {
         if (review.getId() != null) {
             throw new BadRequestAlertException("A new review cannot already have an ID", ENTITY_NAME, "idexists");
         }
+        User user = userService.getUserWithAuthorities().get();
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        review.setUser(user);
         review = reviewRepository.save(review);
         return ResponseEntity.created(new URI("/api/reviews/" + review.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, review.getId().toString()))

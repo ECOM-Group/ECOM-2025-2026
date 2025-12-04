@@ -277,21 +277,17 @@ public class ProductResource {
     @GetMapping("/has-been-purchased/{productId}")
     public ResponseEntity<Boolean> hasPurchased(@PathVariable Long productId) {
         Optional<User> user = userService.getUserWithAuthorities();
-        if (user.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.SC_UNAUTHORIZED).build();
-        }
 
-        boolean purchased = orderLineService.hasUserPurchasedProduct(user.get().getId(), productId);
-        return ResponseEntity.ok(purchased);
+        return ResponseEntity.ok(user.isEmpty() ? false : orderLineService.hasUserPurchasedProduct(user.get().getId(), productId));
     }
 
     @GetMapping("/get-all-purchased-procucts-by-user")
-    public ResponseEntity<List<Long>> getAllPurchasedProcudtsByUser(@PathVariable Long userId) {
+    public ResponseEntity<List<Long>> getAllPurchasedProcudtsByUser() {
         Optional<User> user = userService.getUserWithAuthorities();
         if (user.isEmpty()) {
             return ResponseEntity.ok(new ArrayList<Long>()); // "aucun achat"
         }
 
-        return ResponseEntity.ok(orderLineService.getPurchasedProductIdsByUser(userId));
+        return ResponseEntity.ok(orderLineService.getPurchasedProductIdsByUser(user.get().getId()));
     }
 }

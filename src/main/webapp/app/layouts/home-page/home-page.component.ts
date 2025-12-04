@@ -5,9 +5,6 @@ import { EMPTY, switchMap, tap } from 'rxjs';
 import { HomePageService } from 'app/service/home-page/home-page.service';
 import { MiniFicheComponent } from '../mini-fiche/mini-fiche.component';
 import { CartService } from 'app/service/cart/cart.service';
-import internal from 'stream';
-import { OrderLineService } from 'app/entities/order-line/service/order-line.service';
-import { UserService } from 'app/entities/user/service/user.service';
 
 @Component({
   selector: 'jhi-home-page',
