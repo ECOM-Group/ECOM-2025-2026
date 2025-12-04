@@ -147,22 +147,16 @@
                     class="mb-3 p-2 border rounded position-relative"
                     [class.bg-light]="addr.get('deleted')?.value"
                   >
-                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0" (click)="toggleDelete($index)">
-                      @if (addr.get('deleted')?.value) {
-                        Restaurer
-                      } @else {
-                        Supprimer
-                      }
-                    </button>
-
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-secondary position-absolute top-0 end-0 me-5"
-                      (click)="resetAddress($index)"
-                    >
-                      Reset
-                    </button>
-
+                    <div class="d-flex justify-content-end gap-2 position-absolute top-0 end-0">
+                      <button type="button" class="btn btn-sm btn-secondary" (click)="resetAddress($index)">Reset</button>
+                      <button type="button" class="btn btn-sm btn-danger" (click)="toggleDelete($index)" style="width: 85px">
+                        @if (addr.get('deleted')?.value) {
+                          Restaurer
+                        } @else {
+                          Supprimer
+                        }
+                      </button>
+                    </div>
                     <div class="mb-2">
                       <label for="country-{{ $index }}" class="form-label">Pays</label>
                       <input
