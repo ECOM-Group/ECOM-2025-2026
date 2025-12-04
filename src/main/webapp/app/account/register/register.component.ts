@@ -1,13 +1,14 @@
 import { AfterViewInit, Component, ElementRef, inject, signal, viewChild } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
+import { FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule, FormArray, AbstractControl } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
+import { HttpErrorResponse } from '@angular/common/http';
+
+import SharedModule from 'app/shared/shared.module';
+import { RegisterService } from './register.service';
+import PasswordStrengthBarComponent from '../password/password-strength-bar/password-strength-bar.component';
 
 import { EMAIL_ALREADY_USED_TYPE, LOGIN_ALREADY_USED_TYPE } from 'app/config/error.constants';
-import SharedModule from 'app/shared/shared.module';
-import PasswordStrengthBarComponent from '../password/password-strength-bar/password-strength-bar.component';
-import { RegisterService } from './register.service';
 
 @Component({
   selector: 'jhi-register',
@@ -23,6 +24,9 @@ export default class RegisterComponent implements AfterViewInit {
   errorUserExists = signal(false);
   success = signal(false);
 
+  private readonly translateService = inject(TranslateService);
+  private readonly registerService = inject(RegisterService);
+
   registerForm = new FormGroup({
     login: new FormControl('', {
       nonNullable: true,
@@ -37,6 +41,14 @@ export default class RegisterComponent implements AfterViewInit {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(5), Validators.maxLength(254), Validators.email],
     }),
+    firstName: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(1), Validators.maxLength(50)],
+    }),
+    lastName: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(1), Validators.maxLength(50)],
+    }),
     password: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(4), Validators.maxLength(50)],
@@ -45,10 +57,30 @@ export default class RegisterComponent implements AfterViewInit {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(4), Validators.maxLength(50)],
     }),
+
+    addresses: new FormArray([]),
   });
 
-  private readonly translateService = inject(TranslateService);
-  private readonly registerService = inject(RegisterService);
+  get addressesArray(): FormArray {
+    return this.registerForm.get('addresses') as FormArray;
+  }
+  createAddressGroup(): FormGroup {
+    return new FormGroup({
+      country: new FormControl('', Validators.required),
+      city: new FormControl('', Validators.required),
+      street: new FormControl('', Validators.required),
+      zipcode: new FormControl('', [Validators.required, Validators.pattern('^[0-9]+$')]),
+    });
+  }
+  addAddress(): void {
+    this.addressesArray.push(this.createAddressGroup());
+  }
+  removeAddress(index: number): void {
+    this.addressesArray.removeAt(index);
+  }
+  getAddressFormGroup(ctrl: AbstractControl): FormGroup {
+    return ctrl as FormGroup;
+  }
 
   ngAfterViewInit(): void {
     this.login().nativeElement.focus();
@@ -61,14 +93,28 @@ export default class RegisterComponent implements AfterViewInit {
     this.errorUserExists.set(false);
 
     const { password, confirmPassword } = this.registerForm.getRawValue();
+
     if (password !== confirmPassword) {
       this.doNotMatch.set(true);
-    } else {
-      const { login, email } = this.registerForm.getRawValue();
-      this.registerService
-        .save({ login, email, password, langKey: this.translateService.currentLang })
-        .subscribe({ next: () => this.success.set(true), error: response => this.processError(response) });
+      return;
     }
+
+    const registerData = this.registerForm.getRawValue();
+
+    this.registerService
+      .save({
+        login: registerData.login,
+        email: registerData.email,
+        password: registerData.password,
+        firstName: registerData.firstName,
+        lastName: registerData.lastName,
+        langKey: this.translateService.currentLang,
+        addresses: registerData.addresses,
+      })
+      .subscribe({
+        next: () => this.success.set(true),
+        error: err => this.processError(err),
+      });
   }
 
   private processError(response: HttpErrorResponse): void {

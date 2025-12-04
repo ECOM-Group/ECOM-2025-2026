@@ -54,16 +54,9 @@
                 <fa-icon class="p-1" icon="sort"></fa-icon>
               </div>
             </th>
-            <th scope="col" jhiSortBy="email">
+            <th scope="col" jhiSortBy="userId">
               <div class="d-flex">
-                <span jhiTranslate="ecom20252026App.customer.email">Email</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
-            </th>
-            <th scope="col" jhiSortBy="password">
-              <div class="d-flex">
-                <span jhiTranslate="ecom20252026App.customer.password">Password</span>
+                <span jhiTranslate="ecom20252026App.customer.userId">Jhi User Id</span>
 
                 <fa-icon class="p-1" icon="sort"></fa-icon>
               </div>
@@ -79,8 +72,7 @@
               </td>
               <td>{{ customer.firstName }}</td>
               <td>{{ customer.lastName }}</td>
-              <td>{{ customer.email }}</td>
-              <td>{{ customer.password }}</td>
+              <td>{{ customer.userId }}</td>
               <td class="text-end">
                 <div class="btn-group">
                   <a [routerLink]="['/customer', customer.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">

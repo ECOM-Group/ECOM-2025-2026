@@ -1,11 +1,3 @@
-id;first_name;last_name;email;password
-1;Huguette;Aubry;Antigone_Leclercq43@gmail.com;nonobstant sans
-2;Aristide;Collet;Joachim.Gerard@yahoo.fr;de façon que voyager vivace
-3;Aliette;Dumont;Armide.Laine@gmail.com;copier
-4;Axeline;Poirier;Maugis2@hotmail.fr;disposer
-5;Coraline;Fabre;Laura_Perez60@gmail.com;rédaction
-6;Sabine;Renard;Theodose67@hotmail.fr;même
-7;Adeltrude;Rey;Sandrine21@gmail.com;cependant
-8;Archange;Nicolas;Alois92@yahoo.fr;quand ?
-9;Roméo;Richard;Suzanne_Fontaine59@yahoo.fr;suivant avoir
-10;Garance;Dubois;Quentin26@hotmail.fr;sage triste
+id;first_name;last_name;jhi_user_id
+1;Huguette;Aubry;1
+2;Aristide;Collet;2

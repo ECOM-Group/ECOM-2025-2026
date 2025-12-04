@@ -48,9 +48,7 @@ public class CustomerAsserts {
         assertThat(actual)
             .as("Verify Customer relevant properties")
             .satisfies(a -> assertThat(a.getFirstName()).as("check firstName").isEqualTo(expected.getFirstName()))
-            .satisfies(a -> assertThat(a.getLastName()).as("check lastName").isEqualTo(expected.getLastName()))
-            .satisfies(a -> assertThat(a.getEmail()).as("check email").isEqualTo(expected.getEmail()))
-            .satisfies(a -> assertThat(a.getPassword()).as("check password").isEqualTo(expected.getPassword()));
+            .satisfies(a -> assertThat(a.getLastName()).as("check lastName").isEqualTo(expected.getLastName()));
     }
 
     /**
