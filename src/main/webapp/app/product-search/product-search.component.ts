@@ -8,12 +8,13 @@ import { FormsModule } from '@angular/forms';
 import { TagService } from 'app/entities/tag/service/tag.service';
 import { ITag } from 'app/entities/tag/tag.model';
 import { forkJoin, map, switchMap } from 'rxjs';
+import { TagLabelComponent } from 'app/entities/tag/tag-label/tag-label.component';
 
 @Component({
   selector: 'jhi-product-search',
   templateUrl: './product-search.component.html',
   styleUrls: ['./product-search.component.scss'],
-  imports: [MiniFicheComponent, FormsModule],
+  imports: [MiniFicheComponent, FormsModule, TagLabelComponent],
 })
 export class ProductSearchComponent implements OnInit {
   query: string | null = null;
