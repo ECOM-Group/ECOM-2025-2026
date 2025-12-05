@@ -12,7 +12,7 @@ logging:
     tech.jhipster: INFO
     com.mycompany.myapp: INFO
     # DEBUG pour Liquibase en cas de problème de démarrage lent
-    liquibase: WARN # Conservez WARN ou INFO. Si le problème persiste, passez à DEBUG.
+    liquibase: INFO # Conservez WARN ou INFO. Si le problème persiste, passez à DEBUG.
 
 management:
   prometheus:
