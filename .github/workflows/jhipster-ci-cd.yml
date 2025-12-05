@@ -2,9 +2,9 @@ name: JHipster CI/CD
 
 on:
   push:
-    branches: ['deploy_gasdev'] # Changé la branche cible
+    branches: ["deploy_gasdev"] # Changé la branche cible
   pull_request:
-    branches: ['deploy_gasdev'] # Changé la branche cible
+    branches: ["deploy_gasdev"] # Changé la branche cible
 
 jobs:
   # ======================================================================================
@@ -18,7 +18,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22.20.0'
+          node-version: "22.20.0"
 
       - name: Install dependencies
         run: npm install
@@ -39,8 +39,8 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "temurin"
 
       - name: Build JHipster app (backend + frontend)
         # Utilisation du profil prod pour compiler le JAR qui inclut le frontend minifié.
@@ -65,8 +65,8 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "temurin"
 
       - name: Run Java unit tests
         run: ./mvnw test
@@ -105,23 +105,27 @@ jobs:
         run: echo "JAR_NAME=$(ls target/*.jar | xargs basename)" >> $GITHUB_OUTPUT
 
       # 2.5. CHARGER LA CLÉ PRIVÉE DANS L'AGENT SSH
+      # C'est CRUCIAL pour l'authentification et pour la commande scp manuelle.
       - name: Start SSH Agent and Add Key
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-
-      # 3. TRANSFERT SÉCURISÉ AVEC rsync
-      # On utilise rsync pour garantir l'intégrité du fichier binaire, remplaçant scp-action.
-      - name: Transfer JAR via rsync (Robust)
-        uses: burnettk/rsync-deployments@v1.4
-        with:
-          # On déplace et renomme le fichier en une seule étape rsync
-          command: '-avz --progress target/${{ steps.get_jar.outputs.JAR_NAME }} root@bababooeys.gasdev.fr:/opt/jhipster-app/app.jar'
-          # Le secret est passé à l'environnement pour rsync
-          ssh_private_key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-          # Définir le port SSH
-          ssh_args: '-p 2222'
-
+          
+      # 3. TRANSFERT SÉCURISÉ AVEC SCP MANUEL (Via SSH Agent)
+      # On utilise la commande SCP classique sur le runner pour un transfert binaire sans corruption.
+      - name: Transfer JAR via SCP Command (Bypass corruption issue)
+        env:
+          JAR_FILE: target/${{ steps.get_jar.outputs.JAR_NAME }}
+          TARGET_HOST: bababooeys.gasdev.fr
+          TARGET_PORT: 2222
+          TARGET_PATH: /opt/jhipster-app/app.jar
+        run: |
+          # Création du répertoire distant si nécessaire
+          ssh -p $TARGET_PORT root@$TARGET_HOST "mkdir -p /opt/jhipster-app"
+          
+          # Transfert binaire du JAR (avec option -O pour compatibilité OpenSSH)
+          scp -P $TARGET_PORT $JAR_FILE root@$TARGET_HOST:$TARGET_PATH
+          
       # 4. Déploiement et Démarrage via SSH (Gestion Systemd)
       - name: Deploy and Start via SSH (Systemd)
         uses: appleboy/ssh-action@v1.0.3
@@ -135,50 +139,46 @@ jobs:
             SERVICE_NAME="jhipster-app"
             STATIC_JAR_NAME="app.jar" 
             DEPLOY_PATH="/opt/jhipster-app"
-
+            
             echo "--- Préparation du déploiement Systemd ---"
-
-            # 1. Créer le répertoire de déploiement si manquant
-            mkdir -p $DEPLOY_PATH
-
-            # 2. Stopper l'application avant de recharger le service (sécurité)
+            
+            # 1. Stopper l'application avant de recharger le service (sécurité)
             systemctl stop $SERVICE_NAME.service || true
-
-            # 3. Créer ou mettre à jour le fichier de service systemd 
+            
+            # 2. Créer ou mettre à jour le fichier de service systemd 
             cat << EOF > /etc/systemd/system/$SERVICE_NAME.service
             [Unit]
             Description=JHipster Spring Boot Application
             After=syslog.target network.target
-
+            
             [Service]
-            # CORRECTION JAR : Utilise le nom statique app.jar
+            # Utilise le nom statique app.jar
             ExecStart=/usr/bin/java -jar $DEPLOY_PATH/$STATIC_JAR_NAME
             Restart=always
             User=root
-
+            
             # Variables d'environnement pour l'application Spring Boot
             Environment="SPRING_PROFILES_ACTIVE=prod"
-
+            
             # VARIABLES DE BASE DE DONNÉES (Supabase Pooler)
             Environment="JHIPSTER_DATABASE_HOST=aws-1-eu-central-2.pooler.supabase.com"
             Environment="JHIPSTER_DATABASE_PORT=5432"
             Environment="JHIPSTER_DATABASE_USER=postgres.seqwrlkotxmwgjjwkejl" 
             Environment="JHIPSTER_DATABASE_PASSWORD=${{ secrets.SUPABASE_PASSWORD }}"
-
+            
             # SECRETS DE L'APPLICATION
             Environment="STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}"
             Environment="JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=${{ secrets.JWT_SECRET }}"
-
+            
             [Install]
             WantedBy=multi-user.target
             EOF
-
-            # 4. Recharger la configuration systemd et démarrer/redémarrer le service
+            
+            # 3. Recharger la configuration systemd et démarrer/redémarrer le service
             systemctl daemon-reload
             systemctl enable $SERVICE_NAME.service || true 
-            systemctl start $SERVICE_NAME.service # Utiliser start ici pour ne pas relancer indéfiniment
-
+            systemctl start $SERVICE_NAME.service 
+            
             echo "--- Déploiement Terminé. Affichage du statut et des logs : ---"
             systemctl status $SERVICE_NAME.service
-            # Afficher les 10 dernières lignes du journal pour voir la nouvelle erreur s'il y en a une
-            journalctl -u $SERVICE_NAME.service --no-pager -n 10
+            journalctl -u $SERVICE_NAME.service --no-pager -n 30
