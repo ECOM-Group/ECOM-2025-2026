@@ -29,20 +29,20 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     # L'URL est gérée par la variable d'environnement Heroku
-    url: ${DATABASE_URL} 
+    url: ${DATABASE_URL}
     # NOTE: Laissez 'username' et 'password' vides. Ils sont inclus dans DATABASE_URL
     username:
     password:
     hikari:
       poolName: Hikari
       # ⚠️ IMPORTANT : Optimisation Hikari pour les connexions Cloud/Pooler Supabase
-      maximum-pool-size: 10          # Augmenté légèrement pour un meilleur débit
-      minimum-idle: 2                # Assure qu'un minimum de connexions est maintenu
-      auto-commit: true              # Remis à 'true' (plus sûr, surtout pour Liquibase)
-      connection-timeout: 30000      # 30 secondes pour établir une connexion
-      validation-timeout: 5000       # 5 secondes pour valider une connexion
-      max-lifetime: 1800000          # 30 minutes (30 * 60 * 1000 ms) pour éviter les connexions mortes du pooler
-      idle-timeout: 600000           # 10 minutes (10 * 60 * 1000 ms) avant d'expirer une connexion inactive
+      maximum-pool-size: 10 # Augmenté légèrement pour un meilleur débit
+      minimum-idle: 2 # Assure qu'un minimum de connexions est maintenu
+      auto-commit: true # Remis à 'true' (plus sûr, surtout pour Liquibase)
+      connection-timeout: 30000 # 30 secondes pour établir une connexion
+      validation-timeout: 5000 # 5 secondes pour valider une connexion
+      max-lifetime: 1800000 # 30 minutes (30 * 60 * 1000 ms) pour éviter les connexions mortes du pooler
+      idle-timeout: 600000 # 10 minutes (10 * 60 * 1000 ms) avant d'expirer une connexion inactive
   # Replace by 'prod, faker' to add the faker context and have sample data loaded in production
   liquibase:
     contexts: prod
@@ -62,7 +62,7 @@ stripe:
 server:
   port: ${PORT}
   address: 0.0.0.0
-  shutdown: graceful 
+  shutdown: graceful # see https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-graceful-shutdown
   compression:
     enabled: true
     mime-types: text/html,text/xml,text/plain,text/css,application/javascript,application/json,image/svg+xml
@@ -81,7 +81,6 @@ jhipster:
       time-to-live-seconds: 3600 # By default objects stay 1 hour in the cache
       max-entries: 1000 # Number of objects in each cache entry
   security:
-    content-security-policy: "default-src 'self'; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://res.cloudinary.com ; connect-src 'self'; font-src 'self' data:"
     authentication:
       jwt:
         # Assurez-vous que cette clé n'est PAS stockée en clair dans ce fichier pour la production
@@ -99,7 +98,6 @@ jhipster:
       host: localhost
       port: 5000
       ring-buffer-size: 512
-
 # ===================================================================
 # Application specific properties
 # ===================================================================
