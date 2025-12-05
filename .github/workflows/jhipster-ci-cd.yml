@@ -120,7 +120,12 @@ jobs:
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           port: 2222
           source: 'target/${{ steps.get_jar.outputs.JAR_NAME }}'
-          target: '/opt/jhipster-app/app.jar' # <<<< CORRECTION JAR : Nomme toujours le fichier "app.jar"
+          target: '/opt/jhipster-app/app.jar'
+          # CORRECTION CORRUPTION: Désactive l'utilisation de tar/compression pour un transfert binaire propre.
+          # Cette action est souvent activée par défaut, mais nous forçons le mode scp "pur" pour le fichier unique.
+          tar_dereference: false
+          tar_exec: '' # <<<< Force le mode scp simple pour éviter la corruption
+          overwrite: true # S'assurer que le nouveau fichier écrase l'ancien
 
       # 4. Déploiement et Démarrage via SSH (Gestion Systemd)
       - name: Deploy and Start via SSH (Systemd)
@@ -133,7 +138,6 @@ jobs:
           script: |
             # VARIABLES
             SERVICE_NAME="jhipster-app"
-            # Utilisation du nom statique "app.jar" pour une référence constante
             STATIC_JAR_NAME="app.jar" 
             DEPLOY_PATH="/opt/jhipster-app"
 
