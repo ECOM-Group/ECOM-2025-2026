@@ -8,9 +8,10 @@ on:
 
 jobs:
   # ======================================================================================
-  # 1. Linting (Vérification de la qualité du code)
+  # 1. Linting (Vérification de la qualité du code) - POINT DE DÉPART SANS DÉPENDANCE
   # ======================================================================================
   lint:
+    # Ce job n'a aucune dépendance et sert de point de départ au workflow.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,8 +44,8 @@ jobs:
           distribution: "temurin"
 
       - name: Build JHipster app (backend + frontend)
-        # Utilisation du profil prod pour compiler le JAR qui inclut le frontend minifié.
-        run: ./mvnw -Pprod -DskipTests package
+        # UTILISATION DE 'install' ET 'spring-boot:repackage' POUR GARANTIR LE FAT JAR
+        run: ./mvnw clean install -Pprod -DskipTests spring-boot:repackage
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -99,6 +100,22 @@ jobs:
           name: jhipster-app
           path: target/
 
+      # 1.5. Vérifier et installer les outils nécessaires sur le VPS (JDK pour l'outil 'jar')
+      - name: Prerequisites Check and JDK Install
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: bababooeys.gasdev.fr
+          username: root
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          port: 2222
+          script: |
+            echo "Vérification et installation des dépendances (JDK pour 'jar' et 'file')."
+            apt update
+            
+            # Installation du JDK par défaut (fournit l'outil 'jar') et de l'outil 'file'.
+            # Utilisation de 'default-jdk' qui est l'alias le plus fiable sous Debian.
+            apt install -y default-jdk file || echo "ATTENTION: L'installation du JDK par défaut a échoué. Poursuite, mais le diagnostic pourrait ne pas fonctionner."
+
       # 2. Récupérer le nom du JAR
       - name: Get JAR file name
         id: get_jar
@@ -148,8 +165,12 @@ jobs:
             ls -lh $JAR_FULL_PATH
             file $JAR_FULL_PATH
             
-            # Diagnostic 2: Tente de lister le contenu du JAR (Si corrompu, cette commande échouera et nous aurons le message d'erreur)
-            jar -tf $JAR_FULL_PATH || echo "ERREUR DE DIAGNOSTIC: Le JAR n'est PAS un archive ZIP/JAR valide."
+            # Diagnostic 2: Tente de lister le contenu du JAR (Confirme s'il s'agit d'une archive valide)
+            jar -tf $JAR_FULL_PATH || echo "ERREUR DE DIAGNOSTIC: Le JAR n'est PAS une archive ZIP/JAR valide. Nous pourrions avoir besoin de revoir l'étape de construction Maven."
+            
+            # Diagnostic 3: Tente d'exécuter le JAR avec la classe loader (contournement pour certains JAR mal formés)
+            echo "Tentative de diagnostic via la classe loader..."
+            /usr/bin/java -cp $JAR_FULL_PATH org.springframework.boot.loader.JarLauncher || echo "Diagnostic: JarLauncher a échoué. Le JAR est probablement mal construit ou il y a un problème de classpath."
             
             echo "--- Fin du diagnostic. Déploiement Systemd ---"
             
