@@ -62,7 +62,7 @@ export class TagComponent implements OnInit {
   load(): void {
     this.isLoading = true;
 
-    // 1️⃣ Fetch normal tags
+    // Fetch normal tags
     this.tagService.query({ sort: this.sortService.buildSortParam(this.sortState()) }).subscribe({
       next: res => {
         const tags = res.body ?? [];
@@ -82,7 +82,7 @@ export class TagComponent implements OnInit {
           ),
         );
 
-        // 3️⃣ Run all product ID fetches in parallel
+        // Run all product ID fetches in parallel
         forkJoin(fetchProductIds).subscribe({
           next: () => {
             this.tags.set(this.refineData(tags));

@@ -7,6 +7,7 @@ import { FilterOptions, FilterOption } from 'app/shared/filter/filter.model';
 import { FormsModule } from '@angular/forms';
 import { TagService } from 'app/entities/tag/service/tag.service';
 import { ITag } from 'app/entities/tag/tag.model';
+import { forkJoin, map, switchMap } from 'rxjs';
 import { TagLabelComponent } from 'app/entities/tag/tag-label/tag-label.component';
 
 @Component({
@@ -41,21 +42,40 @@ export class ProductSearchComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe(params => {
-      this.query = params.get('q');
-      if (this.query) this.searchProducts(this.query);
+      const query = params.get('q');
+      const tagId = params.get('tag');
+      // Load all tags first for the filter UI
+      this.loading = true;
+      this.tagService.findAll().subscribe({
+        next: res => {
+          this.tags = res.body ?? [];
+
+          if (tagId) {
+            // Tag-based search
+            const id = +tagId;
+            console.log('Searching products for tag id:', id);
+            this.selectedTagIds = [id];
+            this.searchProductsByTag(id); // <-- full product objects
+          } else if (query) {
+            // Normal text query search
+            this.query = query;
+            this.searchProducts(query);
+          }
+          this.loading = false;
+        },
+        error: err => console.error('Failed to load tags', err),
+      });
     });
 
-    this.tagService.findAll().subscribe({
-      next: res => (this.tags = res.body ?? []),
-      error: err => console.error('Failed to load tags', err),
-    });
-
+    // Listen for filter changes
     this.searchFilters.filterChanges.subscribe(() => this.applyFilters());
   }
 
+  // Normal text search
   searchProducts(query: string): void {
     this.loading = true;
-    // Reset selected tags when starting a new search
+    // Reset selected
+    this.clearAllFilters();
     this.clearAllTags();
 
     this.productService.search(query).subscribe({
@@ -67,6 +87,38 @@ export class ProductSearchComponent implements OnInit {
       },
       error: () => (this.loading = false),
     });
+  }
+
+  // Tag-based search
+  searchProductsByTag(tagId: number): void {
+    this.loading = true;
+    // Reset selected
+    this.clearAllFilters();
+    this.clearAllTags();
+
+    this.selectedTagIds = [tagId];
+    this.tagService
+      .getProductIdsByTag(tagId)
+      .pipe(
+        switchMap((ids: number[]) => {
+          if (ids.length === 0) return []; // no products
+          // fetch each product by id
+          return forkJoin(ids.map(id => this.productService.find(id).pipe(map(res => res.body!))));
+        }),
+      )
+      .subscribe({
+        next: (products: IProduct[]) => {
+          console.log(`Total products fetched for tag ${tagId}:`, products.length);
+          this.products = products;
+          this.filteredProducts = [...products];
+          this.setupPriceSlider();
+          this.loading = false;
+        },
+        error: err => {
+          console.error('Error fetching products for tag', err);
+          this.loading = false;
+        },
+      });
   }
 
   applyFilters(): void {
@@ -109,6 +161,11 @@ export class ProductSearchComponent implements OnInit {
     this.clearAllTags();
   }
 
+  clearAllTags(): void {
+    this.selectedTagIds = [];
+    this.tagFilteredProductIds = null;
+  }
+
   clearFilter(name: string, value: string): void {
     this.searchFilters.removeFilter(name, value);
   }
@@ -139,7 +196,6 @@ export class ProductSearchComponent implements OnInit {
     }
   }
 
-  /** MULTI TAG TOGGLE */
   onTagToggled(tagId: number): void {
     if (this.selectedTagIds.includes(tagId)) {
       this.selectedTagIds = this.selectedTagIds.filter(id => id !== tagId);
@@ -175,17 +231,18 @@ export class ProductSearchComponent implements OnInit {
       });
   }
 
-  clearAllTags(): void {
-    this.selectedTagIds = [];
-    this.tagFilteredProductIds = null;
-    this.applyFilters();
-  }
-
+  // Helper functions
   get colorFilterValues(): string[] {
     return this.searchFilters.filterOptions.find(f => f.name === 'color')?.values ?? [];
   }
 
   get getAvailableColors(): string[] {
     return Array.from(new Set(this.products.map(p => p.color).filter(c => c != null)));
+  }
+
+  get selectedTagName(): string | null {
+    if (this.selectedTagIds.length === 0 || this.tags.length === 0) return null;
+    const tag = this.tags.find(t => t.id === this.selectedTagIds[0]);
+    return tag?.name ?? 'Unknown Tag';
   }
 }
