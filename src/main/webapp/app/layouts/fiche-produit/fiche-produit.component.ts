@@ -30,6 +30,7 @@ export default class FicheProduitComponent implements OnInit {
     imageHash: null,
     tags: [],
   };
+
   id: number = -1;
   isConnected: boolean = true;
   successMessages: string[] = [];
@@ -38,7 +39,7 @@ export default class FicheProduitComponent implements OnInit {
   zoomLevel = 200; // augmente pour zoomer plus
   images: string[] = [];
   alikeProducts: IProduct[] = [];
-  alikeLimit = 2;
+  alikeLimit = 5; // Nombre de produits similaires à charger
 
   currentIndex = 0;
 
