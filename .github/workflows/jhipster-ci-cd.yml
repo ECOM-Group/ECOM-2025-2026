@@ -2,9 +2,9 @@ name: JHipster CI/CD
 
 on:
   push:
-    branches: ['deploy_gasdev']
+    branches: ['deploy_gasdev'] # Changé la branche cible
   pull_request:
-    branches: ['deploy_gasdev']
+    branches: ['deploy_gasdev'] # Changé la branche cible
 
 jobs:
   # ======================================================================================
@@ -104,6 +104,13 @@ jobs:
         id: get_jar
         run: echo "JAR_NAME=$(ls target/*.jar | xargs basename)" >> $GITHUB_OUTPUT
 
+      # 2.5. CORRECTION SSH: CHARGER LA CLÉ PRIVÉE DANS L'AGENT
+      # Cela permet à l'authentification de fonctionner même si la clé a un format non standard.
+      - name: Start SSH Agent and Add Key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+
       # 3. Transférer le JAR via SCP
       - name: Transfer JAR via SCP
         uses: appleboy/scp-action@v0.1.7
@@ -113,7 +120,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           port: 2222
           source: 'target/${{ steps.get_jar.outputs.JAR_NAME }}'
-          target: '/opt/jhipster-app/' # Chemin de destination sur le VPS
+          target: '/opt/jhipster-app/app.jar' # <<<< CORRECTION JAR : Nomme toujours le fichier "app.jar"
 
       # 4. Déploiement et Démarrage via SSH (Gestion Systemd)
       - name: Deploy and Start via SSH (Systemd)
@@ -126,7 +133,8 @@ jobs:
           script: |
             # VARIABLES
             SERVICE_NAME="jhipster-app"
-            JAR_NAME="${{ steps.get_jar.outputs.JAR_NAME }}"
+            # Utilisation du nom statique "app.jar" pour une référence constante
+            STATIC_JAR_NAME="app.jar" 
             DEPLOY_PATH="/opt/jhipster-app"
 
             echo "--- Préparation du déploiement Systemd ---"
@@ -141,10 +149,9 @@ jobs:
             After=syslog.target network.target
 
             [Service]
-            # Utilise le chemin générique 'java' qui doit pointer vers Java 17
-            ExecStart=/usr/bin/java -jar $DEPLOY_PATH/$JAR_NAME
+            # CORRECTION JAR : Utilise le nom statique app.jar
+            ExecStart=/usr/bin/java -jar $DEPLOY_PATH/$STATIC_JAR_NAME
             Restart=always
-            # S'exécute en tant que root pour ce déploiement
             User=root
 
             # Variables d'environnement pour l'application Spring Boot
@@ -164,14 +171,10 @@ jobs:
             WantedBy=multi-user.target
             EOF
 
-            # 3. Supprimer les anciens JARs pour éviter les confusions
-            find $DEPLOY_PATH -type f -name "*.jar" ! -name "$JAR_NAME" -delete
-
-            # 4. Recharger la configuration systemd et démarrer/redémarrer le service
+            # 3. Recharger la configuration systemd et démarrer/redémarrer le service
             systemctl daemon-reload
-            systemctl enable $SERVICE_NAME.service || true # Activation au démarrage
+            systemctl enable $SERVICE_NAME.service || true 
             systemctl restart $SERVICE_NAME.service
 
             echo "--- Déploiement Terminé. Affichage du statut : ---"
-            # 5. Afficher le statut pour confirmation
             systemctl status $SERVICE_NAME.service
