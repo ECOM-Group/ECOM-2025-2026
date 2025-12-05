@@ -2,9 +2,9 @@ name: JHipster CI/CD
 
 on:
   push:
-    branches: ['main']
+    branches: ['deploy_gasdev']
   pull_request:
-    branches: ['main']
+    branches: ['deploy_gasdev']
 
 jobs:
   # ======================================================================================
