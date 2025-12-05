@@ -15,6 +15,7 @@ import { IProdOrder } from 'app/entities/prod-order/prod-order.model';
 import { loadStripe, Stripe, StripeCardElement } from '@stripe/stripe-js';
 import { RouterLink } from '@angular/router';
 import { CartService } from 'app/service/cart/cart.service';
+import { Account } from 'app/core/auth/account.model';
 
 @Component({
   standalone: true,
@@ -32,6 +33,8 @@ export default class PaymentTunelComponent implements OnInit, AfterViewInit {
   card: StripeCardElement | null = null;
   isProcessing = false;
   message: string | null = null;
+
+  account: Account | undefined;
 
   constructor(
     private fb: FormBuilder,
@@ -54,23 +57,15 @@ export default class PaymentTunelComponent implements OnInit, AfterViewInit {
       .identity()
       .pipe(
         switchMap(user => {
-          if (user && user.login) {
-            this.isConnected = true;
-            return of(user);
-          }
-          this.isConnected = false;
-          return this.accountService.getAuthenticationState();
+          this.isConnected = !!user;
+          return this.isConnected ? of(user) : this.accountService.getAuthenticationState();
         }),
         switchMap(user => {
-          if (!user || !user.login) {
-            return EMPTY;
-          }
+          if (!user) return EMPTY; // n'était pas co et ne l'ai toujours pas, stop
+
+          this.account = user;
           this.isConnected = true;
-          return this.http.get<IUser>(`/api/admin/users/${user.login}`);
-        }),
-        map(user => user.id),
-        switchMap(userId => {
-          return this.http.get<IProdOrder>(`/api/prod-orders/${userId}/current`);
+          return this.http.get<IProdOrder>(`/api/prod-orders/current`);
         }),
       )
       .subscribe({
