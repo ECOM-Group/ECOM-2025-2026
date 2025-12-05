@@ -1,15 +1,9 @@
-/* ============================
-   WRAPPER GLOBAL TCG
-============================ */
 .tcg-product-wrapper {
   display: flex;
   justify-content: center;
   padding: 2rem;
 }
 
-/* ============================
-   CADRE TCG PRINCIPAL
-============================ */
 .tcg-card-frame {
   width: 100%;
   max-width: 1100px;
@@ -27,9 +21,6 @@
     inset 0 0 20px rgba(255, 255, 255, 0.15);
 }
 
-/* ============================
-   TITRE TCG — BANDEAU
-============================ */
 .tcg-title-banner {
   text-align: center;
   padding: 1rem;
@@ -52,19 +43,13 @@
   }
 }
 
-/* ============================
-   CONTENU INTÉRIEUR
-============================ */
 .tcg-card-inner {
   display: flex;
   gap: 2rem;
   flex-wrap: nowrap;
-  align-items: stretch; /* ⭐ NEW → pour que le zoom fonctionne */
+  align-items: stretch;
 }
 
-/* ============================
-   IMAGE ZONE
-============================ */
 .tcg-image-zone {
   flex: 1 1 45%;
   display: flex;
@@ -155,15 +140,11 @@
   right: 10px;
 }
 
-/* ============================
-   INFORMATIONS
-============================ */
 .tcg-info-zone {
   flex: 1 1 40%;
   position: relative;
 }
 
-/* DETAILS PANEL */
 .tcg-details-panel {
   padding: 1.5rem;
 
@@ -228,9 +209,6 @@
   cursor: not-allowed;
 }
 
-/* ============================
-   ZOOM PANEL
-============================ */
 .tcg-zoom-panel {
   width: 100%;
   height: 100%;
@@ -321,9 +299,7 @@
   }
 }
 
-/* ============================
-   RESPONSIVE
-============================ */
+
 @media (max-width: 900px) {
   .tcg-zoom-panel {
     display: none;
