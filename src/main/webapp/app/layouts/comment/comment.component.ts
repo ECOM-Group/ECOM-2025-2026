@@ -115,6 +115,7 @@ export class CommentComponent implements OnInit {
 
     this.http.post('/api/reviews', review).subscribe({
       next: () => {
+        this.hasAlreadyCommented = true;
         Swal.fire('Envoyé !', 'Votre commentaire a été enregistré.', 'success');
       },
       error: () => {
