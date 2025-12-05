@@ -60,3 +60,15 @@
 } @else {
   <jhi-login redirectUrl="/fiche_produit/{{ product.id }}"></jhi-login>
 }
+
+<!-- Show similar products for both connected and not connected users -->
+@if (alikeProducts.length > 0) {
+  <h2 class="alike-title">Produits similaires</h2>
+  <div class="alike-products-grid">
+    @for (p of alikeProducts; track p.id) {
+      <jhi-mini-fiche [idProduit]="p.id"></jhi-mini-fiche>
+    }
+  </div>
+} @else {
+  <h2 class="alike-title">Doesnt work lol</h2>
+}

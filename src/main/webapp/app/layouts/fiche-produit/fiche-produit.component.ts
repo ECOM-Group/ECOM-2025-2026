@@ -10,10 +10,12 @@ import { IOrderLine } from 'app/entities/order-line/order-line.model';
 import { RouterModule } from '@angular/router';
 import LoginComponent from 'app/login/login.component';
 import { CartService } from 'app/service/cart/cart.service';
+import { ProductService } from 'app/entities/product/service/product.service';
+import { MiniFicheComponent } from '../mini-fiche/mini-fiche.component';
 
 @Component({
   selector: 'jhi-fiche-produit',
-  imports: [LoginComponent, NgStyle, RouterModule],
+  imports: [LoginComponent, NgStyle, RouterModule, MiniFicheComponent],
   templateUrl: './fiche-produit.component.html',
   styleUrl: './fiche-produit.component.scss',
 })
@@ -35,6 +37,8 @@ export default class FicheProduitComponent implements OnInit {
   backgroundPosition = '0% 0%';
   zoomLevel = 200; // augmente pour zoomer plus
   images: string[] = [];
+  alikeProducts: IProduct[] = [];
+  alikeLimit = 2;
 
   currentIndex = 0;
 
@@ -43,6 +47,7 @@ export default class FicheProduitComponent implements OnInit {
     private http: HttpClient,
     private accountService: AccountService,
     private location: Location,
+    private productService: ProductService,
   ) {}
 
   ngOnInit(): void {
@@ -52,6 +57,11 @@ export default class FicheProduitComponent implements OnInit {
       this.http.get<IProduct>(`/api/products/${this.id}`).subscribe({
         next: product => {
           this.product = product;
+
+          // Charger les produits similaires
+          this.productService.findAlikeProducts(this.id, this.alikeLimit).subscribe(alikeProducts => {
+            this.alikeProducts = alikeProducts;
+          });
 
           // Récupérer toutes les images du produit
           this.http.get<any[]>(`/api/product-images/by-product/${this.id}`).subscribe(images => {
