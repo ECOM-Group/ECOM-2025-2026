@@ -1,22 +1,28 @@
-<div class="cart-line">
-  <div class="image-wrapper">
-    <img class="product-img" [src]="imageUrl || ''" alt="{{ orderLine.product?.name }}" />
+<div class="tcg-cart-line" [class.removing]="isRemoving">
+
+  <div class="tcg-img-zone">
+    <div class="tcg-img-frame">
+      <img class="product-img" [src]="imageUrl || ''" alt="{{ orderLine.product?.name }}" />
+    </div>
     <p class="product-name">{{ orderLine.product?.name ?? 'N/A' }}</p>
   </div>
 
-  <div class="info">
+  <div class="tcg-info-zone">
+
     <div class="details">
-      <p>Quantity: {{ orderLine.quantity ?? 'N/A' }}</p>
-      <p>Unit Price: {{ orderLine.unitPrice ?? 'N/A' }}</p>
-      <p>Total: {{ orderLine.total ?? 'N/A' }}</p>
+      <p><strong>Quantité :</strong> {{ orderLine.quantity ?? 'N/A' }}</p>
+      <p><strong>Prix unité :</strong> {{ orderLine.unitPrice ?? 'N/A' }}€</p>
+      <p><strong>Total :</strong> {{ orderLine.total ?? 'N/A' }}€</p>
     </div>
 
     @if (isCart) {
       <div class="actions">
-        <button type="button" (click)="decrement()">-</button>
-        <button type="button" (click)="increment()">+</button>
-        <button type="button" (click)="delete()">🗑️</button>
+        <button class="tcg-btn dec" type="button" (click)="decrement()">-</button>
+        <button class="tcg-btn inc" type="button" (click)="increment()">+</button>
+        <button class="tcg-btn del" type="button" (click)="delete()">🗑️</button>
       </div>
     }
+
   </div>
+
 </div>

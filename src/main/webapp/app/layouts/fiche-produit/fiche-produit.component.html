@@ -1,60 +1,66 @@
 @if (isConnected) {
-  <button class="back-button" (click)="goback()"><i class="fa-solid fa-reply"></i>Retour aux produits</button>
-  <div class="product-container">
-    <div class="product-card">
-      <div class="product-image-carousel">
-        @if (images.length > 1) {
-          <button class="carousel-btn left" (click)="prevImage()">&#10094;</button>
-        }
+  <button class="back-button" (click)="goback()"><i class="fa-solid fa-reply"></i> Retour aux produits</button>
 
-        <div
-          class="carousel-image-wrapper"
-          (mousemove)="onMouseMove($event)"
-          (mouseenter)="showZoom = true"
-          (mouseleave)="showZoom = false"
-        >
-          <img [src]="images[currentIndex]" alt="product image" class="carousel-image" #imageRef />
-        </div>
-
-        @if (images.length > 1) {
-          <button class="carousel-btn right" (click)="nextImage()">&#10095;</button>
-        }
+  <div class="tcg-product-wrapper">
+    <div class="tcg-card-frame">
+      <div class="tcg-title-banner">
+        <h1>{{ product.name }}</h1>
       </div>
 
-      @if (showZoom) {
-        <div class="zoom-window">
-          <div
-            class="zoom-image"
-            [ngStyle]="{
-              'background-image': 'url(' + images[currentIndex] + ')',
-              'background-position': backgroundPosition,
-              'background-size': zoomLevel + '%',
-            }"
-          ></div>
+      <div class="tcg-card-inner">
+        <div class="tcg-image-zone">
+          <div class="tcg-image-frame" (mousemove)="handleMouseMove($event)" (mouseleave)="showZoom = false">
+            @if (images.length > 1) {
+              <button class="tcg-carousel-btn left no-zoom" (click)="prevImage()">&#10094;</button>
+            }
+
+            <img [src]="images[currentIndex]" class="tcg-image" alt="img" />
+
+            @if (images.length > 1) {
+              <button class="tcg-carousel-btn right no-zoom" (click)="nextImage()">&#10095;</button>
+            }
+
+            <div class="foil-overlay"></div>
+          </div>
         </div>
-      }
 
-      <div class="product-details">
-        @if (product.id !== -1) {
-          <jhi-comment [productId]="product.id"></jhi-comment>
-        }
+        <div class="tcg-info-zone">
+          @if (!showZoom) {
+            <div class="tcg-details-panel">
+              <p class="tcg-desc">{{ product.desc }}</p>
 
-        <h1 class="product-desc">{{ product.name }}</h1>
+              <p class="tcg-price">{{ product.price }} €</p>
 
-        <p class="product-desc">{{ product.desc }}</p>
-        <p class="product-price">{{ product.price }} €</p>
-        <p class="mini-fiche-stock">
-          {{ (product.quantity ?? 0) > 0 ? 'En stock : ' + product.quantity : 'Rupture de stock' }}
-        </p>
+              <p class="tcg-stock" [class.out]="(product.quantity ?? 0) <= 0">
+                {{ (product.quantity ?? 0) > 0 ? 'En stock : ' + product.quantity : 'Rupture de stock' }}
+              </p>
 
-        <div class="product-actions">
-          <button (click)="addToCart(product.id)" class="add-to-cart-button" [disabled]="(product.quantity ?? 0) === 0">
-            Ajouter au panier
-          </button>
+              <button class="tcg-add-button" id="addButton" (click)="addToCart(product.id)" [disabled]="(product.quantity ?? 0) === 0">
+                Ajouter au panier
+              </button>
+              @if (product.id !== -1) {
+                <jhi-comment [productId]="product.id"></jhi-comment>
+              }
+            </div>
 
-          @for (msg of successMessages; track msg; let i = $index) {
-            <div class="feedback-message" [ngStyle]="{ top: 115 + i * 30 + '%', left: '42%' }">
-              {{ msg }}
+            <div class="notif-container">
+              @for (msg of successMessages; track msg) {
+                <div class="feedback-message">
+                  <i class="fa-solid fa-circle-check"></i>
+                  {{ msg }}
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="tcg-zoom-panel">
+              <div
+                class="tcg-zoom-image"
+                [ngStyle]="{
+                  'background-image': 'url(' + images[currentIndex] + ')',
+                  'background-position': backgroundPosition,
+                  'background-size': zoomLevel + '%',
+                }"
+              ></div>
             </div>
           }
         </div>

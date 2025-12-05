@@ -15,6 +15,7 @@ export class CartLineComponent {
   @Output() updated = new EventEmitter<{ id: number; delete: boolean; priceDiff: number }>(); // notify parent cart
 
   imageUrl: string | null = null;
+  isRemoving = false;
 
   private cartService = inject(CartService);
 
@@ -68,13 +69,19 @@ export class CartLineComponent {
   delete(): void {
     if (!this.orderLine?.id) return;
 
-    this.orderLineService.delete(this.orderLine.id).subscribe({
-      // line deleted notify parent cart
-      next: () => {
-        this.updated.emit({ id: this.orderLine.id, delete: true, priceDiff: -(this.orderLine.total ?? 0) });
-        // this.cartService.notifyCartUpdated();
-      },
-      error: err => console.error('Error deleting line', err),
-    });
+    this.isRemoving = true;
+
+    setTimeout(() => {
+      this.orderLineService.delete(this.orderLine.id).subscribe({
+        next: () => {
+          this.updated.emit({
+            id: this.orderLine.id,
+            delete: true,
+            priceDiff: -(this.orderLine.total ?? 0)
+          });
+        },
+        error: err => console.error('Error deleting line', err),
+      });
+    }, 350); 
   }
 }

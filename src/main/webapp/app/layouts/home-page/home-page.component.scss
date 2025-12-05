@@ -1,0 +1,31 @@
+.home-wrapper {
+  padding: 2rem 2.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.home-title {
+  color: white;
+  font-size: 2.2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Grille responsive */
+.product-grid {
+  display: grid;
+  gap: 2rem;
+
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+
+  /* centrage naturel */
+  justify-items: center;
+}
+
+/* Petit bonus : si la page est large, centrer la grille */
+@media (min-width: 1500px) {
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
