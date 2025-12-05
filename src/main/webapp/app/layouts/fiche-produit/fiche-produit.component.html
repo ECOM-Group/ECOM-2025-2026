@@ -35,6 +35,10 @@
       }
 
       <div class="product-details">
+        @if (product.id !== -1) {
+          <jhi-comment [productId]="product.id"></jhi-comment>
+        }
+
         <h1 class="product-desc">{{ product.name }}</h1>
 
         <p class="product-desc">{{ product.desc }}</p>

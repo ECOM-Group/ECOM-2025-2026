@@ -1,11 +1,15 @@
 package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.domain.Product;
+import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.ProductRepository;
 import com.mycompany.myapp.repository.ProductRepositoryCustom;
+import com.mycompany.myapp.service.OrderLineService;
+import com.mycompany.myapp.service.UserService;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -47,10 +51,19 @@ public class ProductResource {
 
     private final ProductRepository productRepository;
     private final ProductRepositoryCustom productRepositoryCustom;
+    private final OrderLineService orderLineService;
+    private final UserService userService;
 
-    public ProductResource(ProductRepository productRepository, ProductRepositoryCustom productRepositoryCustom) {
+    public ProductResource(
+        ProductRepository productRepository,
+        ProductRepositoryCustom productRepositoryCustom,
+        OrderLineService orderLineService,
+        UserService userService
+    ) {
         this.productRepository = productRepository;
         this.productRepositoryCustom = productRepositoryCustom;
+        this.orderLineService = orderLineService;
+        this.userService = userService;
     }
 
     /**
@@ -252,5 +265,28 @@ public class ProductResource {
 
         List<Product> results = productRepositoryCustom.findByKeywords(keywords);
         return results;
+    }
+
+    /*
+    public ProductPurchaseResource(OrderLineService orderLineService, UserService userService) {
+        this.orderLineService = orderLineService;
+        this.userService = userService;
+    }*/
+
+    @GetMapping("/has-been-purchased/{productId}")
+    public ResponseEntity<Boolean> hasPurchased(@PathVariable Long productId) {
+        Optional<User> user = userService.getUserWithAuthorities();
+
+        return ResponseEntity.ok(user.isEmpty() ? false : orderLineService.hasUserPurchasedProduct(user.get().getId(), productId));
+    }
+
+    @GetMapping("/get-all-purchased-procucts-by-user")
+    public ResponseEntity<List<Long>> getAllPurchasedProcudtsByUser() {
+        Optional<User> user = userService.getUserWithAuthorities();
+        if (user.isEmpty()) {
+            return ResponseEntity.ok(new ArrayList<Long>()); // "aucun achat"
+        }
+
+        return ResponseEntity.ok(orderLineService.getPurchasedProductIdsByUser(user.get().getId()));
     }
 }

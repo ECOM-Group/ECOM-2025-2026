@@ -1,7 +1,9 @@
 package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.domain.Review;
+import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.ReviewRepository;
+import com.mycompany.myapp.service.UserService;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -11,9 +13,18 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.ResponseUtil;
 
@@ -33,9 +44,11 @@ public class ReviewResource {
     private String applicationName;
 
     private final ReviewRepository reviewRepository;
+    private final UserService userService;
 
-    public ReviewResource(ReviewRepository reviewRepository) {
+    public ReviewResource(ReviewRepository reviewRepository, UserService userService) {
         this.reviewRepository = reviewRepository;
+        this.userService = userService;
     }
 
     /**
@@ -51,6 +64,11 @@ public class ReviewResource {
         if (review.getId() != null) {
             throw new BadRequestAlertException("A new review cannot already have an ID", ENTITY_NAME, "idexists");
         }
+        User user = userService.getUserWithAuthorities().get();
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        review.setUser(user);
         review = reviewRepository.save(review);
         return ResponseEntity.created(new URI("/api/reviews/" + review.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, review.getId().toString()))
@@ -145,6 +163,19 @@ public class ReviewResource {
     public List<Review> getAllReviews() {
         LOG.debug("REST request to get all Reviews");
         return reviewRepository.findAll();
+    }
+
+    @GetMapping("/exists/{prodId}")
+    public ResponseEntity<List<Review>> existeReviewsOfCurrentUser(@PathVariable("prodId") Long prodId) {
+        LOG.debug("REST request to check if review exists for product {}", prodId);
+
+        Optional<User> user = userService.getUserWithAuthorities();
+        if (user.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<Review> reviews = reviewRepository.getReviewByUserIdAndProductId(prodId, user.get().getId());
+        return ResponseEntity.ok(reviews);
     }
 
     /**
