@@ -28,11 +28,11 @@ spring:
       enabled: false
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    # L'URL est gérée par la variable d'environnement Heroku
-    url: ${DATABASE_URL}
-    # NOTE: Laissez 'username' et 'password' vides. Ils sont inclus dans DATABASE_URL
-    username:
-    password:
+    # Utilisation d'une URL standard PostgreSQL. JHipster construit l'URL avec les variables d'environnement
+    # si elles sont fournies. Sinon, définissez l'URL complète ici en utilisant les variables Spring Boot.
+    url: jdbc:postgresql://${JHIPSTER_DATABASE_HOST}:${JHIPSTER_DATABASE_PORT}/postgres?sslmode=require&socketTimeout=5&connectTimeout=5
+    username: ${JHIPSTER_DATABASE_USER}
+    password: ${JHIPSTER_DATABASE_PASSWORD}
     hikari:
       poolName: Hikari
       # ⚠️ IMPORTANT : Optimisation Hikari pour les connexions Cloud/Pooler Supabase
@@ -60,7 +60,7 @@ stripe:
 # Server configuration
 # ===================================================================
 server:
-  port: ${PORT}
+  port: 80
   address: 0.0.0.0
   shutdown: graceful # see https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-graceful-shutdown
   compression:

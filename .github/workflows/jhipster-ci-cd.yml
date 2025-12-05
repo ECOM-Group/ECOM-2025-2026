@@ -2,12 +2,14 @@ name: JHipster CI/CD
 
 on:
   push:
-    branches: ["main"]
+    branches: ['main']
   pull_request:
-    branches: ["main"]
+    branches: ['main']
 
 jobs:
-  #////////////////////////////////////////////////////////////////////////////////////////
+  # ======================================================================================
+  # 1. Linting (Vérification de la qualité du code)
+  # ======================================================================================
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -16,7 +18,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22.20.0"
+          node-version: '22.20.0'
 
       - name: Install dependencies
         run: npm install
@@ -25,7 +27,9 @@ jobs:
         run: npm run lint || echo "Linting errors found, but build will continue"
         continue-on-error: true
 
-  #////////////////////////////////////////////////////////////////////////////////////////
+  # ======================================================================================
+  # 2. Build (Construction de l'application)
+  # ======================================================================================
   build:
     needs: lint
     runs-on: ubuntu-latest
@@ -35,11 +39,11 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: "17"
-          distribution: "temurin"
+          java-version: '17'
+          distribution: 'temurin'
 
       - name: Build JHipster app (backend + frontend)
-        # Note: Le profil prod est utilisé, ce qui construit la partie frontend avec Webpack.
+        # Utilisation du profil prod pour compiler le JAR qui inclut le frontend minifié.
         run: ./mvnw -Pprod -DskipTests package
 
       - name: Upload artifact
@@ -47,9 +51,11 @@ jobs:
         with:
           name: jhipster-app
           path: target/*.jar
-          retention-days: 1 # Conserver l'artefact juste le temps du déploiement
+          retention-days: 1
 
-  #////////////////////////////////////////////////////////////////////////////////////////
+  # ======================================================================================
+  # 3. Tests (Unitaires et E2E - Maintenus pour la structure)
+  # ======================================================================================
   test-unit:
     needs: build
     runs-on: ubuntu-latest
@@ -59,8 +65,8 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: "17"
-          distribution: "temurin"
+          java-version: '17'
+          distribution: 'temurin'
 
       - name: Run Java unit tests
         run: ./mvnw test
@@ -68,7 +74,6 @@ jobs:
       - name: Skip frontend unit tests
         run: echo "Pas de tests unitaires frontend pour l'instant"
 
-  #////////////////////////////////////////////////////////////////////////////////////////
   test-e2e:
     needs: build
     runs-on: ubuntu-latest
@@ -78,39 +83,95 @@ jobs:
       - name: Skip E2E tests
         run: echo "Pas de tests E2E pour l'instant"
 
-  #////////////////////////////////////////////////////////////////////////////////////////
-  deploy:
-    needs: build
+  # ======================================================================================
+  # 4. Deploy (Transfert SCP et Démarrage Systemd)
+  # ======================================================================================
+  deploy-vps:
+    needs: build # Dépend de la réussite de la construction
     runs-on: ubuntu-latest
-
     steps:
+      - uses: actions/checkout@v4
 
-        # 1. Télécharger l'artefact (le JAR)
-        - name: Download application artifact (JAR)
-          uses: actions/download-artifact@v4
-          with:
-            name: jhipster-app
-            path: target/ # Le JAR est placé dans target/
-        
-        # 2. Installer la CLI Heroku (cette étape semble déjà fonctionner d'après vos logs)
-        - name: Install Heroku CLI
-          run: curl https://cli-assets.heroku.com/install.sh | sh
-        
-        # 3. Installer le plugin nécessaire pour deploy:jar
-        - name: Install Heroku Deploy Plugin (Java)
-          run: heroku plugins:install java
-        
-        # 4. Déploiement du JAR
-        - name: Deploy JHipster JAR to Heroku
-          run: |
-            # heroku deploy:jar s'authentifie automatiquement via HEROKU_API_KEY
-            heroku deploy:jar target/*.jar \
-              --app $HEROKU_APP_NAME \
-              --jdk 17 \
-              --procfile Procfile
-          shell: /usr/bin/bash -e {0}
-          env:
-            # Assurez-vous que les secrets sont passés ici
-            HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }} 
-            HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
-            HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }} # Non nécessaire, mais peut rester
+      # 1. Télécharger l'artefact (le JAR)
+      - name: Download application artifact (JAR)
+        uses: actions/download-artifact@v4
+        with:
+          name: jhipster-app
+          path: target/
+
+      # 2. Récupérer le nom du JAR
+      - name: Get JAR file name
+        id: get_jar
+        run: echo "JAR_NAME=$(ls target/*.jar | xargs basename)" >> $GITHUB_OUTPUT
+
+      # 3. Transférer le JAR via SCP
+      - name: Transfer JAR via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: bababooeys.gasdev.fr
+          username: root
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          port: 2222
+          source: 'target/${{ steps.get_jar.outputs.JAR_NAME }}'
+          target: '/opt/jhipster-app/' # Chemin de destination sur le VPS
+
+      # 4. Déploiement et Démarrage via SSH (Gestion Systemd)
+      - name: Deploy and Start via SSH (Systemd)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: bababooeys.gasdev.fr
+          username: root
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          port: 2222
+          script: |
+            # VARIABLES
+            SERVICE_NAME="jhipster-app"
+            JAR_NAME="${{ steps.get_jar.outputs.JAR_NAME }}"
+            DEPLOY_PATH="/opt/jhipster-app"
+
+            echo "--- Préparation du déploiement Systemd ---"
+
+            # 1. Créer le répertoire de déploiement si manquant
+            mkdir -p $DEPLOY_PATH
+
+            # 2. Créer ou mettre à jour le fichier de service systemd 
+            cat << EOF > /etc/systemd/system/$SERVICE_NAME.service
+            [Unit]
+            Description=JHipster Spring Boot Application
+            After=syslog.target network.target
+
+            [Service]
+            # Utilise le chemin générique 'java' qui doit pointer vers Java 17
+            ExecStart=/usr/bin/java -jar $DEPLOY_PATH/$JAR_NAME
+            Restart=always
+            # S'exécute en tant que root pour ce déploiement
+            User=root
+
+            # Variables d'environnement pour l'application Spring Boot
+            Environment="SPRING_PROFILES_ACTIVE=prod"
+
+            # VARIABLES DE BASE DE DONNÉES (Supabase Pooler)
+            Environment="JHIPSTER_DATABASE_HOST=aws-1-eu-central-2.pooler.supabase.com"
+            Environment="JHIPSTER_DATABASE_PORT=5432"
+            Environment="JHIPSTER_DATABASE_USER=postgres.seqwrlkotxmwgjjwkejl" 
+            Environment="JHIPSTER_DATABASE_PASSWORD=${{ secrets.SUPABASE_PASSWORD }}"
+
+            # SECRETS DE L'APPLICATION
+            Environment="STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}"
+            Environment="JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=${{ secrets.JWT_SECRET }}"
+
+            [Install]
+            WantedBy=multi-user.target
+            EOF
+
+            # 3. Supprimer les anciens JARs pour éviter les confusions
+            find $DEPLOY_PATH -type f -name "*.jar" ! -name "$JAR_NAME" -delete
+
+            # 4. Recharger la configuration systemd et démarrer/redémarrer le service
+            systemctl daemon-reload
+            systemctl enable $SERVICE_NAME.service || true # Activation au démarrage
+            systemctl restart $SERVICE_NAME.service
+
+            echo "--- Déploiement Terminé. Affichage du statut : ---"
+            # 5. Afficher le statut pour confirmation
+            systemctl status $SERVICE_NAME.service
