@@ -113,7 +113,7 @@ jobs:
 
       # 3. Transférer le JAR via SCP
       - name: Transfer JAR via SCP
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v0.1.7 # Revenir à la version que vous utilisez pour minimiser les changements
         with:
           host: bababooeys.gasdev.fr
           username: root
@@ -121,11 +121,10 @@ jobs:
           port: 2222
           source: 'target/${{ steps.get_jar.outputs.JAR_NAME }}'
           target: '/opt/jhipster-app/app.jar'
-          # CORRECTION CORRUPTION: Désactive l'utilisation de tar/compression pour un transfert binaire propre.
-          # Cette action est souvent activée par défaut, mais nous forçons le mode scp "pur" pour le fichier unique.
+          # Laissez ces paramètres qui étaient déjà corrects pour le mode fichier unique
           tar_dereference: false
-          tar_exec: '' # <<<< Force le mode scp simple pour éviter la corruption
-          overwrite: true # S'assurer que le nouveau fichier écrase l'ancien
+          tar_exec: ''
+          overwrite: true
 
       # 4. Déploiement et Démarrage via SSH (Gestion Systemd)
       - name: Deploy and Start via SSH (Systemd)
@@ -146,7 +145,10 @@ jobs:
             # 1. Créer le répertoire de déploiement si manquant
             mkdir -p $DEPLOY_PATH
 
-            # 2. Créer ou mettre à jour le fichier de service systemd 
+            # 2. Stopper l'application avant de recharger le service (sécurité)
+            systemctl stop $SERVICE_NAME.service || true
+
+            # 3. Créer ou mettre à jour le fichier de service systemd 
             cat << EOF > /etc/systemd/system/$SERVICE_NAME.service
             [Unit]
             Description=JHipster Spring Boot Application
@@ -175,10 +177,12 @@ jobs:
             WantedBy=multi-user.target
             EOF
 
-            # 3. Recharger la configuration systemd et démarrer/redémarrer le service
+            # 4. Recharger la configuration systemd et démarrer/redémarrer le service
             systemctl daemon-reload
             systemctl enable $SERVICE_NAME.service || true 
-            systemctl restart $SERVICE_NAME.service
+            systemctl start $SERVICE_NAME.service # Utiliser start ici pour ne pas relancer indéfiniment
 
-            echo "--- Déploiement Terminé. Affichage du statut : ---"
+            echo "--- Déploiement Terminé. Affichage du statut et des logs : ---"
             systemctl status $SERVICE_NAME.service
+            # Afficher les 10 dernières lignes du journal pour voir la nouvelle erreur s'il y en a une
+            journalctl -u $SERVICE_NAME.service --no-pager -n 10
