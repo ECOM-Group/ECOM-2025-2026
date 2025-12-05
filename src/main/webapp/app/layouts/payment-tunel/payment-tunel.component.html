@@ -30,7 +30,9 @@
           <i class="fa-solid fa-credit-card"></i>
           {{ isProcessing ? 'Paiement en cours...' : 'Valider et payer' }}
         </button>
-        <div *ngIf="message" class="message">{{ message }}</div>
+        @if (message) {
+          <div class="message" [innerHTML]="message"></div>
+        }
       </form>
     </div>
   </div>
