@@ -105,7 +105,6 @@ jobs:
         run: echo "JAR_NAME=$(ls target/*.jar | xargs basename)" >> $GITHUB_OUTPUT
 
       # 2.5. CHARGER LA CLÉ PRIVÉE DANS L'AGENT SSH
-      # C'est CRUCIAL pour l'authentification et pour la commande scp manuelle.
       - name: Start SSH Agent and Add Key
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -120,17 +119,15 @@ jobs:
           TARGET_PATH: /opt/jhipster-app/app.jar
         run: |
           # DÉSACTIVATION DE LA VÉRIFICATION DES CLÉS D'HÔTE (-o StrictHostKeyChecking=no)
-          # Note: On laisse le port de côté pour le moment car scp le gère différemment (via -P)
           SSH_OPTS="-o StrictHostKeyChecking=no"
 
-          # 1. Création du répertoire distant via SSH (avec le port séparé)
+          # 1. Création du répertoire distant via SSH
           ssh $SSH_OPTS -p $TARGET_PORT root@$TARGET_HOST "mkdir -p /opt/jhipster-app"
           
-          # 2. Transfert binaire du JAR 
-          # On utilise l'option -P (majuscule) pour le port SCP (ancienne convention)
+          # 2. Transfert binaire du JAR (Correction Port: -P majuscule pour scp)
           scp $SSH_OPTS -P $TARGET_PORT $JAR_FILE root@$TARGET_HOST:$TARGET_PATH
           
-      # 4. Déploiement et Démarrage via SSH (Gestion Systemd)
+      # 4. DIAGNOSTIC ET DÉPLOIEMENT via SSH (Gestion Systemd)
       - name: Deploy and Start via SSH (Systemd)
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -143,8 +140,18 @@ jobs:
             SERVICE_NAME="jhipster-app"
             STATIC_JAR_NAME="app.jar" 
             DEPLOY_PATH="/opt/jhipster-app"
+            JAR_FULL_PATH="$DEPLOY_PATH/$STATIC_JAR_NAME"
             
-            echo "--- Préparation du déploiement Systemd ---"
+            echo "--- Démarrage du diagnostic du JAR ---"
+            
+            # Diagnostic 1: Vérification de la taille et du type du fichier
+            ls -lh $JAR_FULL_PATH
+            file $JAR_FULL_PATH
+            
+            # Diagnostic 2: Tente de lister le contenu du JAR (Si corrompu, cette commande échouera et nous aurons le message d'erreur)
+            jar -tf $JAR_FULL_PATH || echo "ERREUR DE DIAGNOSTIC: Le JAR n'est PAS un archive ZIP/JAR valide."
+            
+            echo "--- Fin du diagnostic. Déploiement Systemd ---"
             
             # 1. Stopper l'application avant de recharger le service (sécurité)
             systemctl stop $SERVICE_NAME.service || true
