@@ -20,4 +20,15 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Modifying
     @Query("update Review r set r.user = null where r.user.id = :userId")
     void clearUserFromReviews(@Param("userId") Long userId);
+
+    @Query(
+        value = """
+            SELECT *
+            FROM review r
+            WHERE r.user_id = :userId
+            AND r.product_id = :prodId
+        """,
+        nativeQuery = true
+    )
+    List<Review> getReviewByUserIdAndProductId(Long prodId, Long userId);
 }

@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import Swal from 'sweetalert2';
-import { NewReview } from 'app/entities/review/review.model';
+import { IReview, NewReview } from 'app/entities/review/review.model';
 
 @Component({
   selector: 'jhi-comment',
@@ -13,12 +13,28 @@ export class CommentComponent implements OnInit {
   @Input() productId!: number;
 
   canComment = false;
+  hasAlreadyCommented = false;
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.http.get<boolean>(`/api/products/has-been-purchased/${this.productId}`).subscribe(result => {
-      this.canComment = result;
+    this.http.get<boolean>(`/api/products/has-been-purchased/${this.productId}`).subscribe({
+      next: hasBeenPurchased => {
+        this.canComment = hasBeenPurchased;
+        if (!hasBeenPurchased) return;
+
+        this.http.get<IReview[]>(`/api/reviews/exists/${this.productId}`).subscribe({
+          next: reviews => {
+            this.hasAlreadyCommented = reviews.length > 0;
+          },
+          error: _ => {
+            this.canComment = false;
+          },
+        });
+      },
+      error: _ => {
+        this.canComment = false;
+      },
     });
   }
 
