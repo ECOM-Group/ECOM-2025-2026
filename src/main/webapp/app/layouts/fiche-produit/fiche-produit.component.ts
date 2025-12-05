@@ -52,33 +52,34 @@ export default class FicheProduitComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.id = Number(this.route.snapshot.paramMap.get('id') ?? '-1');
+    this.route.paramMap.subscribe(params => {
+      const id = Number(params.get('id') ?? '-1');
+      if (!isNaN(id) && id >= 0) {
+        this.id = id;
+        this.loadProduct(this.id);
+      } else {
+        console.error('ID produit invalide', params.get('id'));
+      }
+    });
+  }
 
-    if (!isNaN(this.id) && this.id >= 0) {
-      this.http.get<IProduct>(`/api/products/${this.id}`).subscribe({
-        next: product => {
-          this.product = product;
+  private loadProduct(id: number): void {
+    this.http.get<IProduct>(`/api/products/${id}`).subscribe({
+      next: product => {
+        this.product = product;
 
-          // Charger les produits similaires
-          this.productService.findAlikeProducts(this.id, this.alikeLimit).subscribe(alikeProducts => {
-            this.alikeProducts = alikeProducts;
-          });
+        // Produits similaires
+        this.productService.findAlikeProducts(this.id, this.alikeLimit).subscribe(alikeProducts => {
+          this.alikeProducts = alikeProducts;
+        });
 
-          // Récupérer toutes les images du produit
-          this.http.get<any[]>(`/api/product-images/by-product/${this.id}`).subscribe(images => {
-            if (images.length > 0) {
-              this.images = images.map(img => img.url);
-            } else {
-              // fallback si aucune image
-              this.images = [''];
-            }
-          });
-        },
-        error: err => {
-          console.error('Erreur lors du chargement du produit :', err);
-        },
-      });
-    }
+        // Images du produit
+        this.http.get<any[]>(`/api/product-images/by-product/${id}`).subscribe(images => {
+          this.images = images.length > 0 ? images.map(img => img.url) : [''];
+        });
+      },
+      error: err => console.error('Erreur lors du chargement du produit :', err),
+    });
   }
 
   goback(): void {
