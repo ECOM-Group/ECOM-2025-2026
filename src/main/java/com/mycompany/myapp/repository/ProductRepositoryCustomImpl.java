@@ -52,7 +52,6 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 AND p.prodType = (
                     SELECT p2.prodType FROM Product p2 WHERE p2.id = :productId
                 )
-                ORDER BY FUNCTION('RAND')
             """;
 
         TypedQuery<Product> query = entityManager.createQuery(jpql, Product.class);
