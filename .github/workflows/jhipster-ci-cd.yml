@@ -120,14 +120,15 @@ jobs:
           TARGET_PATH: /opt/jhipster-app/app.jar
         run: |
           # DÉSACTIVATION DE LA VÉRIFICATION DES CLÉS D'HÔTE (-o StrictHostKeyChecking=no)
-          SSH_OPTS="-o StrictHostKeyChecking=no -p $TARGET_PORT"
+          # Note: On laisse le port de côté pour le moment car scp le gère différemment (via -P)
+          SSH_OPTS="-o StrictHostKeyChecking=no"
 
-          # 1. Création du répertoire distant si nécessaire
-          ssh $SSH_OPTS root@$TARGET_HOST "mkdir -p /opt/jhipster-app"
+          # 1. Création du répertoire distant via SSH (avec le port séparé)
+          ssh $SSH_OPTS -p $TARGET_PORT root@$TARGET_HOST "mkdir -p /opt/jhipster-app"
           
-          # 2. Transfert binaire du JAR (avec option -O pour compatibilité OpenSSH)
-          # On utilise les options SCP_OPTS, qui inclut le port et la désactivation de la vérification de l'hôte
-          scp $SSH_OPTS $JAR_FILE root@$TARGET_HOST:$TARGET_PATH
+          # 2. Transfert binaire du JAR 
+          # On utilise l'option -P (majuscule) pour le port SCP (ancienne convention)
+          scp $SSH_OPTS -P $TARGET_PORT $JAR_FILE root@$TARGET_HOST:$TARGET_PATH
           
       # 4. Déploiement et Démarrage via SSH (Gestion Systemd)
       - name: Deploy and Start via SSH (Systemd)
