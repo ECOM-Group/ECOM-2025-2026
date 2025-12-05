@@ -83,7 +83,7 @@ export class CartComponent implements OnInit, OnChanges {
           this.userId = user.id;
           console.log('User id = ', this.userId, 'orderId = ', this.orderId);
 
-          if (this.orderId < 0) return this.http.get<IProdOrder>(`/api/prod-orders/${this.userId}/current`);
+          if (this.orderId < 0) return this.http.get<IProdOrder>(`/api/prod-orders/current`);
           return this.order !== null ? of(this.order) : this.http.get<IProdOrder>(`/api/prod-orders/${this.orderId}`);
         }),
         switchMap(prodOrder => {

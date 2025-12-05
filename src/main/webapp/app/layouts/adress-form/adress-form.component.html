@@ -19,6 +19,16 @@
     <input type="tel" formControlName="phoneNumber" placeholder="01 23 45 67 89" /><br />
   </div>
 
+  @if (addresses.length > 0) {
+    <div>
+      <label>Choisir une adresse existante :</label>
+      <select #addrSelect (change)="onSelectAddress(addrSelect.value)">
+        <option value="">nouvelle adresse</option>
+        <option *ngFor="let addr of addresses" [value]="addr.id">{{ addr.street }}, {{ addr.city }} {{ addr.zipcode }}</option>
+      </select>
+    </div>
+  }
+
   <div>
     <label>Adresse :</label>
     <input type="text" formControlName="adress" placeholder="12 Rue Nationale" /><br />
