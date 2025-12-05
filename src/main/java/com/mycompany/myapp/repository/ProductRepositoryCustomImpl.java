@@ -40,4 +40,15 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         Query query = entityManager.createQuery(finalQuery, Product.class);
         return query.getResultList();
     }
+
+    public List<Product> findAlikeProducts(Long productId, int limit) {
+        LOG.info("Function findAlikeProducts called with productId: {} and limit: {}", productId, limit);
+
+        String jpql = "SELECT p FROM Product p WHERE p.id <> :productId ORDER BY FUNCTION('RAND')";
+        Query query = entityManager.createQuery(jpql, Product.class);
+        query.setParameter("productId", productId);
+        query.setMaxResults(limit);
+
+        return query.getResultList();
+    }
 }

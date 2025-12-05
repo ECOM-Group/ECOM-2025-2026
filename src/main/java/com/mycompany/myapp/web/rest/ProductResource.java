@@ -246,11 +246,28 @@ public class ProductResource {
         return results;
     }*/
 
+    /**
+     * {@code GET  /products/search?q=:query} : search products by keywords.
+     *
+     * @param query the search query containing keywords separated by spaces.
+     * @return  the {@link List} of products matching the keywords.
+     */
     @GetMapping("/search")
     public List<Product> findByKeywords(@RequestParam("q") String query) {
         List<String> keywords = Arrays.stream(query.split("\\s+")).filter(k -> !k.isBlank()).toList();
 
         List<Product> results = productRepositoryCustom.findByKeywords(keywords);
         return results;
+    }
+
+    /**
+     * {@code GET  /products/:id/alike} : get alike products.
+     * @param id  id of the reference product
+     * @param limit maximum number of alike products to return
+     * @return  the {@link List} of alike products.
+     */
+    @GetMapping("/products/{id}/alike")
+    public List<Product> findAlikeProducts(@PathVariable Long id, @RequestParam(defaultValue = "6") int limit) {
+        return productRepositoryCustom.findAlikeProducts(id, limit);
     }
 }
