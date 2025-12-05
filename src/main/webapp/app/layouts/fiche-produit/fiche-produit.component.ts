@@ -184,4 +184,32 @@ export default class FicheProduitComponent implements OnInit {
         },
       });
   }
+
+  handleMouseMove(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+
+    // 1. Si la souris est sur un bouton → zoom OFF
+    if (target.classList.contains('no-zoom')) {
+      this.showZoom = false;
+      return;
+    }
+
+    // 2. Sinon → zoom ON (toujours actif sur l'image)
+    this.showZoom = true;
+
+    // 3. Mise à jour normale de la position du zoom
+    const frame = (event.currentTarget as HTMLElement).getBoundingClientRect();
+
+    const x = event.clientX - frame.left;
+    const y = event.clientY - frame.top;
+
+    const xPercent = (x / frame.width) * 100;
+    const yPercent = (y / frame.height) * 100;
+
+    this.backgroundPosition = `${xPercent}% ${yPercent}%`;
+  }
+
+  handleMouseLeave(): void {
+    this.showZoom = false;
+  }
 }
