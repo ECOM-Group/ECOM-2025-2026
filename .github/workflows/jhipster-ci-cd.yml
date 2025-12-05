@@ -112,7 +112,6 @@ jobs:
           ssh-private-key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           
       # 3. TRANSFERT SÉCURISÉ AVEC SCP MANUEL (Via SSH Agent)
-      # On utilise la commande SCP classique sur le runner pour un transfert binaire sans corruption.
       - name: Transfer JAR via SCP Command (Bypass corruption issue)
         env:
           JAR_FILE: target/${{ steps.get_jar.outputs.JAR_NAME }}
@@ -120,11 +119,15 @@ jobs:
           TARGET_PORT: 2222
           TARGET_PATH: /opt/jhipster-app/app.jar
         run: |
-          # Création du répertoire distant si nécessaire
-          ssh -p $TARGET_PORT root@$TARGET_HOST "mkdir -p /opt/jhipster-app"
+          # DÉSACTIVATION DE LA VÉRIFICATION DES CLÉS D'HÔTE (-o StrictHostKeyChecking=no)
+          SSH_OPTS="-o StrictHostKeyChecking=no -p $TARGET_PORT"
+
+          # 1. Création du répertoire distant si nécessaire
+          ssh $SSH_OPTS root@$TARGET_HOST "mkdir -p /opt/jhipster-app"
           
-          # Transfert binaire du JAR (avec option -O pour compatibilité OpenSSH)
-          scp -P $TARGET_PORT $JAR_FILE root@$TARGET_HOST:$TARGET_PATH
+          # 2. Transfert binaire du JAR (avec option -O pour compatibilité OpenSSH)
+          # On utilise les options SCP_OPTS, qui inclut le port et la désactivation de la vérification de l'hôte
+          scp $SSH_OPTS $JAR_FILE root@$TARGET_HOST:$TARGET_PATH
           
       # 4. Déploiement et Démarrage via SSH (Gestion Systemd)
       - name: Deploy and Start via SSH (Systemd)
