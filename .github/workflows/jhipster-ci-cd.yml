@@ -104,27 +104,23 @@ jobs:
         id: get_jar
         run: echo "JAR_NAME=$(ls target/*.jar | xargs basename)" >> $GITHUB_OUTPUT
 
-      # 2.5. CORRECTION SSH: CHARGER LA CLÉ PRIVÉE DANS L'AGENT
-      # Cela permet à l'authentification de fonctionner même si la clé a un format non standard.
+      # 2.5. CHARGER LA CLÉ PRIVÉE DANS L'AGENT SSH
       - name: Start SSH Agent and Add Key
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
 
-      # 3. Transférer le JAR via SCP
-      - name: Transfer JAR via SCP
-        uses: appleboy/scp-action@v0.1.7 # Revenir à la version que vous utilisez pour minimiser les changements
+      # 3. TRANSFERT SÉCURISÉ AVEC rsync
+      # On utilise rsync pour garantir l'intégrité du fichier binaire, remplaçant scp-action.
+      - name: Transfer JAR via rsync (Robust)
+        uses: burnettk/rsync-deployments@v1.4
         with:
-          host: bababooeys.gasdev.fr
-          username: root
-          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-          port: 2222
-          source: 'target/${{ steps.get_jar.outputs.JAR_NAME }}'
-          target: '/opt/jhipster-app/app.jar'
-          # Laissez ces paramètres qui étaient déjà corrects pour le mode fichier unique
-          tar_dereference: false
-          tar_exec: ''
-          overwrite: true
+          # On déplace et renomme le fichier en une seule étape rsync
+          command: '-avz --progress target/${{ steps.get_jar.outputs.JAR_NAME }} root@bababooeys.gasdev.fr:/opt/jhipster-app/app.jar'
+          # Le secret est passé à l'environnement pour rsync
+          ssh_private_key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          # Définir le port SSH
+          ssh_args: '-p 2222'
 
       # 4. Déploiement et Démarrage via SSH (Gestion Systemd)
       - name: Deploy and Start via SSH (Systemd)
