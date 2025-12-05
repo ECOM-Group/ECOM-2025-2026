@@ -267,7 +267,7 @@ public class ProductResource {
      * @return  the {@link List} of alike products.
      */
     @GetMapping("/products/{id}/alike")
-    public List<Product> findAlikeProducts(@PathVariable Long id, @RequestParam(defaultValue = "6") int limit) {
+    public List<Product> findAlikeProducts(@PathVariable Long id, @RequestParam(defaultValue = "4") int limit) {
         return productRepositoryCustom.findAlikeProducts(id, limit);
     }
 }

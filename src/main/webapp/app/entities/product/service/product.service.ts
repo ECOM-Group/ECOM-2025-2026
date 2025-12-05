@@ -78,9 +78,9 @@ export class ProductService {
     });
   }
 
-  findAlikeProducts(productId: number, limit = 6): Observable<IProduct[]> {
+  findAlikeProducts(productId: number, limit?: number): Observable<IProduct[]> {
     return this.http.get<IProduct[]>(`${this.resourceUrl}/${productId}/alike`, {
-      params: { limit },
+      params: limit ? { limit } : {},
     });
   }
 }
