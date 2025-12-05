@@ -5,6 +5,7 @@ import com.mycompany.myapp.domain.Product;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -44,8 +45,17 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     public List<Product> findAlikeProducts(Long productId, int limit) {
         LOG.info("Function findAlikeProducts called with productId: {} and limit: {}", productId, limit);
 
-        String jpql = "SELECT p FROM Product p WHERE p.id <> :productId ORDER BY FUNCTION('RAND')";
-        Query query = entityManager.createQuery(jpql, Product.class);
+        String jpql =
+            """
+                SELECT p FROM Product p
+                WHERE p.id <> :productId
+                AND p.prodType = (
+                    SELECT p2.prodType FROM Product p2 WHERE p2.id = :productId
+                )
+                ORDER BY FUNCTION('RAND')
+            """;
+
+        TypedQuery<Product> query = entityManager.createQuery(jpql, Product.class);
         query.setParameter("productId", productId);
         query.setMaxResults(limit);
 
