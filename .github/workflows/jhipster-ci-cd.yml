@@ -1,67 +1,104 @@
 name: JHipster CI/CD
-
 on:
   push:
-    branches: ["deploy_gasdev"]
+    branches: ["deploy_gasdev"] # Changé la branche cible
   pull_request:
-    branches: ["deploy_gasdev"]
+    branches: ["deploy_gasdev"] # Changé la branche cible
 
 jobs:
+  # ======================================================================================
+  # 1. Linting (Vérification de la qualité du code) - POINT DE DÉPART SANS DÉPENDANCE
+  # ======================================================================================
   lint:
+    # Ce job n'a aucune dépendance et sert de point de départ au workflow.
     runs-on: ubuntu-latest
     steps:
-      - name: Dummy Lint Step
-        run: echo "Linting step placeholder: Replace with actual linting commands."
+      - uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.20.0"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run linting (warnings only)
+        run: npm run lint || echo "Linting errors found, but build will continue"
+        continue-on-error: true
+
+  # ======================================================================================
+  # 2. Build (Construction de l'application)
+  # ======================================================================================
   build:
     needs: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
         with:
-          java-version: "21"
+          java-version: "17"
           distribution: "temurin"
-          cache: "maven"
 
-      - name: Build with Maven
-        run: ./mvnw -ntp verify -Pprod -DskipTests
+      - name: Build JHipster app (backend + frontend)
+        # UTILISATION DE 'install' ET 'spring-boot:repackage' POUR GARANTIR LE FAT JAR
+        run: ./mvnw clean install -Pprod -DskipTests spring-boot:repackage
 
-      - name: Upload application artifact (JAR)
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: jhipster-app
           path: target/*.jar
-          retention-days: 7
+          retention-days: 1
 
+  # ======================================================================================
+  # 3. Tests (Unitaires et E2E - Maintenus pour la structure)
+  # ======================================================================================
   test-unit:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dummy Unit Test Step
-        run: echo "Unit testing step placeholder"
-
-  test-e2e:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dummy E2E Test Step
-        run: echo "E2E testing step placeholder"
-
-  deploy-vps:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Run Java unit tests
+        run: ./mvnw test
+
+      - name: Skip frontend unit tests
+        run: echo "Pas de tests unitaires frontend pour l'instant"
+
+  test-e2e:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Skip E2E tests
+        run: echo "Pas de tests E2E pour l'instant"
+  # ======================================================================================
+  # 4. Deploy (Transfert SCP et Démarrage Systemd)
+  # ======================================================================================
+  deploy-vps:
+    needs: build # Assurez-vous que cette dépendance est correcte
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1. Télécharger l'artefact (le JAR)
       - name: Download application artifact (JAR)
         uses: actions/download-artifact@v4
         with:
           name: jhipster-app
           path: target/
 
+      # 1.5. Vérifier et installer les outils nécessaires sur le VPS (JDK pour l'outil 'jar')
       - name: Prerequisites Check and JDK Install
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -70,27 +107,40 @@ jobs:
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           port: 2222
           script: |
+            echo "Vérification et installation des dépendances (JDK pour 'jar' et 'file')."
             apt update
-            apt install -y default-jdk file
+            # Installation du JDK par défaut (fournit l'outil 'jar') et de l'outil 'file'.
+            apt install -y default-jdk file || echo "ATTENTION: L'installation du JDK par défaut a échoué. Poursuite, mais le diagnostic pourrait ne pas fonctionner."
 
+      # 2. Récupérer le nom du JAR
       - name: Get JAR file name
         id: get_jar
-        run: |
-          echo "JAR_NAME=$(ls target/*.jar | xargs basename)" >> "$GITHUB_OUTPUT"
+        run: echo "JAR_NAME=$(ls target/*.jar | xargs basename)" >> $GITHUB_OUTPUT
 
+      # 2.5. CHARGER LA CLÉ PRIVÉE DANS L'AGENT SSH
       - name: Start SSH Agent and Add Key
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-
-      - name: Transfer JAR via SCP Command
+          
+      # 3. TRANSFERT SÉCURISÉ AVEC SCP MANUEL (Via SSH Agent)
+      - name: Transfer JAR via SCP Command (Bypass corruption issue)
         env:
           JAR_FILE: target/${{ steps.get_jar.outputs.JAR_NAME }}
+          TARGET_HOST: bababooeys.gasdev.fr
+          TARGET_PORT: 2222
+          TARGET_PATH: /opt/jhipster-app/app.jar
         run: |
+          # DÉSACTIVATION DE LA VÉRIFICATION DES CLÉS D'HÔTE (-o StrictHostKeyChecking=no)
           SSH_OPTS="-o StrictHostKeyChecking=no"
-          ssh $SSH_OPTS -p 2222 root@bababooeys.gasdev.fr "mkdir -p /opt/jhipster-app"
-          scp $SSH_OPTS -P 2222 "$JAR_FILE" root@bababooeys.gasdev.fr:/opt/jhipster-app/app.jar
 
+          # 1. Création du répertoire distant via SSH
+          ssh $SSH_OPTS -p $TARGET_PORT root@$TARGET_HOST "mkdir -p /opt/jhipster-app"
+          
+          # 2. Transfert binaire du JAR (Correction Port: -P majuscule pour scp)
+          scp $SSH_OPTS -P $TARGET_PORT $JAR_FILE root@$TARGET_HOST:$TARGET_PATH
+          
+      # 4. DIAGNOSTIC ET DÉPLOIEMENT via SSH (Gestion Systemd)
       - name: Deploy and Start via SSH (Systemd)
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -99,49 +149,64 @@ jobs:
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           port: 2222
           script: |
+            # VARIABLES
             SERVICE_NAME="jhipster-app"
+            STATIC_JAR_NAME="app.jar" 
             DEPLOY_PATH="/opt/jhipster-app"
-            JAR_FULL_PATH="$DEPLOY_PATH/app.jar"
+            JAR_FULL_PATH="$DEPLOY_PATH/$STATIC_JAR_NAME"
+            
+            echo "--- Démarrage du diagnostic du JAR ---"
+            
+            # Diagnostic 1: Vérification de la taille et du type du fichier
+            ls -lh $JAR_FULL_PATH
+            file $JAR_FULL_PATH
+            
+            # Diagnostic 2: Tente de lister le contenu du JAR (Confirme s'il s'agit d'une archive valide)
+            jar -tf $JAR_FULL_PATH || echo "ERREUR DE DIAGNOSTIC: Le JAR n'est PAS une archive ZIP/JAR valide."
+            
+            echo "--- Fin du diagnostic. Déploiement Systemd ---"
+            
+            # 1. Stopper l'application avant de recharger le service (sécurité)
+            systemctl stop $SERVICE_NAME.service || true
+            
+            # 2. Créer ou mettre à jour le fichier de service systemd 
+            cat << EOF > /etc/systemd/system/$SERVICE_NAME.service
+            [Unit]
+            Description=JHipster Spring Boot Application
+            After=syslog.target network.target
+            
+            [Service]
+            ExecStart=/usr/bin/java -jar $DEPLOY_PATH/$STATIC_JAR_NAME
+            Restart=always
+            User=root
+            
+            # Variables d'environnement pour l'application Spring Boot
+            Environment="SPRING_PROFILES_ACTIVE=prod"
+            
+            # VARIABLES DE BASE DE DONNÉES (Supabase Pooler)
+            Environment="JHIPSTER_DATABASE_HOST=aws-1-eu-central-2.pooler.supabase.com"
+            Environment="JHIPSTER_DATABASE_PORT=5432"
+            Environment="JHIPSTER_DATABASE_USER=postgres.seqwrlkotxmwgjjwkejl" 
+            Environment="JHIPSTER_DATABASE_PASSWORD=${{ secrets.SUPABASE_PASSWORD }}"
+            
+            # SECRETS DE L'APPLICATION
+            Environment="STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}"
+            Environment="JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=${{ secrets.JWT_SECRET }}"
+            
+            # 🔑 CORRECTION : AJOUT DES SECRETS CLOUDINARY
+            Environment="CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}"
+            Environment="CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}"
+            Environment="CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}"
 
-            echo "--- Diagnostic JAR ---"
-            ls -lh "$JAR_FULL_PATH"
-            file "$JAR_FULL_PATH"
-            jar -tf "$JAR_FULL_PATH" || echo "JAR invalide"
-            java -cp "$JAR_FULL_PATH" org.springframework.boot.loader.JarLauncher || echo "JarLauncher KO"
-
-            echo "--- Écriture du fichier systemd ---"
-
-            cat << 'EOF' > /etc/systemd/system/jhipster-app.service
-[Unit]
-Description=JHipster Spring Boot Application
-After=syslog.target network.target
-
-[Service]
-ExecStart=/usr/bin/java -jar /opt/jhipster-app/app.jar
-Restart=always
-User=root
-
-Environment="SPRING_PROFILES_ACTIVE=prod"
-Environment="JHIPSTER_DATABASE_HOST=aws-1-eu-central-2.pooler.supabase.com"
-Environment="JHIPSTER_DATABASE_PORT=5432"
-Environment="JHIPSTER_DATABASE_USER=postgres.seqwrlkotxmwgjjwkejl"
-Environment="JHIPSTER_DATABASE_PASSWORD=${SUPABASE_PASSWORD}"
-
-Environment="STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}"
-Environment="JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=${JWT_SECRET}"
-
-Environment="CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}"
-Environment="CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}"
-Environment="CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}"
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-            echo "--- Reload systemd ---"
+            [Install]
+            WantedBy=multi-user.target
+            EOF
+            
+            # 3. Recharger la configuration systemd et démarrer/redémarrer le service
             systemctl daemon-reload
-            systemctl enable jhipster-app.service || true
-            systemctl restart jhipster-app.service
-
-            systemctl status jhipster-app.service
-            journalctl -u jhipster-app.service --no-pager -n 30
+            systemctl enable $SERVICE_NAME.service || true 
+            systemctl start $SERVICE_NAME.service 
+            
+            echo "--- Déploiement Terminé. Affichage du statut et des logs : ---"
+            systemctl status $SERVICE_NAME.service
+            journalctl -u $SERVICE_NAME.service --no-pager -n 30
