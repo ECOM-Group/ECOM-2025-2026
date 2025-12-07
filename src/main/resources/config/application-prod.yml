@@ -82,6 +82,8 @@ jhipster:
       max-entries: 1000 # Number of objects in each cache entry
   security:
     authentication:
+      # NOUVELLE LIGNE : Désactive l'exigence d'activation (et l'envoi d'e-mail)
+      account-activation-required: false
       jwt:
         # Assurez-vous que cette clé n'est PAS stockée en clair dans ce fichier pour la production
         # Elle DOIT être injectée via une variable d'environnement ou un service de configuration sécurisé.
@@ -89,8 +91,10 @@ jhipster:
         # Token is valid 24 hours
         token-validity-in-seconds: 86400
         token-validity-in-seconds-for-remember-me: 2592000
-  mail: # specific JHipster mail property, for standard properties see MailProperties
-    base-url: https://ecom-2025-2026-1d0257cae8e4.herokuapp.com # Modifiez avec l'URL réelle
+  mail: # specific JHipster mail property
+    # Vous avez retiré l'URL, ce qui est logique si la fonction mail est désactivée.
+    # Base-url est maintenant vide.
+    base-url:
   logging:
     use-json-format: false # By default, logs are not in Json format
     logstash: # Forward logs to logstash over a socket, used by LoggingConfiguration
