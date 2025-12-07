@@ -184,6 +184,7 @@ jobs:
             Environment="SPRING_PROFILES_ACTIVE=prod"
             
             # VARIABLES DE BASE DE DONNÉES (Supabase Pooler)
+            Environment="DATABASE_URL=${{ secrets.DATABASE_URL }}"
             Environment="SPRING_DATASOURCE_URL=${{ secrets.DATABASE_URL }}"
             
             # SECRETS DE L'APPLICATION
