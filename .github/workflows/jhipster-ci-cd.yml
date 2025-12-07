@@ -184,10 +184,7 @@ jobs:
             Environment="SPRING_PROFILES_ACTIVE=prod"
             
             # VARIABLES DE BASE DE DONNÉES (Supabase Pooler)
-            Environment="JHIPSTER_DATABASE_HOST=aws-1-eu-central-2.pooler.supabase.com"
-            Environment="JHIPSTER_DATABASE_PORT=5432"
-            Environment="JHIPSTER_DATABASE_USER=postgres.seqwrlkotxmwgjjwkejl" 
-            Environment="JHIPSTER_DATABASE_PASSWORD=${{ secrets.SUPABASE_PASSWORD }}"
+            Environment="SPRING_DATASOURCE_URL=${{ secrets.DATABASE_URL }}"
             
             # SECRETS DE L'APPLICATION
             Environment="STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}"
