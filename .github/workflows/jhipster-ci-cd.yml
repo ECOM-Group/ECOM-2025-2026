@@ -7,15 +7,71 @@ on:
     branches: ["deploy_gasdev"]
 
 jobs:
-  # --------------------------------------------------------------------------------------
-  # (Les jobs lint, build, test-unit, test-e2e doivent être définis ici)
+  # ======================================================================================
+  # 1. Lint (Nettoyage de code et vérification de style)
+  #    -> À compléter avec vos commandes de linting spécifiques (ex: npm run lint, checkstyle)
+  # ======================================================================================
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dummy Lint Step
+        run: echo "Linting step placeholder: Replace with actual linting commands."
+    # Si cette étape est critique, ajoutez 'fail-fast: true' ou configurez-la correctement.
+
   # --------------------------------------------------------------------------------------
 
   # ======================================================================================
-  # 4. Deploy (Transfert SCP et Démarrage Systemd)
+  # 2. Build (Construction de l'application et création du JAR)
+  # ======================================================================================
+  build:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+      
+      - name: Build with Maven
+        run: ./mvnw -ntp verify -Pprod -DskipTests
+      
+      - name: Upload application artifact (JAR)
+        uses: actions/upload-artifact@v4
+        with:
+          name: jhipster-app
+          path: target/*.jar
+          retention-days: 7
+
+  # --------------------------------------------------------------------------------------
+
+  # ======================================================================================
+  # 3. Test (Unitaires et E2E)
+  #    (Les tests E2E devraient idéalement dépendre de la BDD et du backend démarré)
+  # ======================================================================================
+  test-unit:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dummy Unit Test Step
+        run: echo "Unit testing step placeholder: Replace with actual unit tests."
+
+  test-e2e:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dummy E2E Test Step
+        run: echo "E2E testing step placeholder: Replace with actual E2E tests."
+
+  # --------------------------------------------------------------------------------------
+
+  # ======================================================================================
+  # 4. Deploy (Transfert SCP et Démarrage Systemd) - CORRIGÉ
   # ======================================================================================
   deploy-vps:
-    needs: build # Assurez-vous que cette dépendance est correcte
+    needs: build # Dépend de la réussite de la construction
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +94,7 @@ jobs:
           script: |
             echo "Vérification et installation des dépendances (JDK pour 'jar' et 'file')."
             apt update
+            
             # Installation du JDK par défaut (fournit l'outil 'jar') et de l'outil 'file'.
             apt install -y default-jdk file || echo "ATTENTION: L'installation du JDK par défaut a échoué. Poursuite, mais le diagnostic pourrait ne pas fonctionner."
 
@@ -93,6 +150,10 @@ jobs:
             # Diagnostic 2: Tente de lister le contenu du JAR (Confirme s'il s'agit d'une archive valide)
             jar -tf $JAR_FULL_PATH || echo "ERREUR DE DIAGNOSTIC: Le JAR n'est PAS une archive ZIP/JAR valide."
             
+            # Diagnostic 3: Tente d'exécuter le JAR avec la classe loader
+            echo "Tentative de diagnostic via la classe loader..."
+            /usr/bin/java -cp $JAR_FULL_PATH org.springframework.boot.loader.JarLauncher || echo "Diagnostic: JarLauncher a échoué. Le JAR est probablement mal construit ou il y a un problème de classpath."
+            
             echo "--- Fin du diagnostic. Déploiement Systemd ---"
             
             # 1. Stopper l'application avant de recharger le service (sécurité)
@@ -105,6 +166,7 @@ jobs:
             After=syslog.target network.target
             
             [Service]
+            # Utilise le nom statique app.jar
             ExecStart=/usr/bin/java -jar $DEPLOY_PATH/$STATIC_JAR_NAME
             Restart=always
             User=root
