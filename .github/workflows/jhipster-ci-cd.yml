@@ -2,18 +2,20 @@ name: JHipster CI/CD
 
 on:
   push:
-    branches: ["deploy_gasdev"] # Changé la branche cible
+    branches: ["deploy_gasdev"]
   pull_request:
-    branches: ["deploy_gasdev"] # Changé la branche cible
+    branches: ["deploy_gasdev"]
 
 jobs:
-  # ... (Sections lint, build, test-unit, test-e2e restent inchangées)
+  # --------------------------------------------------------------------------------------
+  # (Les jobs lint, build, test-unit, test-e2e doivent être définis ici)
+  # --------------------------------------------------------------------------------------
 
   # ======================================================================================
   # 4. Deploy (Transfert SCP et Démarrage Systemd)
   # ======================================================================================
   deploy-vps:
-    needs: build # Dépend de la réussite de la construction
+    needs: build # Assurez-vous que cette dépendance est correcte
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,9 +38,7 @@ jobs:
           script: |
             echo "Vérification et installation des dépendances (JDK pour 'jar' et 'file')."
             apt update
-            
             # Installation du JDK par défaut (fournit l'outil 'jar') et de l'outil 'file'.
-            # Utilisation de 'default-jdk' qui est l'alias le plus fiable sous Debian.
             apt install -y default-jdk file || echo "ATTENTION: L'installation du JDK par défaut a échoué. Poursuite, mais le diagnostic pourrait ne pas fonctionner."
 
       # 2. Récupérer le nom du JAR
@@ -91,11 +91,7 @@ jobs:
             file $JAR_FULL_PATH
             
             # Diagnostic 2: Tente de lister le contenu du JAR (Confirme s'il s'agit d'une archive valide)
-            jar -tf $JAR_FULL_PATH || echo "ERREUR DE DIAGNOSTIC: Le JAR n'est PAS une archive ZIP/JAR valide. Nous pourrions avoir besoin de revoir l'étape de construction Maven."
-            
-            # Diagnostic 3: Tente d'exécuter le JAR avec la classe loader (contournement pour certains JAR mal formés)
-            echo "Tentative de diagnostic via la classe loader..."
-            /usr/bin/java -cp $JAR_FULL_PATH org.springframework.boot.loader.JarLauncher || echo "Diagnostic: JarLauncher a échoué. Le JAR est probablement mal construit ou il y a un problème de classpath."
+            jar -tf $JAR_FULL_PATH || echo "ERREUR DE DIAGNOSTIC: Le JAR n'est PAS une archive ZIP/JAR valide."
             
             echo "--- Fin du diagnostic. Déploiement Systemd ---"
             
@@ -109,7 +105,6 @@ jobs:
             After=syslog.target network.target
             
             [Service]
-            # Utilise le nom statique app.jar
             ExecStart=/usr/bin/java -jar $DEPLOY_PATH/$STATIC_JAR_NAME
             Restart=always
             User=root
@@ -127,6 +122,11 @@ jobs:
             Environment="STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}"
             Environment="JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=${{ secrets.JWT_SECRET }}"
             
+            # 🔑 CORRECTION : AJOUT DES SECRETS CLOUDINARY
+            Environment="CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}"
+            Environment="CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}"
+            Environment="CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}"
+
             [Install]
             WantedBy=multi-user.target
             EOF
