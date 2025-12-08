@@ -186,6 +186,8 @@ jobs:
             # VARIABLES DE BASE DE DONNÉES (Supabase Pooler)
             Environment="DATABASE_URL=${{ secrets.DATABASE_URL }}"
             Environment="SPRING_DATASOURCE_URL=${{ secrets.DATABASE_URL }}"
+            Environment="SPRING_DATASOURCE_USERNAME=${{ secrets.DATABASE_USER }}"
+            Environment="SPRING_DATASOURCE_PASSWORD=${{ secrets.DATABASE_PASS }}"
             
             # SECRETS DE L'APPLICATION
             Environment="STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}"
