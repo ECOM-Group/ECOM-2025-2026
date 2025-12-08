@@ -8,11 +8,11 @@
 
 logging:
   level:
-    ROOT: INFO
-    tech.jhipster: INFO
-    com.mycompany.myapp: INFO
+    ROOT: DEBUG
+    tech.jhipster: DEBUG
+    com.mycompany.myapp: DEBUG
     # DEBUG pour Liquibase en cas de problème de démarrage lent
-    liquibase: INFO # Conservez WARN ou INFO. Si le problème persiste, passez à DEBUG.
+    liquibase: DEBUG # Conservez WARN ou INFO. Si le problème persiste, passez à DEBUG.
 
 management:
   security:
