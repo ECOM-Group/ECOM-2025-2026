@@ -189,16 +189,15 @@ jobs:
             Environment="SPRING_DATASOURCE_USERNAME=${{ secrets.DATABASE_USER }}"
             Environment="SPRING_DATASOURCE_PASSWORD=${{ secrets.DATABASE_PASS }}"
 
-            # 💥 LIGNES CLÉS AJOUTÉES ICI 💥
+            # VARIABLES DU MAIL
             Environment="JHIPSTER_MAIL_BASE_URL=http://bababooeys.gasdev.fr" 
-            Environment="JHIPSTER_MAIL_ENABLED=false" 
-            Environment="SPRING_MAIL_HOST=_UNSET_"
+            Environment="JHIPSTER_MAIL_ENABLED=false"
             
             # SECRETS DE L'APPLICATION
             Environment="STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}"
             Environment="JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=${{ secrets.JWT_SECRET }}"
             
-            # 🔑 CORRECTION : AJOUT DES SECRETS CLOUDINARY
+            # CORRECTION : AJOUT DES SECRETS CLOUDINARY
             Environment="CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}"
             Environment="CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}"
             Environment="CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}"
