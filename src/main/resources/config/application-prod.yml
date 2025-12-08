@@ -28,11 +28,11 @@ spring:
       enabled: false
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    # L'URL est gérée par la variable d'environnement Heroku
-    url: ${DATABASE_URL}
-    # NOTE: Laissez 'username' et 'password' vides. Ils sont inclus dans DATABASE_URL
-    username:
-    password:
+    driver-class-name: org.postgresql.Driver # <-- NOUVEAU : Force l'utilisation du driver PostgreSQL
+    # Retirer les paramètres user/password de l'URL. Nous allons les passer séparément.
+    url: ${SPRING_DATASOURCE_URL} # Nous allons injecter l'URL PURE ici via env var
+    username: ${SPRING_DATASOURCE_USERNAME} # <-- NOUVEAU : Utilisateur séparé
+    password: ${SPRING_DATASOURCE_PASSWORD} # <-- NOUVEAU : Mot de passe séparé
     hikari:
       poolName: Hikari
       # ⚠️ IMPORTANT : Optimisation Hikari pour les connexions Cloud/Pooler Supabase
@@ -60,7 +60,7 @@ stripe:
 # Server configuration
 # ===================================================================
 server:
-  port: 80
+  port: ${PORT}
   address: 0.0.0.0
   shutdown: graceful # see https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-graceful-shutdown
   compression:
@@ -83,7 +83,7 @@ jhipster:
   security:
     authentication:
       # NOUVELLE LIGNE : Désactive l'exigence d'activation (et l'envoi d'e-mail)
-      #account-activation-required: false
+      account-activation-required: false
       jwt:
         # Assurez-vous que cette clé n'est PAS stockée en clair dans ce fichier pour la production
         # Elle DOIT être injectée via une variable d'environnement ou un service de configuration sécurisé.
