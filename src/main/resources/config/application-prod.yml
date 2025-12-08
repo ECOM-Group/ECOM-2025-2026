@@ -15,6 +15,8 @@ logging:
     liquibase: INFO # Conservez WARN ou INFO. Si le problème persiste, passez à DEBUG.
 
 management:
+  security:
+      enabled: false
   prometheus:
     metrics:
       export:
@@ -83,7 +85,7 @@ jhipster:
   security:
     authentication:
       # NOUVELLE LIGNE : Désactive l'exigence d'activation (et l'envoi d'e-mail)
-      account-activation-required: false
+      #account-activation-required: false
       jwt:
         # Assurez-vous que cette clé n'est PAS stockée en clair dans ce fichier pour la production
         # Elle DOIT être injectée via une variable d'environnement ou un service de configuration sécurisé.
