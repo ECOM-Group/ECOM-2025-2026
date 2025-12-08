@@ -62,7 +62,7 @@ stripe:
 # Server configuration
 # ===================================================================
 server:
-  port: ${PORT}
+  port: 80
   address: 0.0.0.0
   shutdown: graceful # see https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-graceful-shutdown
   compression:
