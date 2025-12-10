@@ -68,7 +68,23 @@ export class CartLineComponent {
           //this.cartService.notifyCartUpdated();
         }
       },
-      error: err => console.error('Error decrementing quantity', err),
+      error: err => {
+        if (err.status === 409) {
+          this.stockMax = true;
+          const ol =
+            err.error; /* err.error = response.body et l'order line "corrigé" est dans le respons.body aka err.error en cas d'erreur */
+
+          if (ol.quantity === 0) return this.delete();
+
+          this.orderLine.total = ol.total;
+          this.updated.emit({
+            id: this.orderLine.id,
+            delete: false,
+            priceDiff: -(this.orderLine.unitPrice ?? 0) * ((this.orderLine.quantity ?? 0) - ol.quantity),
+          });
+          this.orderLine.quantity = ol.quantity;
+        } else console.error('Error decrementing quantity', err);
+      },
     });
   }
 

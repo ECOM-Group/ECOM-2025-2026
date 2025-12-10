@@ -5,7 +5,7 @@ import { AdressFormComponent } from '../adress-form/adress-form.component';
 import { AdresseFormGroup } from 'app/layouts/adress-form/adress-form-group';
 import { CardFormGroup } from '../payment-card-form/payment-card-group-form';
 // import { PaymentCardFormComponent } from '../payment-card-form/payment-card-form.component';
-import { EMPTY, from, map, Observable, of, switchMap } from 'rxjs';
+import { catchError, EMPTY, from, map, Observable, of, switchMap } from 'rxjs';
 import { Router } from '@angular/router';
 import { AccountService } from 'app/core/auth/account.service';
 import { HttpClient } from '@angular/common/http';
@@ -154,7 +154,7 @@ export default class PaymentTunelComponent implements OnInit, AfterViewInit {
       .post<IMissingStock[]>('/api/payement-tunnels/pre-validate-order', {})
       .pipe(
         switchMap(stockResult => {
-          if (stockResult && stockResult.length > 0) {
+          if (stockResult?.length) {
             this.displayStockErrors(stockResult);
             this.isProcessing = false;
             return EMPTY;
@@ -165,35 +165,38 @@ export default class PaymentTunelComponent implements OnInit, AfterViewInit {
               type: 'card',
               card: this.card as StripeCardElement,
             }),
+          ).pipe(
+            catchError(err => {
+              this.message = err.message || 'Erreur de paiement';
+              return this.refoundCurrentOrder().pipe(switchMap(() => EMPTY));
+            }),
           );
         }),
         switchMap(pmResult => {
-          if (pmResult.error) {
-            this.message = pmResult.error.message || 'Erreur de paiement';
-            return this.refoundCurrentOrder().pipe(switchMap(() => EMPTY));
-          }
-
-          return this.http.post<{ clientSecret: string }>('/api/payement-tunnels/create-payment-intent', {
-            paymentMethodId: pmResult.paymentMethod!.id,
-          });
+          return this.http
+            .post<{ clientSecret: string }>('/api/payement-tunnels/create-payment-intent', {
+              paymentMethodId: pmResult.paymentMethod!.id,
+            })
+            .pipe(
+              catchError(err => {
+                this.message = err.error?.message || 'Erreur serveur';
+                return this.refoundCurrentOrder().pipe(switchMap(() => EMPTY));
+              }),
+            );
         }),
         switchMap(piRes => {
-          if (!piRes || !piRes.clientSecret) {
-            this.message = 'Erreur serveur';
-            return this.refoundCurrentOrder().pipe(switchMap(() => EMPTY));
-          }
-          return from(this.stripe!.confirmCardPayment(piRes.clientSecret));
+          return from(this.stripe!.confirmCardPayment(piRes.clientSecret)).pipe(
+            catchError(err => {
+              this.message = err.message || 'Erreur de paiement';
+              return this.refoundCurrentOrder().pipe(switchMap(() => EMPTY));
+            }),
+          );
         }),
         switchMap(paymentResult => {
           if (paymentResult.paymentIntent?.status === 'succeeded') {
             return this.http.post<void>('/api/payement-tunnels/validate-current-order', {});
           }
-
-          if (paymentResult.error) {
-            this.message = paymentResult.error.message || 'Erreur de paiement';
-          }
-
-          return this.refoundCurrentOrder();
+          return this.refoundCurrentOrder().pipe(switchMap(() => EMPTY));
         }),
       )
       .subscribe({
@@ -204,13 +207,7 @@ export default class PaymentTunelComponent implements OnInit, AfterViewInit {
         },
         error: err => {
           console.error('Erreur reçue :', err);
-
-          if (err.status === 400 && err.error && Array.isArray(err.error)) {
-            this.displayStockErrors(err.error as IMissingStock[]);
-          } else {
-            this.message = 'Erreur serveur';
-          }
-
+          this.message = 'Erreur serveur';
           this.isProcessing = false;
         },
       });
@@ -235,6 +232,7 @@ export default class PaymentTunelComponent implements OnInit, AfterViewInit {
   }
 
   refoundCurrentOrder(): Observable<void> {
+    console.log('REFOUND');
     return this.http.post('/api/payement-tunnels/refound-current-order', {}).pipe(map(() => undefined));
   }
 }

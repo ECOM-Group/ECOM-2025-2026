@@ -60,6 +60,7 @@ public class OrderLineResource {
         if (orderLine.getId() != null) {
             throw new BadRequestAlertException("A new orderLine cannot already have an ID", ENTITY_NAME, "idexists");
         }
+        boolean conflic = false;
         if (
             orderLine.getProduct() != null &&
             orderLine.getProduct().getQuantity() != null &&
@@ -67,10 +68,12 @@ public class OrderLineResource {
             orderLine.getProduct().getQuantity() < orderLine.getQuantity()
         ) {
             orderLine.setQuantity(orderLine.getProduct().getQuantity());
-            orderLineRepository.save(orderLine);
-            return ResponseEntity.status(HttpStatus.SC_CONFLICT).build();
+            conflic = true;
         }
+        orderLine.setTotal(orderLine.getQuantity() * orderLine.getUnitPrice());
         orderLine = orderLineRepository.save(orderLine);
+
+        if (conflic) return ResponseEntity.status(HttpStatus.SC_CONFLICT).body(orderLine);
         return ResponseEntity.created(new URI("/api/order-lines/" + orderLine.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, orderLine.getId().toString()))
             .body(orderLine);
@@ -102,6 +105,7 @@ public class OrderLineResource {
         if (!orderLineRepository.existsById(id)) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
+        boolean conflic = false;
         if (
             orderLine.getProduct() != null &&
             orderLine.getProduct().getQuantity() != null &&
@@ -109,11 +113,11 @@ public class OrderLineResource {
             orderLine.getProduct().getQuantity() < orderLine.getQuantity()
         ) {
             orderLine.setQuantity(orderLine.getProduct().getQuantity());
-            orderLineRepository.save(orderLine);
-            return ResponseEntity.status(HttpStatus.SC_CONFLICT).build();
+            conflic = true;
         }
         orderLine.setTotal(orderLine.getQuantity() * orderLine.getUnitPrice());
         orderLine = orderLineRepository.save(orderLine);
+        if (conflic) return ResponseEntity.status(HttpStatus.SC_CONFLICT).body(orderLine);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, orderLine.getId().toString()))
             .body(orderLine);
@@ -146,6 +150,7 @@ public class OrderLineResource {
         if (!orderLineRepository.existsById(id)) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
+        boolean conflic = false;
         if (
             orderLine.getProduct() != null &&
             orderLine.getProduct().getQuantity() != null &&
@@ -153,9 +158,9 @@ public class OrderLineResource {
             orderLine.getProduct().getQuantity() < orderLine.getQuantity()
         ) {
             orderLine.setQuantity(orderLine.getProduct().getQuantity());
-            orderLineRepository.save(orderLine);
-            return ResponseEntity.status(HttpStatus.SC_CONFLICT).build();
+            conflic = true;
         }
+
         Optional<OrderLine> result = orderLineRepository
             .findById(orderLine.getId())
             .map(existingOrderLine -> {
@@ -173,6 +178,7 @@ public class OrderLineResource {
             })
             .map(orderLineRepository::save);
 
+        if (conflic) return ResponseEntity.status(HttpStatus.SC_CONFLICT).body(orderLine);
         return ResponseUtil.wrapOrNotFound(
             result,
             HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, orderLine.getId().toString())
