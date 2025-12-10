@@ -1,11 +1,11 @@
 <div class="page-layout">
   <!-- FILTERS (LEFT SIDEBAR) -->
   <aside class="filters">
-    <h4>Filters</h4>
+    <h4>Filtres</h4>
 
     <!-- COLOR FILTER -->
     <div class="filter-group">
-      <label class="filter-title">Color</label>
+      <label class="filter-title">Couleur</label>
 
       @for (color of getAvailableColors; track color) {
         <label class="filter-checkbox">
@@ -18,7 +18,7 @@
     <!-- PRICE FILTER -->
     <div class="filter-group">
       <label class="filter-title">
-        Max Price:
+        Prix maximum:
         <input
           type="number"
           [min]="0"
@@ -61,27 +61,27 @@
     <main class="products">
       <!-- Loading message -->
       @if (loading && (query || selectedTagIds.length > 0)) {
-        <p>Loading products...</p>
+        <p>Chargement des produits...</p>
       }
 
       <!-- Search results -->
       @if (!loading) {
         <h2>
-          Search results
+          Resultats de votre recherche
           @if (query) {
-            for: <span style="color: #1a73e8; font-weight: 600">"{{ query }}"</span>
+            pour: <span style="color: #1a73e8; font-weight: 600">"{{ query }}"</span>
           } @else {
-            for tag: <span style="color: #1a73e8; font-weight: 600">"{{ selectedTagName }}"</span>
+            pour le label: <span style="color: #1a73e8; font-weight: 600">"{{ selectedTagName }}"</span>
           }
         </h2>
 
         <p>
           @if (filteredProducts.length === 0) {
-            No products found
+            Pas de produits trouvés
             @if (query) {
-              for: "{{ query }}"
+              pour: "{{ query }}"
             } @else {
-              for tag: "{{ selectedTagName }}"
+              pour "{{ selectedTagName }}".
             }
           }
         </p>
