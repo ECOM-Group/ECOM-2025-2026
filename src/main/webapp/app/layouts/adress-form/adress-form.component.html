@@ -1,36 +1,46 @@
-<div [formGroup]="adresseForm">
-  <div>
+<div [formGroup]="adresseForm" class="tcg-address-form">
+  <div class="tcg-row">
     <label>Prénom :</label>
-    <input type="text" formControlName="firstName" placeholder="Jean" /><br />
+    <input type="text" formControlName="firstName" placeholder="Jean" />
   </div>
 
-  <div>
+  <div class="tcg-row">
     <label>Nom :</label>
-    <input type="text" formControlName="lastName" placeholder="Dupont" /><br />
+    <input type="text" formControlName="lastName" placeholder="Dupont" />
   </div>
 
-  <div>
+  <div class="tcg-row">
     <label>Email :</label>
-    <input type="email" formControlName="email" placeholder="jean.dupont@gmail.com" /><br />
+    <input type="email" formControlName="email" placeholder="jean.dupont@gmail.com" />
   </div>
 
-  <div>
+  <div class="tcg-row">
     <label>Téléphone :</label>
-    <input type="tel" formControlName="phoneNumber" placeholder="01 23 45 67 89" /><br />
+    <input type="tel" formControlName="phoneNumber" placeholder="01 23 45 67 89" />
   </div>
 
-  <div>
+  @if (addresses.length > 0) {
+    <div class="tcg-row">
+      <label>Adresse existante :</label>
+      <select #addrSelect (change)="onSelectAddress(addrSelect.value)">
+        <option value="">Nouvelle adresse</option>
+        <option *ngFor="let addr of addresses" [value]="addr.id">{{ addr.street }}, {{ addr.city }} {{ addr.zipcode }}</option>
+      </select>
+    </div>
+  }
+
+  <div class="tcg-row">
     <label>Adresse :</label>
-    <input type="text" formControlName="adress" placeholder="12 Rue Nationale" /><br />
+    <input type="text" formControlName="adress" placeholder="12 Rue Nationale" />
   </div>
 
-  <div>
+  <div class="tcg-row">
     <label>Code postal :</label>
-    <input type="text" formControlName="postalCode" placeholder="59000" /><br />
+    <input type="text" formControlName="postalCode" placeholder="59000" />
   </div>
 
-  <div>
+  <div class="tcg-row">
     <label>Ville :</label>
-    <input type="text" formControlName="city" placeholder="Lille" /><br />
+    <input type="text" formControlName="city" placeholder="Lille" />
   </div>
 </div>

@@ -1,9 +1,9 @@
 name: JHipster CI/CD
 on:
   push:
-    branches: ["main"] # Changé la branche cible
+    branches: ['main'] # Changé la branche cible
   pull_request:
-    branches: ["main"] # Changé la branche cible
+    branches: ['main'] # Changé la branche cible
 
 jobs:
   # ======================================================================================
@@ -18,7 +18,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22.20.0"
+          node-version: '22.20.0'
 
       - name: Install dependencies
         run: npm install
@@ -39,8 +39,8 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: "17"
-          distribution: "temurin"
+          java-version: '17'
+          distribution: 'temurin'
 
       - name: Build JHipster app (backend + frontend)
         # UTILISATION DE 'install' ET 'spring-boot:repackage' POUR GARANTIR LE FAT JAR
@@ -65,8 +65,8 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: "17"
-          distribution: "temurin"
+          java-version: '17'
+          distribution: 'temurin'
 
       - name: Run Java unit tests
         run: ./mvnw test
@@ -122,7 +122,7 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-          
+
       # 3. TRANSFERT SÉCURISÉ AVEC SCP MANUEL (Via SSH Agent)
       - name: Transfer JAR via SCP Command (Bypass corruption issue)
         env:
@@ -136,10 +136,10 @@ jobs:
 
           # 1. Création du répertoire distant via SSH
           ssh $SSH_OPTS -p $TARGET_PORT root@$TARGET_HOST "mkdir -p /opt/jhipster-app"
-          
+
           # 2. Transfert binaire du JAR (Correction Port: -P majuscule pour scp)
           scp $SSH_OPTS -P $TARGET_PORT $JAR_FILE root@$TARGET_HOST:$TARGET_PATH
-          
+
       # 4. DIAGNOSTIC ET DÉPLOIEMENT via SSH (Gestion Systemd)
       - name: Deploy and Start via SSH (Systemd)
         uses: appleboy/ssh-action@v1.0.3
@@ -154,46 +154,51 @@ jobs:
             STATIC_JAR_NAME="app.jar" 
             DEPLOY_PATH="/opt/jhipster-app"
             JAR_FULL_PATH="$DEPLOY_PATH/$STATIC_JAR_NAME"
-            
+
             echo "--- Démarrage du diagnostic du JAR ---"
-            
+
             # Diagnostic 1: Vérification de la taille et du type du fichier
             ls -lh $JAR_FULL_PATH
             file $JAR_FULL_PATH
-            
+
             # Diagnostic 2: Tente de lister le contenu du JAR (Confirme s'il s'agit d'une archive valide)
             jar -tf $JAR_FULL_PATH || echo "ERREUR DE DIAGNOSTIC: Le JAR n'est PAS une archive ZIP/JAR valide."
-            
+
             echo "--- Fin du diagnostic. Déploiement Systemd ---"
-            
+
             # 1. Stopper l'application avant de recharger le service (sécurité)
             systemctl stop $SERVICE_NAME.service || true
-            
+
             # 2. Créer ou mettre à jour le fichier de service systemd 
             cat << EOF > /etc/systemd/system/$SERVICE_NAME.service
             [Unit]
             Description=JHipster Spring Boot Application
             After=syslog.target network.target
-            
+
             [Service]
             ExecStart=/usr/bin/java -jar $DEPLOY_PATH/$STATIC_JAR_NAME
             Restart=always
             User=root
-            
+
             # Variables d'environnement pour l'application Spring Boot
             Environment="SPRING_PROFILES_ACTIVE=prod"
-            
+
             # VARIABLES DE BASE DE DONNÉES (Supabase Pooler)
-            Environment="JHIPSTER_DATABASE_HOST=aws-1-eu-central-2.pooler.supabase.com"
-            Environment="JHIPSTER_DATABASE_PORT=5432"
-            Environment="JHIPSTER_DATABASE_USER=postgres.seqwrlkotxmwgjjwkejl" 
-            Environment="JHIPSTER_DATABASE_PASSWORD=${{ secrets.SUPABASE_PASSWORD }}"
-            
+
+            Environment="DATABASE_URL=${{ secrets.DATABASE_URL }}"
+            Environment="SPRING_DATASOURCE_URL=${{ secrets.DATABASE_URL }}"
+            Environment="SPRING_DATASOURCE_USERNAME=${{ secrets.DATABASE_USER }}"
+            Environment="SPRING_DATASOURCE_PASSWORD=${{ secrets.DATABASE_PASS }}"
+
+            # VARIABLES DU MAIL
+            Environment="JHIPSTER_MAIL_BASE_URL=http://bababooeys.gasdev.fr" 
+            Environment="JHIPSTER_MAIL_ENABLED=false"
+
             # SECRETS DE L'APPLICATION
             Environment="STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}"
             Environment="JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=${{ secrets.JWT_SECRET }}"
-            
-            # 🔑 CORRECTION : AJOUT DES SECRETS CLOUDINARY
+
+            # CORRECTION : AJOUT DES SECRETS CLOUDINARY
             Environment="CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}"
             Environment="CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}"
             Environment="CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}"
@@ -201,12 +206,12 @@ jobs:
             [Install]
             WantedBy=multi-user.target
             EOF
-            
+
             # 3. Recharger la configuration systemd et démarrer/redémarrer le service
             systemctl daemon-reload
             systemctl enable $SERVICE_NAME.service || true 
             systemctl start $SERVICE_NAME.service 
-            
+
             echo "--- Déploiement Terminé. Affichage du statut et des logs : ---"
             systemctl status $SERVICE_NAME.service
             journalctl -u $SERVICE_NAME.service --no-pager -n 30

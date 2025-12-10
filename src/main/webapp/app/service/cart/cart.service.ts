@@ -38,17 +38,9 @@ export class CartService {
       this.cartCount.set(0);
       return;
     }
-
     this.http
-      .get<IUser>('/api/account')
+      .get<IProdOrder>(`/api/prod-orders/current`)
       .pipe(
-        switchMap(user => {
-          if (!user) return of(null);
-          return this.http.get<IProdOrder>(`/api/prod-orders/${user.id}/current`).pipe(
-            // si `/current` renvoie null → convertir en null propre
-            switchMap(order => of(order ?? null)),
-          );
-        }),
         switchMap(order => {
           if (!order) return of([]); // <-- IMPORTANT : toujours un tableau
           return this.prodOrderService.getOrderLines(order.id);

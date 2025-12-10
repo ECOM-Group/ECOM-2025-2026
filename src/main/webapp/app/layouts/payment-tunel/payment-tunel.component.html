@@ -1,45 +1,42 @@
 @if (isConnected) {
-  <div>
-    <button class="back-button" (click)="goback()"><i class="fa-solid fa-reply"></i>Retour au panier</button>
-  </div>
-  <div class="flex">
-    <div class="form">
-      <form [formGroup]="paymentForm" (ngSubmit)="submit()">
-        <div formGroupName="delivery">
-          <h2>Adresse de livraison</h2>
-          <jhi-adress-form [adresseForm]="deliveryForm()"></jhi-adress-form>
+  <button class="back-button" (click)="goback()"><i class="fa-solid fa-reply"></i> Retour au panier</button>
+
+  <div class="payment-wrapper">
+    <div class="tcg-payment-frame">
+      <form [formGroup]="paymentForm" (ngSubmit)="submit()" class="tcg-form">
+        <div formGroupName="delivery" class="tcg-section">
+          <div class="tcg-section-title">Adresse de livraison</div>
+          <jhi-adress-form [adresseForm]="deliveryForm()" [account]="account"></jhi-adress-form>
         </div>
 
-        <label>
-          <input type="checkbox" formControlName="sameAdress" />
-          Adresse de facturation identique à l'adresse de livraison
-        </label>
+        <div class="tcg-toggle-row">
+          <label class="tcg-switch">
+            <input type="checkbox" formControlName="sameAdress" />
+            <span class="slider"></span>
+          </label>
 
-        <div *ngIf="!isSameAdress()" formGroupName="billing">
-          <h2>Adresse de facturation</h2>
+          <span class="toggle-label"> Adresse de facturation identique à l'adresse de livraison </span>
+        </div>
+
+        <div *ngIf="!isSameAdress()" formGroupName="billing" class="tcg-section">
+          <div class="tcg-section-title">Adresse de facturation</div>
           <jhi-adress-form [adresseForm]="billingForm()"></jhi-adress-form>
         </div>
 
-        <!--
-        <div formGroupName="card">
-          <jhi-payment-card-form [cardForm]="cardForm()"></jhi-payment-card-form>
-        </div>
-        -->
-        <div>
-          <h2>Paiement</h2>
+        <div class="tcg-section">
+          <div class="tcg-section-title">Paiement</div>
           <div id="card-element" class="card-element"></div>
-          <div id="card-errors" class="error"></div>
+          <div id="card-errors" class="tcg-error-message"></div>
         </div>
 
-        <button type="submit" [disabled]="isProcessing">
+        <button type="submit" class="tcg-pay-button" [disabled]="isProcessing">
           <i class="fa-solid fa-credit-card"></i>
           {{ isProcessing ? 'Paiement en cours...' : 'Valider et payer' }}
         </button>
-        <div *ngIf="message" class="message">{{ message }}</div>
+        @if (message) {
+          <div class="message" [innerHTML]="message"></div>
+        }
       </form>
-    </div>
-    <div class="prodOrder">
-      <h1><strong>AFFICHER LE PROD ORDER (component a faire) </strong></h1>
     </div>
   </div>
 } @else {

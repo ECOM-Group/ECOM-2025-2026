@@ -8,15 +8,16 @@
 
 logging:
   level:
-    ROOT: INFO
-    tech.jhipster: INFO
-    com.mycompany.myapp: INFO
+    ROOT: DEBUG
+    tech.jhipster: DEBUG
+    com.mycompany.myapp: DEBUG
     # DEBUG pour Liquibase en cas de problème de démarrage lent
-    liquibase: INFO # Conservez WARN ou INFO. Si le problème persiste, passez à DEBUG.
+
+    liquibase: DEBUG # Conservez WARN ou INFO. Si le problème persiste, passez à DEBUG.
 
 management:
   security:
-      enabled: false
+    enabled: false
   prometheus:
     metrics:
       export:
@@ -40,7 +41,7 @@ spring:
       # ⚠️ IMPORTANT : Optimisation Hikari pour les connexions Cloud/Pooler Supabase
       maximum-pool-size: 10 # Augmenté légèrement pour un meilleur débit
       minimum-idle: 2 # Assure qu'un minimum de connexions est maintenu
-      auto-commit: true # Remis à 'true' (plus sûr, surtout pour Liquibase)
+      auto-commit: false # Remis à 'true' (plus sûr, surtout pour Liquibase)
       connection-timeout: 30000 # 30 secondes pour établir une connexion
       validation-timeout: 5000 # 5 secondes pour valider une connexion
       max-lifetime: 1800000 # 30 minutes (30 * 60 * 1000 ms) pour éviter les connexions mortes du pooler
@@ -58,11 +59,16 @@ spring:
 
 stripe:
   secret-key: ${STRIPE_SECRET_KEY} # Utilisation du format ${VARIABLE} pour les variables d'environnement
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}
 # ===================================================================
 # Server configuration
 # ===================================================================
 server:
-  port: ${PORT}
+  port: 80
   address: 0.0.0.0
   shutdown: graceful # see https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-graceful-shutdown
   compression:
@@ -89,7 +95,8 @@ jhipster:
       jwt:
         # Assurez-vous que cette clé n'est PAS stockée en clair dans ce fichier pour la production
         # Elle DOIT être injectée via une variable d'environnement ou un service de configuration sécurisé.
-        base64-secret: ZDk1MmY1NTNiZTM4MDBiY2I0Zjc1M2JjMTBhNTAwYTk4ZWYwOGJkYjhhYjIzYjkzZDJiOTVmMjUwYjdjZWE5ODM1OTI1MjY1MWZhODQzMDU1NGY0YTMyZDNhMTRlNGRlY2ZiYjc3YmM2ZWMzYzg2MzZiMzNmMTMwYmVmYmE4MDg=
+        #base64-secret: ZDk1MmY1NTNiZTM4MDBiY2I0Zjc1M2JjMTBhNTAwYTk4ZWYwOGJkYjhhYjIzYjkzZDJiOTVmMjUwYjdjZWE5ODM1OTI1MjY1MWZhODQzMDU1NGY0YTMyZDNhMTRlNGRlY2ZiYjc3YmM2ZWMzYzg2MzZiMzNmMTMwYmVmYmE4MDg=
+        base64-secret: ${JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET}
         # Token is valid 24 hours
         token-validity-in-seconds: 86400
         token-validity-in-seconds-for-remember-me: 2592000

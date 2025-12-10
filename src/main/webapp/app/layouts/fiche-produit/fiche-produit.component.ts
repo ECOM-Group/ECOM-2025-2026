@@ -10,10 +10,14 @@ import { IOrderLine } from 'app/entities/order-line/order-line.model';
 import { RouterModule } from '@angular/router';
 import LoginComponent from 'app/login/login.component';
 import { CartService } from 'app/service/cart/cart.service';
+import { ProductService } from 'app/entities/product/service/product.service';
+import { MiniFicheComponent } from '../mini-fiche/mini-fiche.component';
+import { CommentComponent } from '../comment/comment.component';
+import { OrderLineService } from 'app/entities/order-line/service/order-line.service';
 
 @Component({
   selector: 'jhi-fiche-produit',
-  imports: [LoginComponent, NgStyle, RouterModule],
+  imports: [LoginComponent, NgStyle, RouterModule, MiniFicheComponent, CommentComponent],
   templateUrl: './fiche-produit.component.html',
   styleUrl: './fiche-produit.component.scss',
 })
@@ -28,6 +32,7 @@ export default class FicheProduitComponent implements OnInit {
     imageHash: null,
     tags: [],
   };
+
   id: number = -1;
   isConnected: boolean = true;
   successMessages: string[] = [];
@@ -35,39 +40,50 @@ export default class FicheProduitComponent implements OnInit {
   backgroundPosition = '0% 0%';
   zoomLevel = 200; // augmente pour zoomer plus
   images: string[] = [];
+  alikeProducts: IProduct[] = [];
+  alikeLimit = 5; // Nombre de produits similaires à charger
 
   currentIndex = 0;
+  maxStock = false;
 
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient,
     private accountService: AccountService,
     private location: Location,
+    private productService: ProductService,
+    private orderLineService: OrderLineService,
   ) {}
 
   ngOnInit(): void {
-    this.id = Number(this.route.snapshot.paramMap.get('id') ?? '-1');
+    this.route.paramMap.subscribe(params => {
+      const id = Number(params.get('id') ?? '-1');
+      if (!isNaN(id) && id >= 0) {
+        this.id = id;
+        this.loadProduct(this.id);
+      } else {
+        console.error('ID produit invalide', params.get('id'));
+      }
+    });
+  }
 
-    if (!isNaN(this.id) && this.id >= 0) {
-      this.http.get<IProduct>(`/api/products/${this.id}`).subscribe({
-        next: product => {
-          this.product = product;
+  private loadProduct(id: number): void {
+    this.http.get<IProduct>(`/api/products/${id}`).subscribe({
+      next: product => {
+        this.product = product;
 
-          // Récupérer toutes les images du produit
-          this.http.get<any[]>(`/api/product-images/by-product/${this.id}`).subscribe(images => {
-            if (images.length > 0) {
-              this.images = images.map(img => img.url);
-            } else {
-              // fallback si aucune image
-              this.images = [''];
-            }
-          });
-        },
-        error: err => {
-          console.error('Erreur lors du chargement du produit :', err);
-        },
-      });
-    }
+        // Produits similaires
+        this.productService.findAlikeProducts(this.id, this.alikeLimit).subscribe(alikeProducts => {
+          this.alikeProducts = alikeProducts;
+        });
+
+        // Images du produit
+        this.http.get<any[]>(`/api/product-images/by-product/${id}`).subscribe(images => {
+          this.images = images.length > 0 ? images.map(img => img.url) : [''];
+        });
+      },
+      error: err => console.error('Erreur lors du chargement du produit :', err),
+    });
   }
 
   goback(): void {
@@ -121,18 +137,6 @@ export default class FicheProduitComponent implements OnInit {
       .pipe(map(lines => lines.find(l => l.product?.id === productId && l.prodOrder?.id === orderId) ?? null));
   }
 
-  // :four: PATCH une ligne existante (même calcul que l'original)
-  private updateOrderLine(line: IOrderLine): Observable<any> {
-    const newQuantity = (line.quantity ?? 0) + 1;
-
-    return this.http.patch(`/api/order-lines/${line.id}`, {
-      id: line.id,
-      quantity: newQuantity,
-      unitPrice: this.product.price, // identique à l’original
-      total: newQuantity * (this.product.price ?? 0),
-    });
-  }
-
   // :five: POST une nouvelle ligne (identique à l'original)
   private createOrderLine(orderId: number, productId: number): Observable<any> {
     return this.http.post(`/api/order-lines`, {
@@ -163,7 +167,7 @@ export default class FicheProduitComponent implements OnInit {
               if (order) {
                 // Il existe une commande non validée → check line
                 return this.getOrderLine(order.id, productId).pipe(
-                  switchMap(line => (line ? this.updateOrderLine(line) : this.createOrderLine(order.id, productId))),
+                  switchMap(line => (line ? this.orderLineService.incrementQuantity(line) : this.createOrderLine(order.id, productId))),
                 );
               }
 
@@ -180,8 +184,39 @@ export default class FicheProduitComponent implements OnInit {
           this.cartService.notifyCartUpdated();
         },
         error: err => {
+          if (err.status === 409) {
+            this.maxStock = true;
+          }
           console.error('Erreur lors du traitement de la commande :', err);
         },
       });
+  }
+
+  handleMouseMove(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+
+    // 1. Si la souris est sur un bouton → zoom OFF
+    if (target.classList.contains('no-zoom')) {
+      this.showZoom = false;
+      return;
+    }
+
+    // 2. Sinon → zoom ON (toujours actif sur l'image)
+    this.showZoom = true;
+
+    // 3. Mise à jour normale de la position du zoom
+    const frame = (event.currentTarget as HTMLElement).getBoundingClientRect();
+
+    const x = event.clientX - frame.left;
+    const y = event.clientY - frame.top;
+
+    const xPercent = (x / frame.width) * 100;
+    const yPercent = (y / frame.height) * 100;
+
+    this.backgroundPosition = `${xPercent}% ${yPercent}%`;
+  }
+
+  handleMouseLeave(): void {
+    this.showZoom = false;
   }
 }

@@ -17,6 +17,7 @@ const initialAccount: Account = {} as Account;
   selector: 'jhi-settings',
   imports: [SharedModule, FormsModule, ReactiveFormsModule],
   templateUrl: './settings.component.html',
+  styleUrl: './settings.component.scss',
 })
 export default class SettingsComponent implements OnInit {
   success = signal(false);
@@ -132,6 +133,7 @@ export default class SettingsComponent implements OnInit {
 
     this.accountService.save(account).subscribe(() => {
       this.success.set(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       this.accountService.authenticate(account);
       if (account.langKey !== this.translateService.currentLang) {
         this.translateService.use(account.langKey);

@@ -1,27 +1,29 @@
 @if (userConnected) {
-  <button class="back-button" (click)="goback()"><i class="fa-solid fa-reply"></i>Retour</button>
-  <div class="container mt-4">
-    <div id="cartHeader">
-      <div class="top">
-        <h2>Your current cart items:</h2>
+  <button class="back-button" (click)="goback()"><i class="fa-solid fa-reply"></i> Retour</button>
+
+  <div class="tcg-cart-wrapper">
+    <div class="tcg-cart-frame">
+      <div class="tcg-cart-header">
+        <h2 class="cart-title">Votre panier</h2>
+
         @if (!order?.valid && items.length > 0) {
-          <div class="subtotal">
-            <button id="paymentButton">
-              <a routerLink="/payment"> Pay {{ totalPrice }}€</a>
-            </button>
-          </div>
+          <button class="tcg-pay-button">
+            <a routerLink="/payment">Payer {{ totalPrice }} €</a>
+          </button>
         }
       </div>
-      <div class="white-fade"></div>
-    </div>
-    <div id="cartMain">
-      @if (items.length > 0) {
-        @for (item of items; track item.id) {
-          <jhi-cart-line [orderLine]="item" [isCart]="!order?.valid" (updated)="onLineUpdated($event)"></jhi-cart-line>
+
+      <div class="tcg-cart-divider"></div>
+
+      <div class="tcg-cart-content">
+        @if (items.length > 0) {
+          @for (item of items; track item.id) {
+            <jhi-cart-line [orderLine]="item" [isCart]="!order?.valid" (updated)="onLineUpdated($event)"> </jhi-cart-line>
+          }
+        } @else {
+          <p class="empty-cart">Votre panier est vide.</p>
         }
-      } @else {
-        <p>No items found for this order.</p>
-      }
+      </div>
     </div>
   </div>
 } @else {

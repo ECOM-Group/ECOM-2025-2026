@@ -1,3 +1,24 @@
-@for (topSoldProduct of topSoldProducts; track topSoldProduct.id) {
-  <jhi-mini-fiche [idProduit]="topSoldProduct.id"></jhi-mini-fiche>
-}
+<div class="home-wrapper">
+  <h1 class="home-title">Top ventes</h1>
+
+  <!-- Tags as big clickable bubbles -->
+  @if (tags.length > 0) {
+    <div class="tag-bubble-container">
+      @for (tag of tags; track tag.id) {
+        <app-tag-label
+          [tag]="tag"
+          [selected]="selectedTagIds.includes(tag.id!)"
+          (toggled)="onTagClicked($event)"
+          class="big-bubble"
+        ></app-tag-label>
+      }
+    </div>
+  }
+
+  <!-- Top sold products -->
+  <div class="product-grid">
+    @for (topSoldProduct of topSoldProducts; track topSoldProduct.id) {
+      <jhi-mini-fiche [idProduit]="topSoldProduct.id"></jhi-mini-fiche>
+    }
+  </div>
+</div>

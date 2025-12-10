@@ -1,16 +1,27 @@
 <div class="mini-fiche-container">
-  <!-- Afficher l'image du produit et ces informations en dessous-->
   <a routerLink="/fiche_produit/{{ product.id }}" class="mini-fiche-link">
-    <!-- TODO: corriger src pour les images -->
     <img [src]="imageUrl || ''" alt="{{ product.name }}" class="mini-fiche-image" />
-
     <div class="mini-fiche-info">
       <h2 class="mini-fiche-name">{{ product.name }}</h2>
-      <p class="mini-fiche-description">{{ product.desc }}</p>
+
+      <p class="mini-fiche-description">
+        {{ product.desc }}
+      </p>
+
       <p class="mini-fiche-price">{{ product.price }} €</p>
-      <p class="mini-fiche-stock">
-        {{ (product?.quantity ?? 0) > 0 ? 'En stock : ' + product.quantity : 'Rupture de stock' }}
+
+      <p class="mini-fiche-stock" [class.rupture]="(product.quantity ?? 0) <= 0">
+        {{ (product.quantity ?? 0) > 0 ? 'En stock : ' + product.quantity : 'Rupture de stock' }}
       </p>
     </div>
   </a>
+
+  <!-- TAGS OVERLAYED ON CARD -->
+  @if (tags.length > 0) {
+    <div class="mini-fiche-tags-overlay">
+      @for (tag of tags; track tag.id) {
+        <app-tag-label [tag]="tag" (click)="onTagClicked(tag.id); $event.stopPropagation()"></app-tag-label>
+      }
+    </div>
+  }
 </div>

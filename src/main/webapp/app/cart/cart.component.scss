@@ -1,52 +1,88 @@
-#cartHeader {
-  padding-top: 0;
-  position: sticky;
-  top: 0;
-  .top {
-    background-color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.tcg-cart-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
 
-    padding-block: 2rem;
-  }
-  .white-fade {
-    padding: 20px 150px;
-    border: red;
-    background: linear-gradient(to bottom, white 0%, white 60%, transparent);
+/* ====== FRAME PRINCIPALE ====== */
+.tcg-cart-frame {
+  width: 100%;
+  max-width: 1100px;
+
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+
+  backdrop-filter: blur(10px);
+  padding: 1.5rem;
+
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.55),
+    inset 0 0 20px rgba(255, 255, 255, 0.15);
+}
+
+/* ====== HEADER ====== */
+.tcg-cart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 1rem;
+
+  .cart-title {
+    color: white;
+    font-size: 2rem;
+    font-weight: 700;
+    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
   }
 }
 
-#paymentButton {
-  border-radius: 5px;
-  padding-inline: 20px;
-  background-color: #56d187;
-  color: #003122;
-  transition:
-    background-color 180ms ease,
-    transform 120ms ease,
-    box-shadow 180ms ease;
+.tcg-cart-divider {
+  width: 100%;
+  height: 2px;
+  margin-bottom: 1.5rem;
+
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+}
+
+/* ====== PAY BUTTON ====== */
+.tcg-pay-button {
+  padding: 12px 28px;
+  border-radius: 14px;
+  border: none;
+
+  background: linear-gradient(135deg, #0ea5a4, #087f7e);
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 700;
+
+  cursor: pointer;
+  transition: 0.2s ease;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 
   &:hover {
-    background-color: #85e9ad;
-    box-shadow: 0 10px 24px rgba(12, 59, 55, 0.12);
-    transform: translateY(-1px);
-  }
-
-  &:active {
-    transform: translateY(0) scale(0.98);
-    box-shadow: 0 6px 12px rgba(12, 59, 55, 0.1);
+    transform: translateY(-3px);
+    box-shadow:
+      0 10px 25px rgba(0, 0, 0, 0.45),
+      inset 0 0 12px rgba(255, 255, 255, 0.25);
   }
 }
 
-a {
-  text-decoration: none;
-  color: inherit;
+/* ====== CART CONTENT ====== */
+.tcg-cart-content {
+  padding: 1rem;
 }
 
-/* Subtotal styling */
-.subtotal {
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: #003122;
+/* ====== EMPTY CART ====== */
+.empty-cart {
+  padding: 2rem;
+  text-align: center;
+  color: #eee;
+  font-size: 1.3rem;
+
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }

@@ -4,6 +4,7 @@ import com.mycompany.myapp.domain.Address;
 import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.AddressRepository;
 import com.mycompany.myapp.repository.UserRepository;
+import com.mycompany.myapp.service.UserService;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +24,12 @@ public class UserAddressResource {
 
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
+    private final UserService userService;
 
-    public UserAddressResource(UserRepository userRepository, AddressRepository addressRepository) {
+    public UserAddressResource(UserRepository userRepository, AddressRepository addressRepository, UserService userService) {
         this.userRepository = userRepository;
         this.addressRepository = addressRepository;
+        this.userService = userService;
     }
 
     @GetMapping("/{id}/addresses")
@@ -37,6 +40,16 @@ public class UserAddressResource {
         }
 
         List<Address> addresses = addressRepository.findAllByUsersId(id);
+        return ResponseEntity.ok(addresses);
+    }
+
+    @GetMapping("/of-current-user")
+    public ResponseEntity<List<Address>> getUserAddresses() {
+        User user = userService.getUserWithAuthorities().get();
+        if (user == null) {
+            return ResponseEntity.ok(null);
+        }
+        List<Address> addresses = addressRepository.findAllByUsersId(user.getId());
         return ResponseEntity.ok(addresses);
     }
 

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 
 import { isPresent } from 'app/core/util/operators';
 import { ApplicationConfigService } from 'app/core/config/application-config.service';
@@ -80,5 +80,19 @@ export class TagService {
 
   getProductIdsByTag(tagId: number): Observable<number[]> {
     return this.http.get<number[]>(`api/products-tags/by-tag/${tagId}/product-ids`);
+  }
+
+  getTagsByProduct(productId: number): Observable<ITag[]> {
+    console.log('[TagService] Requesting tags for product:', productId);
+    return this.http.get<ITag[]>(`/api/products-tags/${productId}/tags`).pipe(
+      tap({
+        next: tags => {
+          console.log('[TagService] Tags received from API:', tags);
+        },
+        error: err => {
+          console.error('[TagService] Error while loading tags:', err);
+        },
+      }),
+    );
   }
 }

@@ -1,9 +1,11 @@
 package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.config.Constants;
+import com.mycompany.myapp.domain.Address;
 import com.mycompany.myapp.domain.Authority;
 import com.mycompany.myapp.domain.ProdOrder;
 import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.repository.AddressRepository;
 import com.mycompany.myapp.repository.AuthorityRepository;
 import com.mycompany.myapp.repository.ProdOrderRepository;
 import com.mycompany.myapp.repository.ReviewRepository;
@@ -52,13 +54,16 @@ public class UserService {
 
     private final CacheManager cacheManager;
 
+    private final AddressRepository addressRepository;
+
     public UserService(
         UserRepository userRepository,
         ProdOrderRepository prodOrderRepository,
         ReviewRepository reviewRepository,
         PasswordEncoder passwordEncoder,
         AuthorityRepository authorityRepository,
-        CacheManager cacheManager
+        CacheManager cacheManager,
+        AddressRepository addressRepository
     ) {
         this.userRepository = userRepository;
         this.prodOrderRepository = prodOrderRepository;
@@ -66,6 +71,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
         this.authorityRepository = authorityRepository;
         this.cacheManager = cacheManager;
+        this.addressRepository = addressRepository;
     }
 
     public Optional<User> activateRegistration(String key) {
@@ -253,6 +259,18 @@ public class UserService {
 
                 // Reviews -> user = null
                 reviewRepository.clearUserFromReviews(userId);
+
+                // Détacher les addresses de l'utilisateur
+                List<Address> addresses = addressRepository.findAllByIdsContaining(user.getId());
+                for (Address address : addresses) {
+                    address.removeId(user);
+                    addressRepository.save(address);
+
+                    // Supprimer l'address si plus aucun user n'est relié
+                    if (address.getIds().isEmpty()) {
+                        addressRepository.delete(address);
+                    }
+                }
 
                 // Supprimer l'utilisateur
                 userRepository.delete(user);
