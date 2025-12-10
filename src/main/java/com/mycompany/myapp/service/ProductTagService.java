@@ -21,7 +21,7 @@ public class ProductTagService {
         }
     }
 
-    public List<Tag> getTags(Long productId) {
+    public List<Tag> getTagsByProduct(Long productId) {
         return repository.findTagsForProduct(productId);
     }
 

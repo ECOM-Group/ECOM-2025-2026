@@ -31,11 +31,11 @@ public class ProductTagResource {
 
     // Get tags of a product
     @GetMapping("/{productId}/tags")
-    public List<Tag> getTags(@PathVariable Long productId) {
-        return service.getTags(productId);
+    public List<Tag> getTagsByProductId(@PathVariable Long productId) {
+        return service.getTagsByProduct(productId);
     }
 
-    // New endpoint: Get product IDs associated with a tag
+    // Get product IDs associated with a tag
     @GetMapping("/by-tag/{tagId}/product-ids")
     public List<Long> getProductIdsByTag(@PathVariable Long tagId) {
         log.info("Fetching product IDs for tag {}", tagId);
