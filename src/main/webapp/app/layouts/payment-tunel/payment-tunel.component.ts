@@ -20,7 +20,7 @@ import { Account } from 'app/core/auth/account.model';
 @Component({
   standalone: true,
   selector: 'jhi-payment-tunel',
-  imports: [ReactiveFormsModule, NgIf, AdressFormComponent, /* PaymentCardFormComponent ,*/ LoginComponent, RouterLink],
+  imports: [ReactiveFormsModule, NgIf, AdressFormComponent, /* PaymentCardFormComponent ,*/ LoginComponent],
   templateUrl: './payment-tunel.component.html',
   styleUrls: ['./payment-tunel.component.scss'],
 })

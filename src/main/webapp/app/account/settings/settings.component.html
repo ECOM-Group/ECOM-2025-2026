@@ -1,236 +1,178 @@
-<div>
-  <div class="d-flex justify-content-center">
-    <div class="col-md-8">
-      @if (settingsForm.value.login) {
-        <h2 jhiTranslate="settings.title" [translateValues]="{ username: settingsForm.value.login }">
-          Profil de l&apos;utilisateur [<strong>{{ settingsForm.value.login }}</strong
-          >]
-        </h2>
-      }
+<div class="tcg-profile-wrapper">
 
-      @if (success()) {
-        <div class="alert alert-success" jhiTranslate="settings.messages.success"><strong>Votre profil a été sauvegardé !</strong></div>
-      }
+  <div class="tcg-card-frame">
 
-      <jhi-alert-error />
+    <!-- BANDEAU TITRE -->
+    <div class="tcg-title-banner">
+      <h2>
+        Profil de <strong>{{ settingsForm.value.login }}</strong>
+      </h2>
+    </div>
 
-      @if (settingsForm.value.login) {
-        <form name="form" (ngSubmit)="save()" [formGroup]="settingsForm" novalidate>
-          <div class="mb-3">
-            <label class="form-label" for="lastName" jhiTranslate="settings.form.lastname">Nom</label>
-            <input
-              type="text"
-              class="form-control"
-              id="lastName"
-              name="lastName"
-              placeholder="{{ 'settings.form.lastname.placeholder' | translate }}"
-              formControlName="lastName"
-              data-cy="lastname"
-            />
+    <!-- Succès -->
+    @if (success()) {
+      <div class="tcg-success-msg">
+        Votre profil a été sauvegardé !
+      </div>
+    }
 
-            @let lastNameRef = settingsForm.get('lastName')!;
-            @if (lastNameRef.invalid && (lastNameRef.dirty || lastNameRef.touched)) {
-              <div>
-                @if (lastNameRef?.errors?.required) {
-                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.lastname.required">
-                    Votre nom est requis.
-                  </small>
-                }
-                @if (lastNameRef?.errors?.minlength) {
-                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.lastname.minlength">
-                    Votre nom doit comporter au moins un caractère.
-                  </small>
-                }
-                @if (lastNameRef?.errors?.maxlength) {
-                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.lastname.maxlength">
-                    Votre nom ne doit pas comporter plus de 50 caractères.
-                  </small>
-                }
-              </div>
-            }
+    <jhi-alert-error />
+
+    <form name="form" (ngSubmit)="save()" [formGroup]="settingsForm" novalidate>
+
+     
+
+      <div class="tcg-section">
+
+        <div class="tcg-input-row">
+          <label for="lastName">Nom</label>
+          <input
+            id="lastName"
+            type="text"
+            formControlName="lastName"
+            placeholder="Dupont"
+            class="tcg-input"
+          />
+        </div>
+
+        @let lastNameRef = settingsForm.get('lastName')!;
+        @if (lastNameRef.invalid && (lastNameRef.dirty || lastNameRef.touched)) {
+          <div class="tcg-error-message">
+            @if (lastNameRef?.errors?.required) { Votre nom est requis. }
+            @if (lastNameRef?.errors?.minlength) { Votre nom doit contenir au moins 1 caractère. }
+            @if (lastNameRef?.errors?.maxlength) { Votre nom doit contenir max 50 caractères. }
           </div>
+        }
 
-          <div class="mb-3">
-            <label class="form-label" for="firstName" jhiTranslate="settings.form.firstname">Prénom</label>
-            <input
-              type="text"
-              class="form-control"
-              id="firstName"
-              name="firstName"
-              placeholder="{{ 'settings.form.firstname.placeholder' | translate }}"
-              formControlName="firstName"
-              data-cy="firstname"
-            />
+        <div class="tcg-input-row">
+          <label for="firstName">Prénom</label>
+          <input
+            id="firstName"
+            type="text"
+            formControlName="firstName"
+            placeholder="Jean"
+            class="tcg-input"
+          />
+        </div>
 
-            @let firstNameRef = settingsForm.get('firstName')!;
-            @if (firstNameRef.invalid && (firstNameRef.dirty || firstNameRef.touched)) {
-              <div>
-                @if (firstNameRef?.errors?.required) {
-                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.firstname.required">
-                    Votre prénom est requis.
-                  </small>
-                }
-                @if (firstNameRef?.errors?.minlength) {
-                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.firstname.minlength">
-                    Votre prénom doit comporter au moins un caractère.
-                  </small>
-                }
-                @if (firstNameRef?.errors?.maxlength) {
-                  <small class="form-text text-danger" jhiTranslate="settings.messages.validate.firstname.maxlength">
-                    Votre prénom ne doit pas comporter plus de 50 caractères.
-                  </small>
-                }
-              </div>
-            }
+        @let firstNameRef = settingsForm.get('firstName')!;
+        @if (firstNameRef.invalid && (firstNameRef.dirty || firstNameRef.touched)) {
+          <div class="tcg-error-message">
+            @if (firstNameRef?.errors?.required) { Prénom requis. }
+            @if (firstNameRef?.errors?.minlength) { Min. 1 caractère. }
+            @if (firstNameRef?.errors?.maxlength) { Max. 50 caractères. }
           </div>
+        }
 
-          <div class="mb-3">
-            <label class="form-label" for="email" jhiTranslate="global.form.email.label">Email</label>
-            <input
-              type="email"
-              class="form-control"
-              id="email"
-              name="email"
-              placeholder="{{ 'global.form.email.placeholder' | translate }}"
-              formControlName="email"
-              data-cy="email"
-            />
+        <div class="tcg-input-row">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="exemple@gmail.com"
+            class="tcg-input"
+          />
+        </div>
 
-            @let emailRef = settingsForm.get('email')!;
-            @if (emailRef.invalid && (emailRef.dirty || emailRef.touched)) {
-              <div>
-                @if (emailRef?.errors?.required) {
-                  <small class="form-text text-danger" jhiTranslate="global.messages.validate.email.required">
-                    Votre email est requis.
-                  </small>
-                }
-                @if (emailRef?.errors?.email) {
-                  <small class="form-text text-danger" jhiTranslate="global.messages.validate.email.invalid">
-                    Votre email n&apos;est pas valide.
-                  </small>
-                }
-                @if (emailRef?.errors?.minlength) {
-                  <small class="form-text text-danger" jhiTranslate="global.messages.validate.email.minlength">
-                    Votre email doit comporter au moins 5 caractères.
-                  </small>
-                }
-                @if (emailRef?.errors?.maxlength) {
-                  <small class="form-text text-danger" jhiTranslate="global.messages.validate.email.maxlength">
-                    Votre email ne doit pas comporter plus de 50 caractères.
-                  </small>
-                }
-              </div>
-            }
+        @let emailRef = settingsForm.get('email')!;
+        @if (emailRef.invalid && (emailRef.dirty || emailRef.touched)) {
+          <div class="tcg-error-message">
+            @if (emailRef?.errors?.required) { Email requis. }
+            @if (emailRef?.errors?.email) { Email invalide. }
+            @if (emailRef?.errors?.minlength) { Min. 5 caractères. }
+            @if (emailRef?.errors?.maxlength) { Max. 50 caractères. }
           </div>
+        }
 
-          @if (languages && languages.length > 0) {
-            <div class="mb-3">
-              <label for="langKey" jhiTranslate="settings.form.language">Langue</label>
-              <select class="form-control" id="langKey" name="langKey" formControlName="langKey" data-cy="langKey">
-                @for (language of languages; track $index) {
-                  <option [value]="language">{{ language | findLanguageFromKey }}</option>
-                }
-              </select>
-            </div>
-          }
+        <!-- LANGUE -->
+        @if (languages && languages.length > 0) {
+          <div class="tcg-input-row">
+            <label for="langKey">Langue</label>
+            <select id="langKey" class="tcg-input" formControlName="langKey">
+              @for (language of languages; track $index) {
+                <option [value]="language">
+                  {{ language | findLanguageFromKey }}
+                </option>
+              }
+            </select>
+          </div>
+        }
 
-          <!-- Adresses -->
-          <div class="mb-3">
-            <div class="addresses-section mt-4">
-              <h3>Mes adresses</h3>
+      </div>
 
-              <!-- Liste des adresses si présentes -->
-              @if (addressesArray && addressesArray.length > 0) {
-                @for (addr of addressesArray.controls; track $index) {
-                  <div
-                    [formGroup]="getAddressFormGroup(addr)"
-                    class="mb-3 p-2 border rounded position-relative"
-                    [class.bg-light]="addr.get('deleted')?.value"
-                  >
-                    <div class="d-flex justify-content-end gap-2 position-absolute top-0 end-0">
-                      <button type="button" class="btn btn-sm btn-secondary" (click)="resetAddress($index)">Reset</button>
-                      <button type="button" class="btn btn-sm btn-danger" (click)="toggleDelete($index)" style="width: 85px">
-                        @if (addr.get('deleted')?.value) {
-                          Restaurer
-                        } @else {
-                          Supprimer
-                        }
-                      </button>
-                    </div>
-                    <div class="mb-2">
-                      <label for="country-{{ $index }}" class="form-label">Pays</label>
-                      <input
-                        id="country-{{ $index }}"
-                        type="text"
-                        class="form-control"
-                        formControlName="country"
-                        [class.is-invalid]="addr.get('country')?.invalid && addr.get('country')?.touched"
-                        (input)="markModified($index, 'country')"
-                      />
-                    </div>
+      <div class="tcg-section">
 
-                    <div class="mb-2">
-                      <label for="city-{{ $index }}" class="form-label">Ville</label>
-                      <input
-                        id="city-{{ $index }}"
-                        type="text"
-                        class="form-control"
-                        formControlName="city"
-                        [class.is-invalid]="addr.get('city')?.invalid && addr.get('city')?.touched"
-                        (input)="markModified($index, 'city')"
-                      />
-                    </div>
+        <h3 class="tcg-subtitle">Mes adresses</h3>
 
-                    <div class="mb-2">
-                      <label for="street-{{ $index }}" class="form-label">Rue</label>
-                      <input
-                        id="street-{{ $index }}"
-                        type="text"
-                        class="form-control"
-                        formControlName="street"
-                        [class.is-invalid]="addr.get('street')?.invalid && addr.get('street')?.touched"
-                        (input)="markModified($index, 'street')"
-                      />
-                    </div>
+        @if (addressesArray && addressesArray.length > 0) {
 
-                    <div class="mb-2">
-                      <label for="zipcode-{{ $index }}" class="form-label">Code postal</label>
-                      <input
-                        id="zipcode-{{ $index }}"
-                        type="text"
-                        class="form-control"
-                        formControlName="zipcode"
-                        [class.is-invalid]="addr.get('zipcode')?.invalid && addr.get('zipcode')?.touched"
-                        (input)="markModified($index, 'zipcode')"
-                      />
-                    </div>
+          @for (addr of addressesArray.controls; track $index) {
 
-                    @if (addr.get('modified')?.value) {
-                      <div class="text-warning small">Modifié</div>
-                    }
-                  </div>
-                }
-              } @else {
-                <div class="alert alert-info">Aucune adresse disponible</div>
+            <div
+              [formGroup]="getAddressFormGroup(addr)"
+              class="tcg-address-card"
+            >
+
+              <div class="tcg-address-actions">
+                <button type="button" class="tcg-btn small" (click)="resetAddress($index)">Reset</button>
+
+                <button
+                  type="button"
+                  class="tcg-btn delete small"
+                  (click)="toggleDelete($index)"
+                >
+                  @if (addr.get('deleted')?.value) { Restaurer } @else { Supprimer }
+                </button>
+              </div>
+
+              <div class="tcg-input-row">
+                <label>Pays</label>
+                <input type="text" class="tcg-input" formControlName="country" (input)="markModified($index, 'country')" />
+              </div>
+
+              <div class="tcg-input-row">
+                <label>Ville</label>
+                <input type="text" class="tcg-input" formControlName="city" (input)="markModified($index, 'city')" />
+              </div>
+
+              <div class="tcg-input-row">
+                <label>Rue</label>
+                <input type="text" class="tcg-input" formControlName="street" (input)="markModified($index, 'street')" />
+              </div>
+
+              <div class="tcg-input-row">
+                <label>Code postal</label>
+                <input type="text" class="tcg-input" formControlName="zipcode" (input)="markModified($index, 'zipcode')" />
+              </div>
+
+              @if (addr.get('modified')?.value) {
+                <div class="tcg-modified-badge">Modifié</div>
               }
 
-              <!-- Bouton Ajouter une adresse toujours visible -->
-              <button type="button" class="btn btn-sm btn-primary mt-2" (click)="addAddress()">Ajouter une adresse</button>
             </div>
-          </div>
 
-          <!-- Bouton sauvegarder -->
-          <button
-            type="submit"
-            [disabled]="settingsForm.invalid"
-            class="btn btn-primary"
-            data-cy="submit"
-            jhiTranslate="settings.form.button"
-          >
-            Sauvegarder
-          </button>
-        </form>
-      }
-    </div>
+          }
+        } @else {
+          <div class="tcg-info-msg">Aucune adresse enregistrée</div>
+        }
+
+        <button type="button" class="tcg-btn add" (click)="addAddress()">
+          Ajouter une adresse
+        </button>
+
+      </div>
+
+      <button
+        type="submit"
+        class="tcg-btn primary big"
+        [disabled]="settingsForm.invalid"
+      >
+        Sauvegarder
+      </button>
+
+    </form>
+
   </div>
+
 </div>
