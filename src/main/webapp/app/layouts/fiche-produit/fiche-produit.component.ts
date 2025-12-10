@@ -12,10 +12,11 @@ import LoginComponent from 'app/login/login.component';
 import { CartService } from 'app/service/cart/cart.service';
 import { ProductService } from 'app/entities/product/service/product.service';
 import { MiniFicheComponent } from '../mini-fiche/mini-fiche.component';
+import { CommentComponent } from '../comment/comment.component';
 
 @Component({
   selector: 'jhi-fiche-produit',
-  imports: [LoginComponent, NgStyle, RouterModule, MiniFicheComponent],
+  imports: [LoginComponent, NgStyle, RouterModule, MiniFicheComponent, CommentComponent],
   templateUrl: './fiche-produit.component.html',
   styleUrl: './fiche-produit.component.scss',
 })
