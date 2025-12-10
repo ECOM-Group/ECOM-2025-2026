@@ -1,11 +1,6 @@
 <div class="home-wrapper">
   <h1 class="home-title">Top ventes</h1>
 
-  <div class="product-grid">
-    @for (topSoldProduct of topSoldProducts; track topSoldProduct.id) {
-      <jhi-mini-fiche [idProduit]="topSoldProduct.id"></jhi-mini-fiche>
-    }
-  </div>
   <!-- Tags as big clickable bubbles -->
   @if (tags.length > 0) {
     <div class="tag-bubble-container">
@@ -21,7 +16,7 @@
   }
 
   <!-- Top sold products -->
-  <div class="mini-fiche-list">
+  <div class="product-grid">
     @for (topSoldProduct of topSoldProducts; track topSoldProduct.id) {
       <jhi-mini-fiche [idProduit]="topSoldProduct.id"></jhi-mini-fiche>
     }
