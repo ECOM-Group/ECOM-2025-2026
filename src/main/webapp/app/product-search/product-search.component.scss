@@ -7,12 +7,16 @@
 
 /* Sidebar */
 .filters {
-  width: 220px;
-  flex-shrink: 0;
-  top: 80px;
-  background-color: #f7f7f7;
-  padding: 1rem;
-  border-radius: 4px 0 0 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.35),
+    inset 0 0 12px rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+
+  padding: 1.6rem;
+  min-width: 240px;
 }
 
 /* Filter groups inside sidebar */
@@ -57,11 +61,11 @@
   gap: 1.5rem;
 }
 
-/* Custom styles for range input (price slider) */
+/* Custom styles for range input (price slider) with green highlight */
 input[type='range'] {
   -webkit-appearance: none;
   width: 100%;
-  height: 20px; // larger hit area for easier clicking
+  height: 20px; // larger hit area
   background: transparent;
   cursor: pointer;
   margin: 0;
@@ -72,38 +76,51 @@ input[type='range'] {
 input[type='range']::-webkit-slider-runnable-track {
   width: 100%;
   height: 6px;
-  background: #fff; // white bar
-  border: 1px solid #ccc; // border
+  background: rgba(153, 255, 217, 0.3); // green tint
+  border: 1px solid #99ffd9; // green border
   border-radius: 3px;
 }
 
 input[type='range']::-moz-range-track {
   width: 100%;
   height: 6px;
-  background: #fff;
-  border: 1px solid #ccc;
+  background: rgba(153, 255, 217, 0.3);
+  border: 1px solid #99ffd9;
   border-radius: 3px;
 }
 
-/* Thumb  */
+/* Thumb */
 input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #1a73e8;
+  background: #99ffd9; /* green */
   border: none;
   cursor: pointer;
   margin-top: -5px;
+  box-shadow: 0 0 6px rgba(153, 255, 217, 0.6);
 }
 
 input[type='range']::-moz-range-thumb {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #1a73e8;
+  background: #99ffd9;
   border: none;
   cursor: pointer;
+  box-shadow: 0 0 6px rgba(153, 255, 217, 0.6);
+}
+
+/* Fill the range track before the thumb (Webkit only) */
+input[type='range']::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    to right,
+    #99ffd9 0%,
+    #99ffd9 calc((var(--range-progress, 0)) * 1%),
+    rgba(153, 255, 217, 0.3) calc((var(--range-progress, 0)) * 1%),
+    rgba(153, 255, 217, 0.3) 100%
+  );
 }
 
 /* Remove focus outline */
@@ -120,7 +137,7 @@ input[type='range']:focus {
   border: none;
   outline: none;
   background: transparent;
-  color: #1a73e8;
+  color: #99ffd9;
   font-weight: bold;
   text-align: right;
   padding: 0;
@@ -146,18 +163,31 @@ input[type='range']:focus {
   gap: 6px; // spacing between tags
 }
 
-.clear-all {
-  background-color: #f5f5f5;
-  color: #d32f2f;
-  cursor: pointer;
-  border: 1px solid #d32f2f;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  transition: all 0.2s;
+/* Search results header wrapper */
+.search-results-header {
+  margin-bottom: 1.5rem; // spacing from product list
+}
 
-  &:hover {
-    background-color: #d32f2f;
-    color: white;
-  }
+/* Main title */
+.search-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  margin: 0 0 0.5rem 0;
+}
+
+/* Highlighted search term */
+.search-title .highlight {
+  color: #99ffd9; // Green highlight
+  font-weight: 600;
+}
+
+/* No results text */
+.search-no-results {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  margin: 0 0 0.5rem 0;
 }

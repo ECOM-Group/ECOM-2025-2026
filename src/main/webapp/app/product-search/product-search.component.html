@@ -1,11 +1,11 @@
 <div class="page-layout">
   <!-- FILTERS (LEFT SIDEBAR) -->
   <aside class="filters">
-    <h4>Filters</h4>
+    <h4>Filtres</h4>
 
     <!-- COLOR FILTER -->
     <div class="filter-group">
-      <label class="filter-title">Color</label>
+      <label class="filter-title">Couleur</label>
 
       @for (color of getAvailableColors; track color) {
         <label class="filter-checkbox">
@@ -18,7 +18,7 @@
     <!-- PRICE FILTER -->
     <div class="filter-group">
       <label class="filter-title">
-        Max Price:
+        Prix maximum:
         <input
           type="number"
           [min]="0"
@@ -61,30 +61,32 @@
     <main class="products">
       <!-- Loading message -->
       @if (loading && (query || selectedTagIds.length > 0)) {
-        <p>Loading products...</p>
+        <p>Chargement des produits...</p>
       }
 
       <!-- Search results -->
       @if (!loading) {
-        <h2>
-          Search results
-          @if (query) {
-            for: <span style="color: #1a73e8; font-weight: 600">"{{ query }}"</span>
-          } @else {
-            for tag: <span style="color: #1a73e8; font-weight: 600">"{{ selectedTagName }}"</span>
-          }
-        </h2>
-
-        <p>
-          @if (filteredProducts.length === 0) {
-            No products found
+        <div class="search-results-header">
+          <h1 class="search-title">
+            Resultats de votre recherche
             @if (query) {
-              for: "{{ query }}"
+              pour: <span class="highlight">"{{ query }}"</span>
             } @else {
-              for tag: "{{ selectedTagName }}"
+              pour le label: <span class="highlight">"{{ selectedTagName }}"</span>
             }
+          </h1>
+
+          @if (filteredProducts.length === 0) {
+            <p class="search-no-results">
+              Pas de produits trouvés
+              @if (query) {
+                pour: <span class="highlight">"{{ query }}"</span>
+              } @else {
+                pour <span class="highlight">"{{ selectedTagName }}"</span>.
+              }
+            </p>
           }
-        </p>
+        </div>
 
         <div class="mini-fiche-list">
           @for (product of filteredProducts; track product.id) {
