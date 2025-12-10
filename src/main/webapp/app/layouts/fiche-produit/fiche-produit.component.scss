@@ -299,7 +299,6 @@
   }
 }
 
-
 @media (max-width: 900px) {
   .tcg-zoom-panel {
     display: none;
@@ -310,4 +309,16 @@
   .tcg-card-inner {
     flex-direction: column;
   }
+}
+
+.alike-products-section {
+  margin: 2rem 0;
+}
+
+.alike-products-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 1.5rem;
+  width: 100%;
 }

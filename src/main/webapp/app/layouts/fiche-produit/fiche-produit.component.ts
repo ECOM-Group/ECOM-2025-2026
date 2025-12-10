@@ -10,11 +10,12 @@ import { IOrderLine } from 'app/entities/order-line/order-line.model';
 import { RouterModule } from '@angular/router';
 import LoginComponent from 'app/login/login.component';
 import { CartService } from 'app/service/cart/cart.service';
-import { CommentComponent } from '../comment/comment.component';
+import { ProductService } from 'app/entities/product/service/product.service';
+import { MiniFicheComponent } from '../mini-fiche/mini-fiche.component';
 
 @Component({
   selector: 'jhi-fiche-produit',
-  imports: [LoginComponent, NgStyle, RouterModule, CommentComponent],
+  imports: [LoginComponent, NgStyle, RouterModule, MiniFicheComponent],
   templateUrl: './fiche-produit.component.html',
   styleUrl: './fiche-produit.component.scss',
 })
@@ -29,6 +30,7 @@ export default class FicheProduitComponent implements OnInit {
     imageHash: null,
     tags: [],
   };
+
   id: number = -1;
   isConnected: boolean = true;
   successMessages: string[] = [];
@@ -36,6 +38,8 @@ export default class FicheProduitComponent implements OnInit {
   backgroundPosition = '0% 0%';
   zoomLevel = 200; // augmente pour zoomer plus
   images: string[] = [];
+  alikeProducts: IProduct[] = [];
+  alikeLimit = 5; // Nombre de produits similaires à charger
 
   currentIndex = 0;
 
@@ -44,31 +48,38 @@ export default class FicheProduitComponent implements OnInit {
     private http: HttpClient,
     private accountService: AccountService,
     private location: Location,
+    private productService: ProductService,
   ) {}
 
   ngOnInit(): void {
-    this.id = Number(this.route.snapshot.paramMap.get('id') ?? '-1');
+    this.route.paramMap.subscribe(params => {
+      const id = Number(params.get('id') ?? '-1');
+      if (!isNaN(id) && id >= 0) {
+        this.id = id;
+        this.loadProduct(this.id);
+      } else {
+        console.error('ID produit invalide', params.get('id'));
+      }
+    });
+  }
 
-    if (!isNaN(this.id) && this.id >= 0) {
-      this.http.get<IProduct>(`/api/products/${this.id}`).subscribe({
-        next: product => {
-          this.product = product;
+  private loadProduct(id: number): void {
+    this.http.get<IProduct>(`/api/products/${id}`).subscribe({
+      next: product => {
+        this.product = product;
 
-          // Récupérer toutes les images du produit
-          this.http.get<any[]>(`/api/product-images/by-product/${this.id}`).subscribe(images => {
-            if (images.length > 0) {
-              this.images = images.map(img => img.url);
-            } else {
-              // fallback si aucune image
-              this.images = [''];
-            }
-          });
-        },
-        error: err => {
-          console.error('Erreur lors du chargement du produit :', err);
-        },
-      });
-    }
+        // Produits similaires
+        this.productService.findAlikeProducts(this.id, this.alikeLimit).subscribe(alikeProducts => {
+          this.alikeProducts = alikeProducts;
+        });
+
+        // Images du produit
+        this.http.get<any[]>(`/api/product-images/by-product/${id}`).subscribe(images => {
+          this.images = images.length > 0 ? images.map(img => img.url) : [''];
+        });
+      },
+      error: err => console.error('Erreur lors du chargement du produit :', err),
+    });
   }
 
   goback(): void {
