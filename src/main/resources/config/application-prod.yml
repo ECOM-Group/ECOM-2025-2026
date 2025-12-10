@@ -59,7 +59,7 @@ spring:
 
 stripe:
   secret-key: ${STRIPE_SECRET_KEY} # Utilisation du format ${VARIABLE} pour les variables d'environnement
-   public-key: 'pk_test_51SL1eH9mZN1DQFxykNy0gNXhNOGZgIgHZkLX48pw9TWxyFCWx2gPDSzNNaUAGFChLmoQs05oFbJgDWXuWZqHqtkV00dDaJneYm'
+  public-key: 'pk_test_51SL1eH9mZN1DQFxykNy0gNXhNOGZgIgHZkLX48pw9TWxyFCWx2gPDSzNNaUAGFChLmoQs05oFbJgDWXuWZqHqtkV00dDaJneYm'
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}
