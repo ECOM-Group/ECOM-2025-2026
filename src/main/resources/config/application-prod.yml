@@ -16,7 +16,7 @@ logging:
 
 management:
   security:
-      enabled: false
+    enabled: false
   prometheus:
     metrics:
       export:
@@ -99,10 +99,16 @@ jhipster:
         # Token is valid 24 hours
         token-validity-in-seconds: 86400
         token-validity-in-seconds-for-remember-me: 2592000
-      content-security-policy:
-        policy-directives: >-
-          default-src 'self' 'unsafe-inline' 'unsafe-eval'; 
-          img-src 'self' data: https://res.cloudinary.com;
+    content-security-policy:
+      policy-directives: >-
+        default-src 'self' 'unsafe-inline' 'unsafe-eval';
+        img-src 'self' data: https://res.cloudinary.com;
+        connect-src 'self' ws://localhost:80 http://localhost:80; 
+        script-src 'self' 'unsafe-inline'; 
+        style-src 'self' 'unsafe-inline'; 
+        font-src 'self' data:; 
+        object-src 'none'; 
+        media-src 'self'
   mail: # specific JHipster mail property
     # Vous avez retiré l'URL, ce qui est logique si la fonction mail est désactivée.
     # Base-url est maintenant vide.
