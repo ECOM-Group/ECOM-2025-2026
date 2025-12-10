@@ -6,6 +6,8 @@ import com.mycompany.myapp.domain.ProdOrder;
 import com.mycompany.myapp.repository.OrderLineRepository;
 import com.mycompany.myapp.repository.PayementTunnelRepository;
 import com.mycompany.myapp.repository.ProdOrderRepository;
+import com.mycompany.myapp.service.ProdOrderService;
+import com.mycompany.myapp.service.dto.MissingStockDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import com.stripe.Stripe;
 import com.stripe.model.PaymentIntent;
@@ -55,15 +57,18 @@ public class PayementTunnelResource {
     private final PayementTunnelRepository payementTunnelRepository;
     private final ProdOrderRepository prodOrderRepository;
     private final OrderLineRepository orderLineRepository;
+    private final ProdOrderService prodOrderService;
 
     public PayementTunnelResource(
         PayementTunnelRepository payementTunnelRepository,
         ProdOrderRepository prodOrderRepository,
+        ProdOrderService prodOrderService,
         OrderLineRepository orderLineRepository
     ) {
         this.payementTunnelRepository = payementTunnelRepository;
         this.prodOrderRepository = prodOrderRepository;
         this.orderLineRepository = orderLineRepository;
+        this.prodOrderService = prodOrderService;
     }
 
     @PostMapping("/create-payment-intent")
@@ -199,20 +204,54 @@ public class PayementTunnelResource {
         );
     }
 
-    @PostMapping("/validate-order")
-    public ResponseEntity<Void> validateCurrentOrder() {
+    @PostMapping("/pre-validate-order")
+    public ResponseEntity<List<MissingStockDTO>> prevalidateCurrentOrder() {
         LOG.debug("Validation du panier en cours pour l’utilisateur connecté");
+
         ProdOrder currentOrder = prodOrderRepository.findInvalidByUserIsCurrentUser();
         if (currentOrder == null) {
             LOG.warn("Aucun panier non validé trouvé pour cet utilisateur");
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(List.of());
         }
 
-        currentOrder.setValid(true);
-        prodOrderRepository.save(currentOrder);
+        List<MissingStockDTO> missingStock = prodOrderService.finalizeOrder(currentOrder);
+        return ResponseEntity.ok(missingStock);
+    }
 
-        LOG.info("Commande {} validée avec succès", currentOrder.getId());
-        return ResponseEntity.ok().build();
+    @PostMapping("/validate-current-order")
+    public ResponseEntity<?> validateCurrentOrder() {
+        LOG.debug("Validation finale de la commande pour l’utilisateur connecté");
+
+        ProdOrder currentOrder = prodOrderRepository.findInvalidByUserIsCurrentUser();
+        if (currentOrder == null) {
+            LOG.warn("Aucune commande non validée trouvée");
+            return ResponseEntity.badRequest().body("Aucune commande en attente de validation");
+        }
+
+        try {
+            prodOrderService.confirmOrderPayment(currentOrder);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/refound-current-order")
+    public ResponseEntity<?> refoundCurrentOrder() {
+        LOG.debug("Remboursement du stock pour l’utilisateur connecté (paiement échoué)");
+
+        ProdOrder currentOrder = prodOrderRepository.findInvalidByUserIsCurrentUser();
+        if (currentOrder == null) {
+            LOG.warn("Aucune commande non validée trouvée à rembourser");
+            return ResponseEntity.badRequest().body("Aucune commande à rembourser");
+        }
+
+        try {
+            prodOrderService.restoreOrderStock(currentOrder);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     /**

@@ -178,6 +178,14 @@ public class ProdOrderResource {
     public ResponseEntity<ProdOrder> getCurrentProdOrder() {
         LOG.debug("REST request to get current ProdOrder");
         ProdOrder prodOrder = prodOrderRepository.findInvalidByUserIsCurrentUser();
+        /*
+        if (prodOrder == null) {
+            // Log en DEBUG ou INFO si tu veux
+            LOG.info("Aucune commande en cours pour l’utilisateur courant.");
+            return ResponseEntity.status(HttpStatus.SC_NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(prodOrder);
+        */
         return ResponseUtil.wrapOrNotFound(Optional.ofNullable(prodOrder));
     }
 

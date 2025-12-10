@@ -259,6 +259,12 @@ public class ProductResource {
         return results;
     }*/
 
+    /**
+     * {@code GET  /products/search?q=:query} : search products by keywords.
+     *
+     * @param query the search query containing keywords separated by spaces.
+     * @return  the {@link List} of products matching the keywords.
+     */
     @GetMapping("/search")
     public List<Product> findByKeywords(@RequestParam("q") String query) {
         List<String> keywords = Arrays.stream(query.split("\\s+")).filter(k -> !k.isBlank()).toList();
@@ -284,9 +290,20 @@ public class ProductResource {
     public ResponseEntity<List<Long>> getAllPurchasedProcudtsByUser() {
         Optional<User> user = userService.getUserWithAuthorities();
         if (user.isEmpty()) {
-            return ResponseEntity.ok(new ArrayList<Long>()); // "aucun achat"
+            return ResponseEntity.ok(new ArrayList<>()); // "aucun achat"
         }
 
         return ResponseEntity.ok(orderLineService.getPurchasedProductIdsByUser(user.get().getId()));
+    }
+
+    /**
+     * {@code GET  /products/:id/alike} : get alike products.
+     * @param id  id of the reference product
+     * @param limit maximum number of alike products to return
+     * @return  the {@link List} of alike products.
+     */
+    @GetMapping("/{id}/alike")
+    public List<Product> findAlikeProducts(@PathVariable Long id, @RequestParam(defaultValue = "4") int limit) {
+        return productRepositoryCustom.findAlikeProducts(id, limit);
     }
 }
