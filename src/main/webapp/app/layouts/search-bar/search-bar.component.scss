@@ -1,3 +1,55 @@
-form {
+.tcg-search-bar {
+  width: 60%;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  border-radius: 999px;
+
+  padding: 0.35rem 1rem;
+  display: flex;
   align-items: center;
+  position: relative;
+  margin: auto;
+
+  border: 1px solid rgba(255,255,255,0.75);
+
+  box-shadow:
+    0 0 12px rgba(120, 200, 255, 0.45),
+    0 0 24px rgba(255, 150, 255, 0.30);
+}
+
+.tcg-search-bar input {
+  color: #1c1f27 !important;
+  font-weight: 500;
+  background: transparent !important;
+  border: none !important;
+  width: 100%;
+}
+
+.tcg-search-bar input:focus {
+  outline: none;
+}
+
+.tcg-search-bar button {
+  color: #344b63;
+  background: transparent;
+  border: none;
+
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  transition: 0.25s;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tcg-search-bar button:hover {
+  background: rgba(255,255,255,0.35);
+  box-shadow: 0 0 10px rgba(120,200,255,0.5);
+  transform: scale(1.1);
+}
+
+.form-control:focus {
+  box-shadow: none;
 }

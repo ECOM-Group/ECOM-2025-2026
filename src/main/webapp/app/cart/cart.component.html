@@ -1,10 +1,18 @@
 @if (userConnected) {
-  <button class="back-button" (click)="goback()"><i class="fa-solid fa-reply"></i> Retour</button>
+
+  @if (!order?.valid) {
+    <button class="back-button" (click)="goback()">
+      <i class="fa-solid fa-reply"></i> Retour
+    </button>
+  }
 
   <div class="tcg-cart-wrapper">
     <div class="tcg-cart-frame">
       <div class="tcg-cart-header">
-        <h2 class="cart-title">Votre panier</h2>
+
+        @if (!order?.valid) {
+          <h2 class="cart-title">Votre panier</h2>
+        }
 
         @if (!order?.valid && items.length > 0) {
           <button class="tcg-pay-button">

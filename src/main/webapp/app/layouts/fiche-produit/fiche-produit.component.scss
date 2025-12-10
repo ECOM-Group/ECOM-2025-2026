@@ -182,7 +182,6 @@
   font-weight: 700;
 }
 
-/* BUTTON */
 .tcg-add-button {
   padding: 12px 22px;
   border-radius: 12px;
@@ -197,7 +196,7 @@
   transition: 0.2s ease;
 }
 
-.tcg-add-button:hover {
+.tcg-add-button:hover:not(:disabled) {
   transform: translateY(-3px);
   box-shadow:
     0 10px 25px rgba(0, 0, 0, 0.45),

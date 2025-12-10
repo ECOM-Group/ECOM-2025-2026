@@ -1,31 +1,15 @@
 <form class="d-flex w-100" (ngSubmit)="onSearch()">
-  <div
-    class="position-relative w-100"
-    style="background-color: #ffffff; /* white bubble */ border-radius: 9999px; display: flex; align-items: center; padding: 0.25rem 0.5rem"
-  >
+  <div class="tcg-search-bar">
     <input
       type="text"
       class="form-control border-0 bg-transparent text-black"
-      placeholder="Search products..."
+      placeholder="Rechercher des produits..."
       [(ngModel)]="query"
       name="searchQuery"
-      style="padding-right: 3rem; outline: none; box-shadow: none"
     />
     <button
       type="submit"
-      class="btn position-absolute"
-      style="
-        background: transparent;
-        border: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: black;
-        right: 0.5rem;
-        width: 2.5rem;
-        height: 2.5rem;
-        border-radius: 50%;
-      "
+      class="btn"
     >
       <fa-icon icon="search"></fa-icon>
     </button>
