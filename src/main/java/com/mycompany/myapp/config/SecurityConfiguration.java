@@ -67,6 +67,7 @@ public class SecurityConfiguration {
                     .requestMatchers(mvc.pattern("/api/products/**")).permitAll()
                     .requestMatchers(mvc.pattern("/api/product-images/**")).permitAll()
                     .requestMatchers(mvc.pattern("/api/tags/**")).permitAll()
+                    .requestMatchers(mvc.pattern("/api/products-tags/**")).permitAll()
                     .requestMatchers(mvc.pattern(HttpMethod.POST, "/api/authenticate")).permitAll()
                     .requestMatchers(mvc.pattern(HttpMethod.GET, "/api/authenticate")).permitAll()
                     .requestMatchers(mvc.pattern("/api/register")).permitAll()
