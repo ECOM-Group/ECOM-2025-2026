@@ -1,14 +1,16 @@
 name: JHipster CI/CD
-
 on:
   push:
-    branches: ["main"]
+    branches: ["deploy_gasdev"] # Changé la branche cible
   pull_request:
-    branches: ["main"]
+    branches: ["deploy_gasdev"] # Changé la branche cible
 
 jobs:
-  #////////////////////////////////////////////////////////////////////////////////////////
+  # ======================================================================================
+  # 1. Linting (Vérification de la qualité du code) - POINT DE DÉPART SANS DÉPENDANCE
+  # ======================================================================================
   lint:
+    # Ce job n'a aucune dépendance et sert de point de départ au workflow.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,7 +27,9 @@ jobs:
         run: npm run lint || echo "Linting errors found, but build will continue"
         continue-on-error: true
 
-  #////////////////////////////////////////////////////////////////////////////////////////
+  # ======================================================================================
+  # 2. Build (Construction de l'application)
+  # ======================================================================================
   build:
     needs: lint
     runs-on: ubuntu-latest
@@ -39,17 +43,19 @@ jobs:
           distribution: "temurin"
 
       - name: Build JHipster app (backend + frontend)
-        # Note: Le profil prod est utilisé, ce qui construit la partie frontend avec Webpack.
-        run: ./mvnw -Pprod -DskipTests package
+        # UTILISATION DE 'install' ET 'spring-boot:repackage' POUR GARANTIR LE FAT JAR
+        run: ./mvnw clean install -Pprod -DskipTests spring-boot:repackage
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: jhipster-app
           path: target/*.jar
-          retention-days: 1 # Conserver l'artefact juste le temps du déploiement
+          retention-days: 1
 
-  #////////////////////////////////////////////////////////////////////////////////////////
+  # ======================================================================================
+  # 3. Tests (Unitaires et E2E - Maintenus pour la structure)
+  # ======================================================================================
   test-unit:
     needs: build
     runs-on: ubuntu-latest
@@ -68,7 +74,6 @@ jobs:
       - name: Skip frontend unit tests
         run: echo "Pas de tests unitaires frontend pour l'instant"
 
-  #////////////////////////////////////////////////////////////////////////////////////////
   test-e2e:
     needs: build
     runs-on: ubuntu-latest
@@ -77,40 +82,135 @@ jobs:
 
       - name: Skip E2E tests
         run: echo "Pas de tests E2E pour l'instant"
-
-  #////////////////////////////////////////////////////////////////////////////////////////
-  deploy:
-    needs: build
+  # ======================================================================================
+  # 4. Deploy (Transfert SCP et Démarrage Systemd)
+  # ======================================================================================
+  deploy-vps:
+    needs: build # Assurez-vous que cette dépendance est correcte
     runs-on: ubuntu-latest
-
     steps:
+      - uses: actions/checkout@v4
 
-        # 1. Télécharger l'artefact (le JAR)
-        - name: Download application artifact (JAR)
-          uses: actions/download-artifact@v4
-          with:
-            name: jhipster-app
-            path: target/ # Le JAR est placé dans target/
-        
-        # 2. Installer la CLI Heroku (cette étape semble déjà fonctionner d'après vos logs)
-        - name: Install Heroku CLI
-          run: curl https://cli-assets.heroku.com/install.sh | sh
-        
-        # 3. Installer le plugin nécessaire pour deploy:jar
-        - name: Install Heroku Deploy Plugin (Java)
-          run: heroku plugins:install java
-        
-        # 4. Déploiement du JAR
-        - name: Deploy JHipster JAR to Heroku
-          run: |
-            # heroku deploy:jar s'authentifie automatiquement via HEROKU_API_KEY
-            heroku deploy:jar target/*.jar \
-              --app $HEROKU_APP_NAME \
-              --jdk 17 \
-              --procfile Procfile
-          shell: /usr/bin/bash -e {0}
-          env:
-            # Assurez-vous que les secrets sont passés ici
-            HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }} 
-            HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
-            HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }} # Non nécessaire, mais peut rester
+      # 1. Télécharger l'artefact (le JAR)
+      - name: Download application artifact (JAR)
+        uses: actions/download-artifact@v4
+        with:
+          name: jhipster-app
+          path: target/
+
+      # 1.5. Vérifier et installer les outils nécessaires sur le VPS (JDK pour l'outil 'jar')
+      - name: Prerequisites Check and JDK Install
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: bababooeys.gasdev.fr
+          username: root
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          port: 2222
+          script: |
+            echo "Vérification et installation des dépendances (JDK pour 'jar' et 'file')."
+            apt update
+            # Installation du JDK par défaut (fournit l'outil 'jar') et de l'outil 'file'.
+            apt install -y default-jdk file || echo "ATTENTION: L'installation du JDK par défaut a échoué. Poursuite, mais le diagnostic pourrait ne pas fonctionner."
+
+      # 2. Récupérer le nom du JAR
+      - name: Get JAR file name
+        id: get_jar
+        run: echo "JAR_NAME=$(ls target/*.jar | xargs basename)" >> $GITHUB_OUTPUT
+
+      # 2.5. CHARGER LA CLÉ PRIVÉE DANS L'AGENT SSH
+      - name: Start SSH Agent and Add Key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          
+      # 3. TRANSFERT SÉCURISÉ AVEC SCP MANUEL (Via SSH Agent)
+      - name: Transfer JAR via SCP Command (Bypass corruption issue)
+        env:
+          JAR_FILE: target/${{ steps.get_jar.outputs.JAR_NAME }}
+          TARGET_HOST: bababooeys.gasdev.fr
+          TARGET_PORT: 2222
+          TARGET_PATH: /opt/jhipster-app/app.jar
+        run: |
+          # DÉSACTIVATION DE LA VÉRIFICATION DES CLÉS D'HÔTE (-o StrictHostKeyChecking=no)
+          SSH_OPTS="-o StrictHostKeyChecking=no"
+
+          # 1. Création du répertoire distant via SSH
+          ssh $SSH_OPTS -p $TARGET_PORT root@$TARGET_HOST "mkdir -p /opt/jhipster-app"
+          
+          # 2. Transfert binaire du JAR (Correction Port: -P majuscule pour scp)
+          scp $SSH_OPTS -P $TARGET_PORT $JAR_FILE root@$TARGET_HOST:$TARGET_PATH
+          
+      # 4. DIAGNOSTIC ET DÉPLOIEMENT via SSH (Gestion Systemd)
+      - name: Deploy and Start via SSH (Systemd)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: bababooeys.gasdev.fr
+          username: root
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          port: 2222
+          script: |
+            # VARIABLES
+            SERVICE_NAME="jhipster-app"
+            STATIC_JAR_NAME="app.jar" 
+            DEPLOY_PATH="/opt/jhipster-app"
+            JAR_FULL_PATH="$DEPLOY_PATH/$STATIC_JAR_NAME"
+            
+            echo "--- Démarrage du diagnostic du JAR ---"
+            
+            # Diagnostic 1: Vérification de la taille et du type du fichier
+            ls -lh $JAR_FULL_PATH
+            file $JAR_FULL_PATH
+            
+            # Diagnostic 2: Tente de lister le contenu du JAR (Confirme s'il s'agit d'une archive valide)
+            jar -tf $JAR_FULL_PATH || echo "ERREUR DE DIAGNOSTIC: Le JAR n'est PAS une archive ZIP/JAR valide."
+            
+            echo "--- Fin du diagnostic. Déploiement Systemd ---"
+            
+            # 1. Stopper l'application avant de recharger le service (sécurité)
+            systemctl stop $SERVICE_NAME.service || true
+            
+            # 2. Créer ou mettre à jour le fichier de service systemd 
+            cat << EOF > /etc/systemd/system/$SERVICE_NAME.service
+            [Unit]
+            Description=JHipster Spring Boot Application
+            After=syslog.target network.target
+            
+            [Service]
+            ExecStart=/usr/bin/java -jar $DEPLOY_PATH/$STATIC_JAR_NAME
+            Restart=always
+            User=root
+            
+            # Variables d'environnement pour l'application Spring Boot
+            Environment="SPRING_PROFILES_ACTIVE=prod"
+            
+            # VARIABLES DE BASE DE DONNÉES (Supabase Pooler)
+            Environment="DATABASE_URL=${{ secrets.DATABASE_URL }}"
+            Environment="SPRING_DATASOURCE_URL=${{ secrets.DATABASE_URL }}"
+            Environment="SPRING_DATASOURCE_USERNAME=${{ secrets.DATABASE_USER }}"
+            Environment="SPRING_DATASOURCE_PASSWORD=${{ secrets.DATABASE_PASS }}"
+
+            # VARIABLES DU MAIL
+            Environment="JHIPSTER_MAIL_BASE_URL=http://bababooeys.gasdev.fr" 
+            Environment="JHIPSTER_MAIL_ENABLED=false"
+            
+            # SECRETS DE L'APPLICATION
+            Environment="STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}"
+            Environment="JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=${{ secrets.JWT_SECRET }}"
+            
+            # CORRECTION : AJOUT DES SECRETS CLOUDINARY
+            Environment="CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}"
+            Environment="CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}"
+            Environment="CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}"
+
+            [Install]
+            WantedBy=multi-user.target
+            EOF
+            
+            # 3. Recharger la configuration systemd et démarrer/redémarrer le service
+            systemctl daemon-reload
+            systemctl enable $SERVICE_NAME.service || true 
+            systemctl start $SERVICE_NAME.service 
+            
+            echo "--- Déploiement Terminé. Affichage du statut et des logs : ---"
+            systemctl status $SERVICE_NAME.service
+            journalctl -u $SERVICE_NAME.service --no-pager -n 30
