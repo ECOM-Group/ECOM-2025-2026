@@ -91,7 +91,7 @@
   <!-- Show similar products for both connected and not connected users -->
   @if (alikeProducts.length > 0) {
     <div class="alike-products-section">
-      <h2 class="alike-title">You might also like:</h2>
+      <h1 class="alike-products-label">Produits similaires:</h1>
       <div class="alike-products-grid">
         @for (p of alikeProducts; track p.id) {
           <jhi-mini-fiche [idProduit]="p.id"></jhi-mini-fiche>
