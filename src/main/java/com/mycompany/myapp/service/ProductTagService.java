@@ -2,11 +2,12 @@ package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.Tag;
 import com.mycompany.myapp.repository.ProductTagRepository;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class ProductTagService {
 
     private final ProductTagRepository repository;
@@ -21,11 +22,12 @@ public class ProductTagService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<Tag> getTagsByProduct(Long productId) {
         return repository.findTagsForProduct(productId);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Long> getProductIdsByTag(Long tagId) {
         return repository.findProductIdsForTag(tagId);
     }

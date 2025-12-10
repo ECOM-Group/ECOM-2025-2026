@@ -7,8 +7,10 @@ import com.mycompany.myapp.service.mapper.CustomerMapper;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class CustomerService {
 
     private final CustomerRepository repository;
@@ -25,10 +27,12 @@ public class CustomerService {
         return mapper.toDto(entity);
     }
 
+    @Transactional(readOnly = true)
     public List<CustomerDTO> findAll() {
         return repository.findAll().stream().map(mapper::toDto).toList();
     }
 
+    @Transactional(readOnly = true)
     public Optional<CustomerDTO> findOne(Long id) {
         return repository.findById(id).map(mapper::toDto);
     }
