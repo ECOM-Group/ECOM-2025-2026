@@ -1,15 +1,9 @@
 @if (isConnected) {
-
-  <button class="back-button" (click)="goback()">
-    <i class="fa-solid fa-reply"></i> Retour au panier
-  </button>
+  <button class="back-button" (click)="goback()"><i class="fa-solid fa-reply"></i> Retour au panier</button>
 
   <div class="payment-wrapper">
-
     <div class="tcg-payment-frame">
-
       <form [formGroup]="paymentForm" (ngSubmit)="submit()" class="tcg-form">
-
         <div formGroupName="delivery" class="tcg-section">
           <div class="tcg-section-title">Adresse de livraison</div>
           <jhi-adress-form [adresseForm]="deliveryForm()" [account]="account"></jhi-adress-form>
@@ -21,9 +15,7 @@
             <span class="slider"></span>
           </label>
 
-          <span class="toggle-label">
-            Adresse de facturation identique à l'adresse de livraison
-          </span>
+          <span class="toggle-label"> Adresse de facturation identique à l'adresse de livraison </span>
         </div>
 
         <div *ngIf="!isSameAdress()" formGroupName="billing" class="tcg-section">
@@ -41,15 +33,12 @@
           <i class="fa-solid fa-credit-card"></i>
           {{ isProcessing ? 'Paiement en cours...' : 'Valider et payer' }}
         </button>
-
-        <div *ngIf="message" class="message">{{ message }}</div>
-
+        @if (message) {
+          <div class="message" [innerHTML]="message"></div>
+        }
       </form>
-
     </div>
-
   </div>
-
 } @else {
   <jhi-login redirectUrl="payment"></jhi-login>
 }

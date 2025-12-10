@@ -5,17 +5,17 @@ import { AdressFormComponent } from '../adress-form/adress-form.component';
 import { AdresseFormGroup } from 'app/layouts/adress-form/adress-form-group';
 import { CardFormGroup } from '../payment-card-form/payment-card-group-form';
 // import { PaymentCardFormComponent } from '../payment-card-form/payment-card-form.component';
-import { EMPTY, map, of, switchMap } from 'rxjs';
+import { EMPTY, from, map, Observable, of, switchMap } from 'rxjs';
 import { Router } from '@angular/router';
 import { AccountService } from 'app/core/auth/account.service';
 import { HttpClient } from '@angular/common/http';
 import LoginComponent from 'app/login/login.component';
-import { IUser } from 'app/admin/user-management/user-management.model';
 import { IProdOrder } from 'app/entities/prod-order/prod-order.model';
 import { loadStripe, Stripe, StripeCardElement } from '@stripe/stripe-js';
 import { RouterLink } from '@angular/router';
 import { CartService } from 'app/service/cart/cart.service';
 import { Account } from 'app/core/auth/account.model';
+import { IMissingStock } from 'app/model/IMissingStock';
 
 @Component({
   standalone: true,
@@ -141,7 +141,7 @@ export default class PaymentTunelComponent implements OnInit, AfterViewInit {
     this.pay();
   }
 
-  async pay() {
+  pay(): void {
     if (!this.stripe || !this.card) {
       console.error('Stripe non initialisé');
       return;
@@ -150,49 +150,91 @@ export default class PaymentTunelComponent implements OnInit, AfterViewInit {
     this.isProcessing = true;
     this.message = null;
 
-    const { paymentMethod, error } = await this.stripe.createPaymentMethod({
-      type: 'card',
-      card: this.card,
-    });
-
-    if (error) {
-      this.message = error.message || 'Erreur de paiement';
-      this.isProcessing = false;
-      return;
-    }
-
     this.http
-      .post<any>('/api/payement-tunnels/create-payment-intent', {
-        paymentMethodId: paymentMethod.id,
-      })
-      .subscribe(res => {
-        if (res == null || res == undefined) {
-          this.message = 'Erreur serveur';
-          this.isProcessing = false;
-          return;
-        }
-        this.stripe!.confirmCardPayment(res.clientSecret).then(result => {
-          if (result.error) {
-            this.message = result.error.message || 'Erreur de paiement';
-          } else if (result.paymentIntent.status === 'succeeded') {
-            this.message = 'Paiement réussi !';
-            this.saveOrder();
+      .post<IMissingStock[]>('/api/payement-tunnels/pre-validate-order', {})
+      .pipe(
+        switchMap(stockResult => {
+          if (stockResult && stockResult.length > 0) {
+            this.displayStockErrors(stockResult);
+            this.isProcessing = false;
+            return EMPTY;
           }
-        });
-        this.isProcessing = false;
+          // OK => Stripe
+          return from(
+            this.stripe!.createPaymentMethod({
+              type: 'card',
+              card: this.card as StripeCardElement,
+            }),
+          );
+        }),
+        switchMap(pmResult => {
+          if (pmResult.error) {
+            this.message = pmResult.error.message || 'Erreur de paiement';
+            return this.refoundCurrentOrder().pipe(switchMap(() => EMPTY));
+          }
+
+          return this.http.post<{ clientSecret: string }>('/api/payement-tunnels/create-payment-intent', {
+            paymentMethodId: pmResult.paymentMethod!.id,
+          });
+        }),
+        switchMap(piRes => {
+          if (!piRes || !piRes.clientSecret) {
+            this.message = 'Erreur serveur';
+            return this.refoundCurrentOrder().pipe(switchMap(() => EMPTY));
+          }
+          return from(this.stripe!.confirmCardPayment(piRes.clientSecret));
+        }),
+        switchMap(paymentResult => {
+          if (paymentResult.paymentIntent?.status === 'succeeded') {
+            return this.http.post<void>('/api/payement-tunnels/validate-current-order', {});
+          }
+
+          if (paymentResult.error) {
+            this.message = paymentResult.error.message || 'Erreur de paiement';
+          }
+
+          return this.refoundCurrentOrder();
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.message = 'Paiement réussi !';
+          this.isProcessing = false;
+          this.router.navigate(['/']);
+        },
+        error: err => {
+          console.error('Erreur reçue :', err);
+
+          if (err.status === 400 && err.error && Array.isArray(err.error)) {
+            this.displayStockErrors(err.error as IMissingStock[]);
+          } else {
+            this.message = 'Erreur serveur';
+          }
+
+          this.isProcessing = false;
+        },
       });
   }
 
-  saveOrder() {
-    this.http.post('/api/payement-tunnels/validate-order', {}).subscribe({
-      next: () => {
-        console.log('Commande validée en base');
-        this.router.navigate(['/']);
-      },
-      error: err => {
-        console.error('Erreur lors de la validation de la commande :', err);
-        this.message = 'Erreur lors de la validation de la commande';
-      },
-    });
+  displayStockErrors(stockErrors: IMissingStock[]) {
+    const listItems = stockErrors
+      .map(
+        item =>
+          `<li>${item.productName} x${item.requestedQuantity} 
+        (stock disponible : ${item.availableQuantity})</li>`,
+      )
+      .join('');
+
+    this.message = `
+      Stock insuffisant pour certains produits :
+      <ul>
+        ${listItems}
+      </ul>
+      Merci de modifier votre panier ou d'attendre une augmentation des stocks.
+    `;
+  }
+
+  refoundCurrentOrder(): Observable<void> {
+    return this.http.post('/api/payement-tunnels/refound-current-order', {}).pipe(map(() => undefined));
   }
 }
