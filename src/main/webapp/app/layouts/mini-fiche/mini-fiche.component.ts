@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { IProduct } from 'app/entities/product/product.model';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { TagLabelComponent } from 'app/entities/tag/tag-label/tag-label.component';
 import { TagService } from 'app/entities/tag/service/tag.service';
 import { ITag } from 'app/entities/tag/tag.model';
@@ -27,6 +27,7 @@ export class MiniFicheComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private tagService: TagService,
+    private router: Router,
   ) {}
   imageUrl: string | null = null;
 
@@ -44,5 +45,16 @@ export class MiniFicheComponent implements OnInit {
         });
       });
     }
+  }
+
+  onTagClicked(tagId: number): void {
+    const tagName = this.tags.find(t => t.id === tagId)?.name;
+
+    if (!tagName) return;
+    this.router.navigate(['/search'], {
+      queryParams: {
+        tag: tagId,
+      },
+    });
   }
 }
