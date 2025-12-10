@@ -1,3 +1,11 @@
-<span class="tag-label" [class.selected]="selected" (click)="onClick()" [title]="tag.name">
-  {{ tag.name }}
-</span>
+<div
+  class="fancy-bubble"
+  [class.selected]="selected"
+  [style.background-color]="color"
+  [style.color]="getContrastColor(color)"
+  [style.transform]="'rotate(' + rotation + 'deg)'"
+  (click)="onClick()"
+>
+  <span class="tag-icon">🏷️</span>
+  <span class="tag-text">{{ tag.name }}</span>
+</div>
