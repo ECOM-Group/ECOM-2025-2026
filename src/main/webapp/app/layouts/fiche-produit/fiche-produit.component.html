@@ -29,6 +29,19 @@
             <div class="tcg-details-panel">
               <p class="tcg-desc">{{ product.desc }}</p>
 
+              <!-- Tags -->
+              @if (tags.length > 0) {
+                <div class="tcg-tags-block">
+                  <span class="tcg-tags-label">Associated tags:</span>
+
+                  <div class="tcg-tags">
+                    @for (tag of tags; track tag.id) {
+                      <app-tag-label [tag]="tag" (click)="onTagClicked(tag.id)"></app-tag-label>
+                    }
+                  </div>
+                </div>
+              }
+
               <p class="tcg-price">{{ product.price }} €</p>
 
               <p class="tcg-stock" [class.out]="(product.quantity ?? 0) <= 0">

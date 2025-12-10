@@ -34,3 +34,11 @@
   gap: 10px;
   margin: 12px 0 20px 0;
 }
+
+:host {
+  display: inline-flex;
+  background: transparent !important;
+  border-radius: 999px;
+  overflow: visible;
+  box-shadow: none !important;
+}
