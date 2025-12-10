@@ -1,12 +1,9 @@
 package com.mycompany.myapp.config;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
-import com.mycompany.myapp.security.AuthoritiesConstants;
-import com.mycompany.myapp.web.filter.SpaWebFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import static org.springframework.security.config.Customizer.withDefaults;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
@@ -20,6 +17,10 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+
+import com.mycompany.myapp.security.AuthoritiesConstants;
+import com.mycompany.myapp.web.filter.SpaWebFilter;
+
 import tech.jhipster.config.JHipsterProperties;
 
 @Configuration
@@ -65,6 +66,7 @@ public class SecurityConfiguration {
                     .requestMatchers(mvc.pattern("/swagger-ui/**")).permitAll()
                     .requestMatchers(mvc.pattern("/api/products/**")).permitAll()
                     .requestMatchers(mvc.pattern("/api/product-images/**")).permitAll()
+                    .requestMatchers(mvc.pattern("/api/tags/**")).permitAll()
                     .requestMatchers(mvc.pattern(HttpMethod.POST, "/api/authenticate")).permitAll()
                     .requestMatchers(mvc.pattern(HttpMethod.GET, "/api/authenticate")).permitAll()
                     .requestMatchers(mvc.pattern("/api/register")).permitAll()
