@@ -88,15 +88,6 @@ jhipster:
       time-to-live-seconds: 3600 # By default objects stay 1 hour in the cache
       max-entries: 1000 # Number of objects in each cache entry
   security:
-    policy-directives: >-
-      default-src 'self' 'unsafe-inline' 'unsafe-eval';
-      img-src 'self' data: https://res.cloudinary.com;
-      connect-src 'self' ws://localhost:80 http://localhost:80;
-      script-src 'self' 'unsafe-inline';
-      style-src 'self' 'unsafe-inline';
-      font-src 'self' data:;
-      object-src 'none';
-      media-src 'self'
     authentication:
       # NOUVELLE LIGNE : Désactive l'exigence d'activation (et l'envoi d'e-mail)
       #account-activation-required: false
