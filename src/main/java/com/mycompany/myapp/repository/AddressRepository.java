@@ -49,4 +49,7 @@ public interface AddressRepository extends AddressRepositoryWithBagRelationships
         @Param("zipcode") Integer zipcode,
         @Param("city") String city
     );
+
+    @Query("SELECT a FROM Address a JOIN a.ids ids WHERE ids.id = :userId")
+    List<Address> findAllByIdsContaining(@Param("userId") Long userId);
 }
