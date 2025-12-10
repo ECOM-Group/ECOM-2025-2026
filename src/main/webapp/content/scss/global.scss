@@ -298,9 +298,92 @@ Global site background
 ========================================================================== */
 
 body {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)),
-    url(https://external-preview.redd.it/k6iZb2V_UuLCQ2nrmPngb3aP37xkmHKoyHuRJcKtY_s.jpg?auto=webp&s=5c1e3c3b35237983f46ec8dee73c310daacbdc08);
-  background-size: cover;
+  min-height: 100vh;
+  margin: 0;
+
+  /* Dégradé PRINCIPAL — version beaucoup plus lumineuse */
+  background: linear-gradient(
+      135deg,
+      #253449 0%,       /* bleu clair pro */
+      #30445c 35%,      /* néon soft */
+      #3a5270 70%,      /* plus lumineux */
+      #2b3c50 100%      /* finition douce */
+    );
+
   background-attachment: fixed;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      circle at 20% 25%,
+      rgba(0, 255, 240, 0.55),
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(255, 150, 255, 0.42),
+      transparent 65%
+    ),
+    radial-gradient(
+      circle at 50% 10%,
+      rgba(255, 220, 160, 0.42),
+      transparent 60%
+    );
+
+  filter: blur(55px);
+  opacity: 0.70;    /* plus lumineux */
+  z-index: -2;
+  animation: holoFlow 18s ease-in-out infinite alternate;
+}
+
+/* Holo flow animation (très subtil) */
+@keyframes holoFlow {
+  0%   { transform: translate3d(0,0,0) scale(1); }
+  100% { transform: translate3d(2%, -2%, 0) scale(1.07); }
+}
+
+/* =============================
+   FOIL / LIGNES HOLOGRAPHIQUES
+   ============================= */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+
+  background: 
+    linear-gradient(
+      115deg,
+      rgba(255,255,255,0.18) 0%,
+      rgba(255,255,255,0.08) 40%,
+      rgba(0,0,0,0.05) 90%
+    ),
+    repeating-linear-gradient(
+      115deg,
+      rgba(255,255,255,0.12) 0px,
+      rgba(255,255,255,0.12) 2px,
+      rgba(0,0,0,0.04) 5px,
+      rgba(0,0,0,0.04) 8px
+    );
+
+  mix-blend-mode: overlay;
+  opacity: 0.42;  
+  z-index: -1;
+
+  background-size: 100% 100%, 200% 100%;
+  background-position: 0 0, 0 0;
+  animation: foilStripesMove 16s linear infinite;
+}
+
+@keyframes foilStripesMove {
+  0%   { background-position: 0 0, 20% 0; }
+  100% { background-position: 0 0, 0% 0; }
 }

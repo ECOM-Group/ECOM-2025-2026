@@ -1,15 +1,9 @@
-/* ------------------------------------------------------------
-   CONTAINER — Largeur fixe + perspective pour tilt 3D
-------------------------------------------------------------- */
 .mini-fiche-container {
   width: 280px;
   flex: 0 0 280px;
   perspective: 900px;
 }
 
-/* ------------------------------------------------------------
-   CARD — Style TCG premium + foil
-------------------------------------------------------------- */
 .mini-fiche-link {
   position: relative;
   display: flex;
@@ -38,18 +32,12 @@
     box-shadow 200ms ease;
 }
 
-/* ------------------------------------------------------------
-   TILT 3D (Desktop uniquement)
-------------------------------------------------------------- */
 @media (hover: hover) and (pointer: fine) {
   .mini-fiche-container:hover .mini-fiche-link {
     transform: rotateX(8deg) rotateY(8deg) translateY(-8px) scale(1.03);
   }
 }
 
-/* ------------------------------------------------------------
-   FOIL ANIMÉ (reflet holographique)
-------------------------------------------------------------- */
 .mini-fiche-link::after {
   content: '';
   position: absolute;
@@ -76,23 +64,16 @@
   transform: translateX(100%);
 }
 
-/* ------------------------------------------------------------
-   FOIL GRAIN (texture holographique discrète)
-------------------------------------------------------------- */
 .mini-fiche-link::before {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
 
-  background: url('https://i.imgur.com/5bYQrQp.png');
   opacity: 0.05;
   mix-blend-mode: overlay;
 }
 
-/* ------------------------------------------------------------
-   IMAGE — taille uniforme
-------------------------------------------------------------- */
 .mini-fiche-image {
   width: 280px;
   height: 230px;
@@ -103,9 +84,6 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-/* ------------------------------------------------------------
-   INFO ZONE
-------------------------------------------------------------- */
 .mini-fiche-info {
   flex: 1;
   padding: 0.8rem 1rem;
