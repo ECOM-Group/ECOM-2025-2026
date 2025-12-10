@@ -1,9 +1,9 @@
 name: JHipster CI/CD
 on:
   push:
-    branches: ["deploy_gasdev"] # Changé la branche cible
+    branches: ["main"] # Changé la branche cible
   pull_request:
-    branches: ["deploy_gasdev"] # Changé la branche cible
+    branches: ["main"] # Changé la branche cible
 
 jobs:
   # ======================================================================================
