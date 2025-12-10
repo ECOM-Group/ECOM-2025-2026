@@ -35,14 +35,22 @@
                 {{ (product.quantity ?? 0) > 0 ? 'En stock : ' + product.quantity : 'Rupture de stock' }}
               </p>
 
-              <button class="tcg-add-button" id="addButton" (click)="addToCart(product.id)" [disabled]="(product.quantity ?? 0) === 0">
-                Ajouter au panier
+              <button
+                class="tcg-add-button"
+                id="addButton"
+                (click)="addToCart(product.id)"
+                [disabled]="(product.quantity ?? 0) === 0 || maxStock"
+              >
+                @if (maxStock) {
+                  Stock épuisé
+                } @else {
+                  Ajouter au panier
+                }
               </button>
               @if (product.id !== -1) {
                 <jhi-comment [productId]="product.id"></jhi-comment>
               }
             </div>
-
             <div class="notif-container">
               @for (msg of successMessages; track msg) {
                 <div class="feedback-message">

@@ -1,5 +1,4 @@
 <div class="tcg-cart-line" [class.removing]="isRemoving">
-
   <div class="tcg-img-zone">
     <div class="tcg-img-frame">
       <img class="product-img" [src]="imageUrl || ''" alt="{{ orderLine.product?.name }}" />
@@ -8,9 +7,13 @@
   </div>
 
   <div class="tcg-info-zone">
-
     <div class="details">
-      <p><strong>Quantité :</strong> {{ orderLine.quantity ?? 'N/A' }}</p>
+      <p>
+        <strong>Quantité :</strong> {{ orderLine.quantity ?? 'N/A' }}
+        @if (stockMax) {
+          ( max )
+        }
+      </p>
       <p><strong>Prix unité :</strong> {{ orderLine.unitPrice ?? 'N/A' }}€</p>
       <p><strong>Total :</strong> {{ orderLine.total ?? 'N/A' }}€</p>
     </div>
@@ -18,11 +21,9 @@
     @if (isCart) {
       <div class="actions">
         <button class="tcg-btn dec" type="button" (click)="decrement()">-</button>
-        <button class="tcg-btn inc" type="button" (click)="increment()">+</button>
+        <button class="tcg-btn inc" type="button" (click)="increment()" [disabled]="stockMax">+</button>
         <button class="tcg-btn del" type="button" (click)="delete()">🗑️</button>
       </div>
     }
-
   </div>
-
 </div>

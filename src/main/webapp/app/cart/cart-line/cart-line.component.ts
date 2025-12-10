@@ -16,8 +16,7 @@ export class CartLineComponent {
 
   imageUrl: string | null = null;
   isRemoving = false;
-
-  private cartService = inject(CartService);
+  stockMax = false;
 
   constructor(
     private orderLineService: OrderLineService,
@@ -26,6 +25,7 @@ export class CartLineComponent {
 
   ngOnInit(): void {
     const idProduit = this.orderLine?.product?.id;
+    this.stockMax = (this.orderLine.product?.quantity ?? 0) <= (this.orderLine.quantity ?? 0);
     if (idProduit) {
       this.http.get<any>(`/api/product-images/first-by-product/${idProduit}`).subscribe(img => {
         this.imageUrl = img?.url ?? 'assets/images/no-image.png';
@@ -40,10 +40,15 @@ export class CartLineComponent {
       next: res => {
         if (res.body) {
           this.orderLine = res.body;
+          this.stockMax = (this.orderLine.product?.quantity ?? 0) <= (this.orderLine.quantity ?? 0);
           this.updated.emit({ id: this.orderLine.id, delete: false, priceDiff: this.orderLine.unitPrice ?? 0 });
         }
       },
-      error: err => console.error('Error incrementing quantity', err),
+      error: err => {
+        if (err.status === 409) {
+          this.stockMax = true;
+        } else console.error('Error incrementing quantity', err);
+      },
     });
   }
 
@@ -55,6 +60,7 @@ export class CartLineComponent {
         // res.body can be IOrderLine (updated) or {} (deleted)
         if (res.body && 'id' in res.body) {
           // updated line
+          this.stockMax = false;
           this.orderLine = res.body as IOrderLine;
           this.updated.emit({ id: this.orderLine.id, delete: false, priceDiff: -(this.orderLine.unitPrice ?? 0) });
         } else {
@@ -77,11 +83,11 @@ export class CartLineComponent {
           this.updated.emit({
             id: this.orderLine.id,
             delete: true,
-            priceDiff: -(this.orderLine.total ?? 0)
+            priceDiff: -(this.orderLine.total ?? 0),
           });
         },
         error: err => console.error('Error deleting line', err),
       });
-    }, 350); 
+    }, 350);
   }
 }

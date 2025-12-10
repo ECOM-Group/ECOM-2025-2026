@@ -13,6 +13,7 @@ import { CartService } from 'app/service/cart/cart.service';
 import { ProductService } from 'app/entities/product/service/product.service';
 import { MiniFicheComponent } from '../mini-fiche/mini-fiche.component';
 import { CommentComponent } from '../comment/comment.component';
+import { OrderLineService } from 'app/entities/order-line/service/order-line.service';
 
 @Component({
   selector: 'jhi-fiche-produit',
@@ -43,6 +44,7 @@ export default class FicheProduitComponent implements OnInit {
   alikeLimit = 5; // Nombre de produits similaires à charger
 
   currentIndex = 0;
+  maxStock = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -50,6 +52,7 @@ export default class FicheProduitComponent implements OnInit {
     private accountService: AccountService,
     private location: Location,
     private productService: ProductService,
+    private orderLineService: OrderLineService,
   ) {}
 
   ngOnInit(): void {
@@ -134,18 +137,6 @@ export default class FicheProduitComponent implements OnInit {
       .pipe(map(lines => lines.find(l => l.product?.id === productId && l.prodOrder?.id === orderId) ?? null));
   }
 
-  // :four: PATCH une ligne existante (même calcul que l'original)
-  private updateOrderLine(line: IOrderLine): Observable<any> {
-    const newQuantity = (line.quantity ?? 0) + 1;
-
-    return this.http.patch(`/api/order-lines/${line.id}`, {
-      id: line.id,
-      quantity: newQuantity,
-      unitPrice: this.product.price, // identique à l’original
-      total: newQuantity * (this.product.price ?? 0),
-    });
-  }
-
   // :five: POST une nouvelle ligne (identique à l'original)
   private createOrderLine(orderId: number, productId: number): Observable<any> {
     return this.http.post(`/api/order-lines`, {
@@ -176,7 +167,7 @@ export default class FicheProduitComponent implements OnInit {
               if (order) {
                 // Il existe une commande non validée → check line
                 return this.getOrderLine(order.id, productId).pipe(
-                  switchMap(line => (line ? this.updateOrderLine(line) : this.createOrderLine(order.id, productId))),
+                  switchMap(line => (line ? this.orderLineService.incrementQuantity(line) : this.createOrderLine(order.id, productId))),
                 );
               }
 
@@ -193,6 +184,9 @@ export default class FicheProduitComponent implements OnInit {
           this.cartService.notifyCartUpdated();
         },
         error: err => {
+          if (err.status === 409) {
+            this.maxStock = true;
+          }
           console.error('Erreur lors du traitement de la commande :', err);
         },
       });
