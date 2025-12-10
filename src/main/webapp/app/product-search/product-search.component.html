@@ -66,25 +66,27 @@
 
       <!-- Search results -->
       @if (!loading) {
-        <h2>
-          Resultats de votre recherche
-          @if (query) {
-            pour: <span style="color: #1a73e8; font-weight: 600">"{{ query }}"</span>
-          } @else {
-            pour le label: <span style="color: #1a73e8; font-weight: 600">"{{ selectedTagName }}"</span>
-          }
-        </h2>
-
-        <p>
-          @if (filteredProducts.length === 0) {
-            Pas de produits trouvés
+        <div class="search-results-header">
+          <h1 class="search-title">
+            Resultats de votre recherche
             @if (query) {
-              pour: "{{ query }}"
+              pour: <span class="highlight">"{{ query }}"</span>
             } @else {
-              pour "{{ selectedTagName }}".
+              pour le label: <span class="highlight">"{{ selectedTagName }}"</span>
             }
+          </h1>
+
+          @if (filteredProducts.length === 0) {
+            <p class="search-no-results">
+              Pas de produits trouvés
+              @if (query) {
+                pour: <span class="highlight">"{{ query }}"</span>
+              } @else {
+                pour <span class="highlight">"{{ selectedTagName }}"</span>.
+              }
+            </p>
           }
-        </p>
+        </div>
 
         <div class="mini-fiche-list">
           @for (product of filteredProducts; track product.id) {
