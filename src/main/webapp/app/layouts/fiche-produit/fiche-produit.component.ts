@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { NgStyle, Location } from '@angular/common';
 import { IProduct } from '../../entities/product/product.model';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable, switchMap } from 'rxjs';
 import { AccountService } from 'app/core/auth/account.service';
@@ -14,10 +14,13 @@ import { ProductService } from 'app/entities/product/service/product.service';
 import { MiniFicheComponent } from '../mini-fiche/mini-fiche.component';
 import { CommentComponent } from '../comment/comment.component';
 import { OrderLineService } from 'app/entities/order-line/service/order-line.service';
+import { ITag } from 'app/entities/tag/tag.model';
+import { TagService } from 'app/entities/tag/service/tag.service';
+import { TagLabelComponent } from 'app/entities/tag/tag-label/tag-label.component';
 
 @Component({
   selector: 'jhi-fiche-produit',
-  imports: [LoginComponent, NgStyle, RouterModule, MiniFicheComponent, CommentComponent],
+  imports: [LoginComponent, NgStyle, RouterModule, MiniFicheComponent, CommentComponent, TagLabelComponent],
   templateUrl: './fiche-produit.component.html',
   styleUrl: './fiche-produit.component.scss',
 })
@@ -42,7 +45,7 @@ export default class FicheProduitComponent implements OnInit {
   images: string[] = [];
   alikeProducts: IProduct[] = [];
   alikeLimit = 5; // Nombre de produits similaires à charger
-
+  tags: ITag[] = [];
   currentIndex = 0;
   maxStock = false;
 
@@ -53,6 +56,8 @@ export default class FicheProduitComponent implements OnInit {
     private location: Location,
     private productService: ProductService,
     private orderLineService: OrderLineService,
+    private router: Router,
+    private tagService: TagService,
   ) {}
 
   ngOnInit(): void {
@@ -80,6 +85,12 @@ export default class FicheProduitComponent implements OnInit {
         // Images du produit
         this.http.get<any[]>(`/api/product-images/by-product/${id}`).subscribe(images => {
           this.images = images.length > 0 ? images.map(img => img.url) : [''];
+        });
+
+        // Tags du produit
+        this.tagService.getTagsByProduct(this.product.id).subscribe({
+          next: tags => (this.tags = tags),
+          error: err => console.error('Error loading tags:', err),
         });
       },
       error: err => console.error('Erreur lors du chargement du produit :', err),
@@ -218,5 +229,17 @@ export default class FicheProduitComponent implements OnInit {
 
   handleMouseLeave(): void {
     this.showZoom = false;
+  }
+
+  // Gestion des clics sur les tags
+  onTagClicked(tagId: number): void {
+    const tagName = this.tags.find(t => t.id === tagId)?.name;
+
+    if (!tagName) return;
+    this.router.navigate(['/search'], {
+      queryParams: {
+        tag: tagId,
+      },
+    });
   }
 }

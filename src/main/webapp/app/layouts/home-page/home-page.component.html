@@ -1,20 +1,22 @@
 <div class="home-wrapper">
-  <h1 class="home-title">Top ventes</h1>
-
-  <!-- Tags as big clickable bubbles -->
+  <!-- Top tags section -->
   @if (tags.length > 0) {
-    <div class="tag-bubble-container">
-      @for (tag of tags; track tag.id) {
-        <app-tag-label
-          [tag]="tag"
-          [selected]="selectedTagIds.includes(tag.id!)"
-          (toggled)="onTagClicked($event)"
-          class="big-bubble"
-        ></app-tag-label>
-      }
+    <div class="home-tags-section">
+      <h1 class="home-title home-tags-title">Nos labels</h1>
+      <div class="tag-bubble-container">
+        @for (tag of tags; track tag.id) {
+          <app-tag-label
+            [tag]="tag"
+            [selected]="selectedTagIds.includes(tag.id!)"
+            (toggled)="onTagClicked($event)"
+            class="big-bubble"
+          ></app-tag-label>
+        }
+      </div>
     </div>
   }
 
+  <h1 class="home-title">Top ventes</h1>
   <!-- Top sold products -->
   <div class="product-grid">
     @for (topSoldProduct of topSoldProducts; track topSoldProduct.id) {

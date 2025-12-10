@@ -134,29 +134,15 @@
   }
 }
 
-/* --------------------------
-   TAGS OVERLAY
--------------------------- */
-.mini-fiche-tags-overlay {
-  position: absolute;
-  bottom: 0.6rem; /* adjust as needed */
-  left: 0.65rem;
-  right: 0.65rem;
+.mini-fiche-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
-  z-index: 20;
-  pointer-events: auto; /* ensures clicks are captured */
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+  pointer-events: none; // ensures whole card remains clickable
 }
 
-.mini-fiche-tags-overlay app-tag-label {
-  position: relative;
-  z-index: 20;
-  cursor: pointer;
-  transition: transform 150ms ease;
-
-  &:hover {
-    transform: scale(1.05) rotate(var(--rotation, 0deg));
-    z-index: 30; /* hover above other tags */
-  }
+.mini-fiche-tags app-tag-label {
+  transform: none; // prevent hover conflict with 3D card
+  cursor: default;
 }

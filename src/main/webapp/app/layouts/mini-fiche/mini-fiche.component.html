@@ -1,27 +1,32 @@
 <div class="mini-fiche-container">
   <a routerLink="/fiche_produit/{{ product.id }}" class="mini-fiche-link">
     <img [src]="imageUrl || ''" alt="{{ product.name }}" class="mini-fiche-image" />
+
     <div class="mini-fiche-info">
-      <h2 class="mini-fiche-name">{{ product.name }}</h2>
+      <div>
+        <h2 class="mini-fiche-name">{{ product.name }}</h2>
 
-      <p class="mini-fiche-description">
-        {{ product.desc }}
-      </p>
+        <p class="mini-fiche-description">
+          {{ product.desc }}
+        </p>
+      </div>
 
-      <p class="mini-fiche-price">{{ product.price }} €</p>
+      <div>
+        <p class="mini-fiche-price">{{ product.price }} €</p>
 
-      <p class="mini-fiche-stock" [class.rupture]="(product.quantity ?? 0) <= 0">
-        {{ (product.quantity ?? 0) > 0 ? 'En stock : ' + product.quantity : 'Rupture de stock' }}
-      </p>
-    </div>
-  </a>
+        <p class="mini-fiche-stock" [class.rupture]="(product?.quantity ?? 0) === 0">
+          {{ (product?.quantity ?? 0) > 0 ? 'En stock : ' + product.quantity : 'Rupture de stock' }}
+        </p>
+      </div>
 
-  <!-- TAGS OVERLAYED ON CARD -->
-  @if (tags.length > 0) {
-    <div class="mini-fiche-tags-overlay">
-      @for (tag of tags; track tag.id) {
-        <app-tag-label [tag]="tag" (click)="onTagClicked(tag.id); $event.stopPropagation()"></app-tag-label>
+      <!-- Tags -->
+      @if (tags.length > 0) {
+        <div class="mini-fiche-tags">
+          @for (tag of tags; track tag.id) {
+            <app-tag-label [tag]="tag"></app-tag-label>
+          }
+        </div>
       }
     </div>
-  }
+  </a>
 </div>
