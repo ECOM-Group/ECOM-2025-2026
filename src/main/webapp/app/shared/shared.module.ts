@@ -27,4 +27,13 @@ import { AlertErrorComponent } from './alert/alert-error.component';
     TranslateDirective,
   ],
 })
-export default class SharedModule {}
+export default class SharedModule {
+    // ⬇️ AJOUTER UN CONSTRUCTEUR ET INJECTER FaIconLibrary
+    constructor(iconLibrary: FaIconLibrary) {
+        // Ajouter les icônes 'Solid'
+        iconLibrary.addIcons(faCreditCard, faClockRotateLeft, faCartShopping, faReply);
+
+        // Ajouter les icônes 'Brands'
+        iconLibrary.addIcons(faLinkedin, faInstagram, faTwitter, faFacebookF);
+    }
+}
