@@ -39,7 +39,7 @@ spring:
     hikari:
       poolName: Hikari
       # ⚠️ IMPORTANT : Optimisation Hikari pour les connexions Cloud/Pooler Supabase
-      maximum-pool-size: 10 # Augmenté légèrement pour un meilleur débit
+      maximum-pool-size: 4 # Augmenté légèrement pour un meilleur débit
       minimum-idle: 2 # Assure qu'un minimum de connexions est maintenu
       auto-commit: false # Remis à 'true' (plus sûr, surtout pour Liquibase)
       connection-timeout: 30000 # 30 secondes pour établir une connexion
