@@ -73,6 +73,7 @@ export default class FicheProduitComponent implements OnInit {
   }
 
   private loadProduct(id: number): void {
+    this.currentIndex = 0;
     this.http.get<IProduct>(`/api/products/${id}`).subscribe({
       next: product => {
         this.product = product;
