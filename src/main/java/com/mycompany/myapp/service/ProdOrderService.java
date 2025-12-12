@@ -9,6 +9,8 @@ import com.mycompany.myapp.repository.ProductRepository;
 import com.mycompany.myapp.service.dto.MissingStockDTO;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,15 +36,24 @@ public class ProdOrderService {
         return orderLineRepository.findByProdOrderId(prodOrderId);
     }
 
+    @Transactional
     public List<MissingStockDTO> finalizeOrder(ProdOrder order) {
         if (Boolean.TRUE.equals(order.getValid())) {
             throw new RuntimeException("Commande déjà validée");
         }
 
+        // IDs des produits à verrouiller
+        List<Long> productIds = order.getOrderLines().stream().map(line -> line.getProduct().getId()).toList();
+
+        // Verrouillage pessimiste
+        List<Product> lockedProducts = productRepository.findAllForUpdate(productIds);
+
+        Map<Long, Product> productMap = lockedProducts.stream().collect(Collectors.toMap(Product::getId, p -> p));
+
         List<MissingStockDTO> missingStock = new ArrayList<>();
 
         for (OrderLine line : order.getOrderLines()) {
-            Product product = line.getProduct();
+            Product product = productMap.get(line.getProduct().getId());
             int requested = line.getQuantity();
             int available = product.getQuantity();
 
@@ -57,7 +68,7 @@ public class ProdOrderService {
 
         // Déduire le stock
         for (OrderLine line : order.getOrderLines()) {
-            Product product = line.getProduct();
+            Product product = productMap.get(line.getProduct().getId());
             product.setQuantity(product.getQuantity() - line.getQuantity());
             productRepository.save(product);
         }
@@ -76,13 +87,20 @@ public class ProdOrderService {
         prodOrderRepository.save(order);
     }
 
+    @Transactional
     public void restoreOrderStock(ProdOrder order) {
         if (Boolean.TRUE.equals(order.getValid())) {
             throw new RuntimeException("Impossible de restaurer le stock d’une commande déjà validée");
         }
 
+        List<Long> productIds = order.getOrderLines().stream().map(line -> line.getProduct().getId()).toList();
+
+        List<Product> lockedProducts = productRepository.findAllForUpdate(productIds);
+
+        Map<Long, Product> productMap = lockedProducts.stream().collect(Collectors.toMap(Product::getId, p -> p));
+
         for (OrderLine line : order.getOrderLines()) {
-            Product product = line.getProduct();
+            Product product = productMap.get(line.getProduct().getId());
             product.setQuantity(product.getQuantity() + line.getQuantity());
             productRepository.save(product);
         }
